@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="0208cd39-c12f-4d14-a593-ddfa6e3d0b87" ChangeDateTime="02/11/2022 07:10:47">
+    <Property Name="ElementName" Value="[dbo].[Queues].[User]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Queues]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="CreatorId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="64df43f6-13e8-40bd-8a26-f6ffc17980bc" ChangeDateTime="02/11/2022 07:11:19">
+    <Property Name="ElementName" Value="[dbo].[Queues].[Q]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Queues]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="UserLastModifiedDate" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e6465d31-43fa-43ae-9c3c-02383b64c6af" ChangeDateTime="02/11/2022 07:20:49">
+    <Property Name="ElementName" Value="[dbo].[Heijunka].[ProcessName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Heijunka]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ProductId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="024983e4-0a9c-40ec-a7d0-8d89b59c2ca2" ChangeDateTime="02/11/2022 07:32:54">
+    <Property Name="ElementName" Value="[dbo].[HistoryLog].[ChangeLogId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[HistoryLog]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ChangeLog" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="2c1632e8-3d72-4e3e-92a6-7754ea2069b9" ChangeDateTime="02/11/2022 07:35:31">
+    <Property Name="ElementName" Value="[dbo].[Heijunka].[TimeToComplete]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Heijunka]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="TimetoComplete" />
+  </Operation>
+</Operations>
