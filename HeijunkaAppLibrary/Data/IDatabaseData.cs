@@ -8,10 +8,10 @@ namespace HeijunkaAppLibrary.Data
     public interface IDatabaseData
     {
         bool Logon(string UserName, string Password);
-        void Logoff();
+        void Logoff(string UserName);
         void AddNewUser(string UserName, string Password, AuthenticationLevel Level);
-        void UpdateUser(string UserName, string CurrentPassword, string NewPassword);
-        void UpdateUser(string UserName, string CurrentPassword, AuthenticationLevel NewLevel);
+        void UpdateUserPassword(string UserName, string CurrentPassword, string NewPassword);
+        void UpdateUserAuthenticalLevel(string UserName, string CurrentPassword, AuthenticationLevel NewLevel);
         void DeleteUser(string UserName);
 
 
