@@ -20,7 +20,7 @@ namespace HeijunkaAppLibrary.Models
             {
                 StartDate = value;
                 // Update EndDate
-                EndDate = StartDate.AddMinutes(TimetoComplete);
+                EndDate = StartDate.AddMinutes((double)TimetoComplete);
             } 
         }
         public DateTime EndDate { get; private set; }

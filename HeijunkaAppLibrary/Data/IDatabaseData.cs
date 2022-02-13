@@ -1,38 +1,55 @@
 ﻿using HeijunkaAppLibrary.Models;
 using System;
 using System.Collections.Generic;
-using System.Text;
+
 
 namespace HeijunkaAppLibrary.Data
 {
+    /*
+     * All functions directly perform CRUD actions.
+     */
     public interface IDatabaseData
     {
-        bool Logon(string UserName, string Password);
-        void Logoff(string UserName);
-        void AddNewUser(string UserName, string Password, AuthenticationLevel Level);
-        void UpdateUserPassword(string UserName, string CurrentPassword, string NewPassword);
-        void UpdateUserAuthenticalLevel(string UserName, string CurrentPassword, AuthenticationLevel NewLevel);
-        void DeleteUser(string UserName);
+        bool Logon(string userName, string password);
+        void Logoff(string userName);
+        void AddNewUser(string userName, string password, AuthenticationLevel level);
+        void UpdateUserPassword(string userName, string currentPassword, string newPassword);
+        void UpdateUserAuthenticalLevel(string userName, string currentPassword, AuthenticationLevel newLevel);
+        void DeleteUser(string userName);
+        UserModel GetUser(string userName);
 
 
-        void CreateQueue(string QueueName, string Description, int RowNumber);
-        void DeleteQueue(string QueueName);
-        void EnableQueue(string QueueName);
-        void DisableQueue(string QueueName);
+        void CreateQueue(string queueName, string description, int rowNumber);
+        void DeleteQueue(string queueName);
+        void EnableQueue(string queueName);
+        void DisableQueue(string queueName);
         List<QueueModel> FindActiveQueues();
         List<QueueModel> FindAllQueues();
         List<QueueModel> FindInActiveQueues();
 
 
-        void CreateProduct(string ProductName, decimal TimetoComplete, string Description);
-        void UpdateProduct(string ProductName, decimal TimetoComplete, string Description);
-        void UpdateProduct(string ProductName, string Description);
-        void UpdateProduct(string ProductName, decimal TimetoComplete);
-        void DeleteProduct(string ProductName);
+        void CreateProduct(string productName,
+                           decimal timetoComplete,
+                           string description);
+        void UpdateProduct(string productName, decimal timetoComplete, string description);
+        void UpdateProduct(string productName, string description);
+        void UpdateProduct(string productName, decimal timetoComplete);
+        void DeleteProduct(string productName);
         List<ProductModel> GetAllProducts();
         ProductModel FindProduct();
 
-
+        void AddtoKanban(QueueModel queue,   // specific queue
+                         UserModel user,
+                         ProductModel product,
+                         DateTime startDate,
+                         string orderNumber,
+                         string notes);
+        void AddtoKanban(UserModel user,   // any queue
+                         ProductModel product,
+                         DateTime startDate,
+                         string orderNumber,
+                         string notes);
+        void DeletefromKanban(ProcessModel item);
 
     }
 }
