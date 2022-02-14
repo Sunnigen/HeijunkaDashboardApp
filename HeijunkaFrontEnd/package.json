@@ -1,0 +1,8 @@
+{
+"version":"1.0.0",
+"name":"asp.net",
+"private":true,
+"devDependencies":{
+"@syncfusion/ej2-js-es5":"19.4.38"
+}
+}
