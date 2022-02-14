@@ -7,7 +7,7 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "HeijunkaSQLDB", "HeijunkaSQ
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HeijunkaAppLibrary", "HeijunkaAppLibrary\HeijunkaAppLibrary.csproj", "{C13E8CCD-728E-473A-903E-FAF4A72D4D4F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeijunkaFrontEnd", "HeijunkaFrontEnd\HeijunkaFrontEnd.csproj", "{08812020-F2B6-4C2F-B5E6-32C86DFE0DA5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HotelAppLibrary", "..\HotelApp\HotelAppLibrary\HotelAppLibrary.csproj", "{50343E5B-B83C-4D0A-93A4-CF1B3298C43A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +25,10 @@ Global
 		{C13E8CCD-728E-473A-903E-FAF4A72D4D4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C13E8CCD-728E-473A-903E-FAF4A72D4D4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C13E8CCD-728E-473A-903E-FAF4A72D4D4F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{08812020-F2B6-4C2F-B5E6-32C86DFE0DA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{08812020-F2B6-4C2F-B5E6-32C86DFE0DA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{08812020-F2B6-4C2F-B5E6-32C86DFE0DA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{08812020-F2B6-4C2F-B5E6-32C86DFE0DA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50343E5B-B83C-4D0A-93A4-CF1B3298C43A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50343E5B-B83C-4D0A-93A4-CF1B3298C43A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50343E5B-B83C-4D0A-93A4-CF1B3298C43A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50343E5B-B83C-4D0A-93A4-CF1B3298C43A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
