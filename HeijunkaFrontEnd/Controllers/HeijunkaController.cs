@@ -66,22 +66,18 @@ namespace HeijunkaTest.Controllers
             {
                 new
                 {
-                    id = 1,
-                    hasChild = true,
-                    expanded = true,
-                    name = "Aileron" 
+                    Id = 1,
+                    Name = "Aileron" 
                 },
                 new 
                 { 
-                    id = 2,
-                    pid = 1,
-                    name = "Hinge Flap" 
+                    Id = 2,
+                    Name = "Hinge Flap" 
                 },
                 new 
                 { 
-                    id = 3,
-                    pid = 1,
-                    name = "Winglet" 
+                    Id = 3,
+                    Name = "Winglet" 
                 }
             };
 

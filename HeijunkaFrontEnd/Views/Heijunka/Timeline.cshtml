@@ -7,12 +7,14 @@
 @using Syncfusion.EJ2
 <div class="control-section">
     <div class="content-wrapper">
+        <div class="title-container">
+                <h2 class="title-text">Info/Events</h2>
+            </div>   
+        <label>There are @ViewBag.Owners.Count Queues at the moment</label>
         <div class="schedule-container">
             <div class="title-container">
                 <h2 class="title-text">Digital Heijunka</h2>
-            </div>
-            
-            <label>There are @ViewBag.Owners.Count Queues at the moment</label>
+            </div>           
 
             <!--
               Html.EJS().Schedule("schedule").Width("100%").Height("650px").CssClass("schedule-drag-drop").Views(view => { view.Option(View.TimelineDay).Add(); view.Option(View.TimelineMonth).Add(); }).CurrentView(View.TimelineDay).SelectedDate(new DateTime(DateTime.Today.Year, 7, 2)).WorkHours(new ScheduleWorkHours { Highlight = true, Start = "08:00", End = "18:00" }).Group(group => group.EnableCompactView(false).Resources(ViewBag.Resources)).Resources(res =>
@@ -21,8 +23,6 @@
                         res.DataSource(ViewBag.Consultants).Field("ConsultantID").Title("Consultant").Name("Consultants").TextField("text").IdField("id").ColorField("color").GroupIDField("groupId").AllowMultiple(false).Add();
                     }).ResourceHeaderTemplate("#resource-template").ActionBegin("OnActionBegin").Drag("OnItemDrag").EventSettings(e => e.Fields(f => f.Subject(sub => sub.Name("Name").Title("Patient Name")).StartTime(start => start.Name("StartTime").Title("From")).EndTime(end => end.Name("EndTime").Title("To")).Description(des => des.Name("Description").Title("Reason"))).DataSource(ViewBag.datasource)).Render()
                     -->
-
-
             <ejs-schedule id="schedule" height="100%" width="100%" views="@ViewBag.view" selectedDate="new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day)">
                 <!-- Set the Hour and Date Rows  -->
                 <e-schedule-header-rows>
@@ -56,7 +56,8 @@
                 <!--Html.EJS().TreeView("tree").Fields(fields => fields.DataSource(ViewBag.treeDataSource).Id("Id").Text("Name")).AllowDragAndDrop(true).NodeDragStop("OnTreeDragStop").NodeDragging("OnItemDrag").NodeTemplate("#treeTemplate").DragArea(".content-wrapper").CssClass("treeview-external-drag").Render()-->
                 <!-- <ejs-treeview id="treeview" fields="@ViewBag.Fields" allowDragAndDrop="true" ></ejs-treeview> -->                                   
             </div>
-            @Html.EJS().TreeView("listdata").Fields(field=>field.Id("id").ParentID("pid").Selected("selected").Expanded("expanded").Text("name").HasChildren("hasChild").DataSource(ViewBag.DataSource)).Render()
+            <!-- Html.EJS().TreeView("listdata").Fields(field=>field.Id("id").ParentID("pid").Selected("selected").Expanded("expanded").Text("name").HasChildren("hasChild").DataSource(ViewBag.DataSource)).Render() -->
+            @Html.EJS().TreeView("tree").Fields(Fields => Fields.DataSource(ViewBag.DataSource).Id("Id").Text("Name")).AllowDragAndDrop(true).NodeDragStop("OnTreeDragStop").NodeDragging("OnItemDrag").NodeTemplate("#treeTemplate").DragArea(".content-wrapper").CssClass("treeview-external-drag").Render()
         </div>
     </div>
 </div>

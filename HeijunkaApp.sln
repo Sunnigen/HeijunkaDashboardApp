@@ -7,7 +7,12 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "HeijunkaSQLDB", "HeijunkaSQ
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HeijunkaAppLibrary", "HeijunkaAppLibrary\HeijunkaAppLibrary.csproj", "{C13E8CCD-728E-473A-903E-FAF4A72D4D4F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeijunkaFrontEnd", "HeijunkaFrontEnd\HeijunkaFrontEnd.csproj", "{F1F06140-0AF5-413F-ACAC-9DA02C4A66C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HeijunkaFrontEnd", "HeijunkaFrontEnd\HeijunkaFrontEnd.csproj", "{F1F06140-0AF5-413F-ACAC-9DA02C4A66C2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4F494020-4005-4880-9326-C289AD62F485}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
