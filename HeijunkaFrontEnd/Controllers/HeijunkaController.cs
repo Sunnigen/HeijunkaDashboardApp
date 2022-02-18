@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using HeijunkaTest.Models;
 using Syncfusion.EJ2.Schedule;
+using Syncfusion.EJ2.Navigations;
+using HeijunkaFrontEnd.Models;
 
 namespace HeijunkaTest.Controllers
 {
@@ -8,34 +10,98 @@ namespace HeijunkaTest.Controllers
     {
         [BindProperty]
         public List<OwnerModel> ownerData { get; set; } = new List<OwnerModel>();
+        public List<AppointmentData> appointmentData { get; set; } = new List<AppointmentData>();
 
-        public IActionResult Timeline()
+        private List<ScheduleView> viewOptions { get; set; } = new List<ScheduleView>() 
+        {
+            new ScheduleView { Option = Syncfusion.EJ2.Schedule.View.Agenda}
+        }; 
+
+        public HeijunkaController()
+        {
+            // Set to Timeline Day
+            ViewBag.view = this.viewOptions;
+
+            // Initialize TreeView
+            //TreeViewFieldsSettings treeViewFields = new TreeViewFieldsSettings();
+            //treeViewFields.DataSource = GetStagedParts();
+            //treeViewFields.HasChildren = "HasChild";
+            //treeViewFields.Expanded = "Expanded";
+            //treeViewFields.Id = "Id";
+            //treeViewFields.ParentID = "PId";
+            //treeViewFields.Text = "Name";
+            //ViewBag.Fields = treeViewFields;
+
+
+            //ViewBag.treeDataSource
+        }
+
+        public ActionResult TestFunction1(OwnerModel owner)
+        {
+            return Json(owner);
+        }
+
+        public IActionResult Timeline(List<OwnerModel> oData = null, List<AppointmentData> apData = null)
         {
             // Set Queue Column
             string[] resources = new string[] { "Owners" };
             ViewBag.Resources = resources;
-            this.SetOwnerQueues();
-            ViewBag.Owners = ownerData;
+            this.ownerData = this.SetOwnerQueues();
+            ViewBag.Owners = this.ownerData;
 
             // Existing Parts in Process Data
-            //ViewBag.appointments = GetScheduleData();
-            ViewBag.datasource = GetScheduleData();
+            this.appointmentData = GetScheduleData();
+            ViewBag.datasource = this.appointmentData;
 
-            // Set to Timeline Day
-            List<ScheduleView> viewOptions = new List<ScheduleView>()
+            // Set Staging Area
+            ViewBag.DataSource = GetStagedParts();
+
+            return View(this.ownerData);
+            //return View(this.ownerData, this.appointmentData);
+        }
+
+        private List<object> GetStagedParts()
+        {
+            return new List<object>()
             {
-                new ScheduleView { Option = Syncfusion.EJ2.Schedule.View.TimelineDay }
+                new
+                {
+                    id = 1,
+                    hasChild = true,
+                    expanded = true,
+                    name = "Aileron" 
+                },
+                new 
+                { 
+                    id = 2,
+                    pid = 1,
+                    name = "Hinge Flap" 
+                },
+                new 
+                { 
+                    id = 3,
+                    pid = 1,
+                    name = "Winglet" 
+                }
             };
 
-            ViewBag.view = viewOptions;
 
-            return View();
-        }
-        private void SetOwnerQueues()
+        //    public int Id { get; set; }
+        //public string PartName { get; set; }
+        //public bool HasChild { get; set; } = false;
+        //public int PId { get; set; }
+        //public bool Expanded { get; set; } = false;
+
+    }
+
+        private List<OwnerModel> SetOwnerQueues()
         {
-            ownerData.Add(new OwnerModel { Id = 1, Text = "Cutting Edge 1", Color = "#ffaa00" });
-            ownerData.Add(new OwnerModel { Id = 2, Text = "Cutting Edge 2", Color = "#f8a398" });
-            ownerData.Add(new OwnerModel { Id = 3, Text = "Cutting Edge 3", Color = "#7499e1" });
+            return new List<OwnerModel>()
+            {
+               new OwnerModel { Id = 1, Text = "Cutting Edge 1", Color = "#ffaa00" },
+               new OwnerModel { Id = 2, Text = "Cutting Edge 2", Color = "#f8a398" },
+               new OwnerModel { Id = 3, Text = "Cutting Edge 3", Color = "#7499e1" }
+            };
         }
 
         private List<AppointmentData> GetScheduleData()
