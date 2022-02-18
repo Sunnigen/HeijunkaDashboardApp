@@ -7,10 +7,11 @@ Particularly in manufacturing industries where various processes like the CNC mi
 
 ## Software Developer Details
 The project is created in ASP.NET MVC and utilizes:
-	- Design Patterns such as MVC, Singleton, Dependency Injection
-	- Utilizes client side packages like jQuery/AJAX
-	- Azure SQL/SQL Server/SQLite
-	- Micro ORM: Dapper
-	- HTML/CSS
-	- Relational Databases such as Azure SQL, SQL Server SQLite
-	- REST
+    - Design Patterns such as MVC, Singleton, Dependency Injection  
+    - Utilizes client side packages like jQuery/AJAX  
+    - Azure SQL/SQL Server/SQLite  
+    - Micro ORM: Dapper  
+    - HTML/CSS  
+    - Relational Databases such as Azure SQL, SQL Server SQLite  
+    - REST  
+	
