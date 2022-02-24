@@ -21,24 +21,12 @@ namespace HeijunkaTest.Controllers
         {
             // Set to Timeline Day
             ViewBag.view = this.viewOptions;
-
-            // Initialize TreeView
-            //TreeViewFieldsSettings treeViewFields = new TreeViewFieldsSettings();
-            //treeViewFields.DataSource = GetStagedParts();
-            //treeViewFields.HasChildren = "HasChild";
-            //treeViewFields.Expanded = "Expanded";
-            //treeViewFields.Id = "Id";
-            //treeViewFields.ParentID = "PId";
-            //treeViewFields.Text = "Name";
-            //ViewBag.Fields = treeViewFields;
-
-
-            //ViewBag.treeDataSource
         }
 
         public ActionResult TestFunction1(OwnerModel owner)
         {
-            return Json(owner);
+
+            return Json(this.ownerData);
         }
 
         public IActionResult Timeline(List<OwnerModel> oData = null, List<AppointmentData> apData = null)
@@ -51,7 +39,7 @@ namespace HeijunkaTest.Controllers
 
             // Existing Parts in Process Data
             this.appointmentData = GetScheduleData();
-            ViewBag.datasource = this.appointmentData;
+            ViewBag.Appointments = this.appointmentData;
 
             // Set Staging Area
             ViewBag.DataSource = GetStagedParts();
@@ -60,34 +48,29 @@ namespace HeijunkaTest.Controllers
             //return View(this.ownerData, this.appointmentData);
         }
 
-        private List<object> GetStagedParts()
+        private List<StagingObjectModel> GetStagedParts()
         {
-            return new List<object>()
-            {
-                new
+
+            return new List<StagingObjectModel>() {
+                new StagingObjectModel
                 {
                     Id = 1,
-                    Name = "Aileron" 
+                    Name = "Aileron",
+                    OrderNumber = "33334444"
                 },
-                new 
-                { 
+                new StagingObjectModel
+                {
                     Id = 2,
-                    Name = "Hinge Flap" 
+                    Name = "Hinge Flap",
+                    OrderNumber = "11112222"
                 },
-                new 
-                { 
+                new StagingObjectModel
+                {
                     Id = 3,
-                    Name = "Winglet" 
+                    Name = "Winglet",
+                    OrderNumber = "12345678"
                 }
             };
-
-
-        //    public int Id { get; set; }
-        //public string PartName { get; set; }
-        //public bool HasChild { get; set; } = false;
-        //public int PId { get; set; }
-        //public bool Expanded { get; set; } = false;
-
     }
 
         private List<OwnerModel> SetOwnerQueues()

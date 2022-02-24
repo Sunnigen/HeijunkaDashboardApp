@@ -4,60 +4,110 @@
 @{
     ViewData["Title"] = "Timeline";
 }
+@using HeijunkaTest.Models
 @using Syncfusion.EJ2
+@using Syncfusion.EJ2.Schedule
 <div class="control-section">
     <div class="content-wrapper">
-        <div class="title-container">
+
+        <div class="event-container">
+            <div class="title-container">
                 <h2 class="title-text">Info/Events</h2>
-            </div>   
-        <label>There are @ViewBag.Owners.Count Queues at the moment</label>
+            </div>
+            <label id="queue-count-label">There are @ViewBag.Owners.Count Queues at the moment</label>
+        </div>
+        
         <div class="schedule-container">
             <div class="title-container">
                 <h2 class="title-text">Digital Heijunka</h2>
             </div>           
-
+            
             <!--
-              Html.EJS().Schedule("schedule").Width("100%").Height("650px").CssClass("schedule-drag-drop").Views(view => { view.Option(View.TimelineDay).Add(); view.Option(View.TimelineMonth).Add(); }).CurrentView(View.TimelineDay).SelectedDate(new DateTime(DateTime.Today.Year, 7, 2)).WorkHours(new ScheduleWorkHours { Highlight = true, Start = "08:00", End = "18:00" }).Group(group => group.EnableCompactView(false).Resources(ViewBag.Resources)).Resources(res =>
+           (Html.EJS().Schedule("schedule")
+             .Width("100%")
+             .Height("650px")
+             .CssClass("schedule-drag-drop")
+             .Views(view => { 
+                 view.Option(View.TimelineDay).Add(); 
+                 view.Option(View.TimelineMonth).Add(); 
+             })
+             .CurrentView(View.TimelineDay)
+             .SelectedDate(new DateTime(DateTime.Today.Year, 7, 2))             
+             .Group(group => group.EnableCompactView(false)
+             .Resources(ViewBag.Resources)).Resources(res =>
                     {
                         res.DataSource(ViewBag.Departments).Field("DepartmentID").Title("Department").Name("Departments").TextField("text").IdField("id").ColorField("color").Add();
                         res.DataSource(ViewBag.Consultants).Field("ConsultantID").Title("Consultant").Name("Consultants").TextField("text").IdField("id").ColorField("color").GroupIDField("groupId").AllowMultiple(false).Add();
-                    }).ResourceHeaderTemplate("#resource-template").ActionBegin("OnActionBegin").Drag("OnItemDrag").EventSettings(e => e.Fields(f => f.Subject(sub => sub.Name("Name").Title("Patient Name")).StartTime(start => start.Name("StartTime").Title("From")).EndTime(end => end.Name("EndTime").Title("To")).Description(des => des.Name("Description").Title("Reason"))).DataSource(ViewBag.datasource)).Render()
-                    -->
-            <ejs-schedule id="schedule" height="100%" width="100%" views="@ViewBag.view" selectedDate="new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day)">
-                <!-- Set the Hour and Date Rows  -->
-                <e-schedule-header-rows>
-                    <e-schedule-header-row option="Date"></e-schedule-header-row>
-                    <e-schedule-header-row option="Hour"></e-schedule-header-row>
-                </e-schedule-header-rows>
+                    })
+             .ResourceHeaderTemplate("#resource-template")
+             .ActionBegin("OnActionBegin")
+             .Drag("OnItemDrag")
+             .EventSettings(e => e.Fields(f => f.Subject(sub => sub.Name("Name").Title("Patient Name"))
+             .StartTime(start => start.Name("StartTime").Title("From"))
+             .EndTime(end => end.Name("EndTime").Title("To"))
+             .Description(des => des.Name("Description").Title("Reason")))
+             .DataSource(ViewBag.datasource))
+             .Render()
+           )  -->
+                        
+           <!--field="OwnerId" title="Owners" name="Owners" textField="Text" idField="Id" colorField="Color" -->
+            @(Html.EJS().Schedule("schedule")
+             .Width("100%")
+             .Height("550px")
+             .Group(group => group.Resources(ViewBag.Resources))
+             .Resources(res => {res.DataSource(ViewBag.Owners)
+                 .Field("OwnerId")
+                 .Title("Owners")
+                 .Name("Owners")
+                 .TextField("Text")
+                 .IdField("Id")
+                 .ColorField("Color")
+                 .Add();
+             })
+             .Views(view => view
+                .Option(View.TimelineDay)
+                .AllowVirtualScrolling(true)
+                .Add()
+             )
+             .SelectedDate(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day))
+             .HeaderRows(headerRow => headerRow.Option(HeaderRowType.Hour).Add())
+             .EventSettings(new ScheduleEventSettings{DataSource = ViewBag.Appointments})
+             .ActionBegin("onActionBegin")
+             .EventRendered("onEventRendered") 
+             .PopupOpen("onPopupOpen")
+             .EditorTemplate("#EventEditorTemplate")
+             .ShowQuickInfo(false)
+             .Render()
+            )
+            
 
-                <!-- Set the Timeline View -->
-                <e-schedule-views>
-                    <e-schedule-view option="TimelineWeek" ></e-schedule-view>
-                </e-schedule-views>
-
-                <!-- Set the Resources for Different Queues -->
-                <e-schedule-group resources="@ViewBag.Resources"></e-schedule-group>
-                <e-schedule-resources id="scheduleresources">
-                    <e-schedule-resource  dataSource="@ViewBag.Owners" field="OwnerId" title="Owners" name="Owners" textField="Text" idField="Id" colorField="Color"></e-schedule-resource>
-                </e-schedule-resources>
-
-                <!-- Insert Existing Parts in Process -->
-                <e-schedule-eventsettings dataSource="@ViewBag.datasource"></e-schedule-eventsettings>
-            </ejs-schedule>
-
-            <ejs-button id="button" onclick="addQueue()" numberOfQueues="@ViewBag.Owners.Count" content="Add Queue"></ejs-button>
-            <ejs-button id="button1" onclick="removeQueue()" content="Remove Queue"></ejs-button>
-            <button onclick="OwnerTest()">Click Meeee!</button>
+            <ejs-button id="addQueueButton" onclick="addQueue()" content="Add Queue"></ejs-button>
+            <ejs-button id="removeQueueButton" onclick="removeQueue()" content="Remove Queue"></ejs-button>
+            <ejs-button id="getDataButton" onclick="printtoConsole()" content="Print Data"></ejs-button>
+            <ejs-button id="addAppointment" onclick="addAppointment()" content="Schedule Process"></ejs-button>
+            <ejs-button id="addStagingButton" onclick="addStaging()" content="Stage Process"></ejs-button>
         </div>
         <!-- Staging Area for Parts to Process -->
         <div class="treeview-container">
             <div class="title-container">
                 <h2 class="title-text">Staging Area</h2>
-                <!--Html.EJS().TreeView("tree").Fields(fields => fields.DataSource(ViewBag.treeDataSource).Id("Id").Text("Name")).AllowDragAndDrop(true).NodeDragStop("OnTreeDragStop").NodeDragging("OnItemDrag").NodeTemplate("#treeTemplate").DragArea(".content-wrapper").CssClass("treeview-external-drag").Render()-->
-                <!-- <ejs-treeview id="treeview" fields="@ViewBag.Fields" allowDragAndDrop="true" ></ejs-treeview> -->                                   
             </div>
-            <!-- Html.EJS().TreeView("listdata").Fields(field=>field.Id("id").ParentID("pid").Selected("selected").Expanded("expanded").Text("name").HasChildren("hasChild").DataSource(ViewBag.DataSource)).Render() -->
-            @Html.EJS().TreeView("tree").Fields(Fields => Fields.DataSource(ViewBag.DataSource).Id("Id").Text("Name")).AllowDragAndDrop(true).NodeDragStop("OnTreeDragStop").NodeDragging("OnItemDrag").NodeTemplate("#treeTemplate").DragArea(".content-wrapper").CssClass("treeview-external-drag").Render()
+            <!-- Actual TreeView Widget-->
+            @(Html.EJS().TreeView("tree")
+                .Fields(Fields => Fields.DataSource(ViewBag.DataSource)
+                    .Id("Id")
+                    .Text("Name")
+                    .Text("OrderNumber")
+                )
+                .AllowEditing(true)
+                .AllowDragAndDrop(true)
+                .NodeDragStop("OnTreeDragStop")
+                .NodeDragging("OnItemDrag")
+                .NodeTemplate("#treeTemplate")
+                .DragArea(".content-wrapper")
+                .CssClass("treeview-external-drag")
+                .Render()
+            )
         </div>
     </div>
 </div>
@@ -90,6 +140,16 @@
         text-align: center;
     }
 
+    .custom-event-editor .e-textlabel {
+        padding-right: 15px;
+        text-align: right;
+    }
+
+    .custom-event-editor td {
+        padding: 7px;
+        padding-right: 16px;
+    }
+
     .treeview-external-drag #waiting {
         height: 100%;
         padding: 0;
@@ -113,7 +173,7 @@
         text-overflow: ellipsis;
     }
 
-    .treeview-external-drag #waitcategory {
+    .treeview-external-drag #ordernumber {
         height: 50%;
         font-family: "Segoe UI";
         font-size: 10px;
@@ -257,47 +317,57 @@
     <div id="waiting">
         <div id="waitdetails">
             <div id="waitlist">${Name}</div>
-            <div id="waitcategory">${DepartmentName} - ${Description}</div>
+            <div id="ordernumber">
+                <label>Order Number:&ensp;</label>
+                <label> ${OrderNumber}</label>
+            </div>
         </div>
     </div>
 </script>
 
-<!-- Resource Header Template -->
-<script id="resource-template" type="text/x-template">
-    <div class="template-wrap">
-        <div class="specialist-category">
-            ${getConsultantImage(data)}
-            <div class="specialist-name">${getConsultantName(data)}</div>
-            <div class="specialist-designation">${getConsultantDesignation(data)}</div>
-        </div>
-    </div>
+
+<script id="EventEditorTemplate" type="text/x-template">
+    <table class="custom-event-editor" width="100%" cellpadding="5">
+        <tbody>
+            <tr>
+                <td class="e-textlabel">Process</td>
+                <td colspan="4">
+                    <input id="Process" class="e-field e-input" type="text" name="Process" style="width: 100%"></input>
+                </td>
+            </tr>
+            <tr>
+                <td class="e-textlabel">Order Number</td>
+                <td colspan="4">
+                    <input id="OrderNumber" class="e-field e-input" type="text" name="OrderNumber" style="width: 100%"></input>
+                </td>
+            </tr>
+            <tr>
+                <td class="e-textlabel">From</td>
+                <td colspan="4">
+                    <input id="StartTime" class="e-field" type="text" name="StartTime" />
+                </td>
+            </tr>
+            <tr>
+                <td class="e-textlabel">To</td>
+                <td colspan="4">
+                    <input id="EndTime" class="e-field" type="text" name="EndTime" />
+                </td>
+            </tr>
+
+
+            <tr>
+                <td class="e-textlabel">Queue</td>
+                <td colspan="4">
+                    <label id="OwnerId" name="OwnerId">${QueueName}</label>
+                </td>
+            </tr>
+
+
+        </tbody>
+    </table>
 </script>
 
 <script type="text/javascript">
-
-    function getConsultantName(value) {
-        return value.resourceData[value.resource.textField];
-    };
-
-    function getConsultantImage(value) {
-        var resourceName = value.resourceData[value.resource.textField];
-        if (resourceName === 'GENERAL' || resourceName === 'DENTAL') {
-            return '';
-        } else {
-            var path = "@Url.Content("~/Content/schedule/images/")";
-            var src = path + resourceName.toLowerCase() + ".png";
-            return '<img class="specialist-image" src=' + src + '></img>';
-        }
-    };
-
-    function getConsultantDesignation(value) {
-        var resourceName = value.resourceData[value.resource.textField];
-        if (resourceName === 'GENERAL' || resourceName === 'DENTAL') {
-            return '';
-        } else {
-            return value.resourceData.designation;
-        }
-    };
 
     var isTreeItemDropped = false;
     var draggedItemId = '';
@@ -313,7 +383,7 @@
                 ej.base.addClass([event.event.target], 'e-device-hover');
             }
         }
-        document.body.style.position = 'fixed';
+        //document.body.style.position = 'fixed';   // this might cause problems later, right now it creates an empty column on right of entire page
         if (document.body.style.cursor === 'not-allowed') {
             document.body.style.cursor = '';
         }
@@ -325,7 +395,7 @@
         }
     }
 
-    function OnActionBegin(event) {
+    function onActionBegin(event) {
         if (event.requestType === 'eventCreate' && isTreeItemDropped) {
             var treeObj = document.querySelector(".e-treeview.treeview-external-drag").ej2_instances[0];
             var treeViewdata = treeObj.fields.dataSource;
@@ -357,67 +427,166 @@
                     var resourceDetails = scheduleObj.getResourcesByIndex(cellData.groupIndex);
                     var eventData = {
                         Name: filteredData[0].Name,
+                        OrderNumber: filteredData[0].OrderNumber,
                         StartTime: cellData.startTime,
                         EndTime: cellData.endTime,
-                        IsAllDay: cellData.isAllDay,
+                        QueueName: resourceDetails.resourceData.Text,
                         Description: filteredData[0].Description,
-                        DepartmentID: resourceDetails.resourceData.groupId,
-                        ConsultantID: resourceDetails.resourceData.id
+                        IsAllDay: cellData.isAllDay,
+                        OwnerId: resourceDetails.resourceData.Id
                     };
-                    scheduleObj.openEditor(eventData, 'Add', true);
+                    //scheduleObj.openEditor(eventData, 'Add', true);
+                    
                     isTreeItemDropped = true;
                     draggedItemId = event.draggedNodeData.id;
+                    scheduleProcess(eventData);
                 }
             }
         }
     }
-</script>
 
+    function scheduleProcess(args) {
+        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+        var scheduleEventsData = scheduleObj.eventsData;
+        var newProcess = {
+            Id: scheduleEventsData.length + 1, 
+            OwnerId: args.OwnerId, 
+            Subject: args.Name, 
+            StartTime: args.StartTime, 
+            EndTime: args.EndTime
+        }
+        console.log(`scheduleProcess\n\tId: ${newProcess.Id}, OwnerId: ${newProcess.OwnerId}, Subject: ${newProcess.Subject}, StartTime: ${newProcess.StartTime}, EndTime: ${newProcess.EndTime}`);
+        scheduleObj.addEvent(newProcess);
+        //var newProcess = {Id: scheduleEventsData.length + 1, OwnerId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
+    }
 
-<!--
-<script type="text/javascript">
+    function onEventRendered(args) {
+        console.log(`onEventRendered: ${args.data}`);
+    }
+
+    function onPopupOpen(args) {
+        console.log(`onPopupOpen: ${args?.type}`);
+        if (args.type === 'Editor') {
+            var processElement = args.element.querySelector('#Process');
+            processElement.innerHTML = args.data.Subject;
+
+            //if (!statusElement.classList.contains('e-dropdownlist')) {
+            //    var dropDownListObject = new ej.dropdowns.DropDownList({
+            //        placeholder: 'Choose status', value: statusElement.value,
+            //        dataSource: ['New', 'Requested', 'Confirmed']
+            //    });
+            //    dropDownListObject.appendTo(statusElement);
+            //    statusElement.setAttribute('name', 'EventType');
+            //}
+            var startElement = args.element.querySelector('#StartTime');
+            if (!startElement.classList.contains('e-datetimepicker')) {
+                new ej.calendars.DateTimePicker({ value: new Date(startElement.value) || new Date(), min: Date(startElement.value) }, startElement);
+            }
+            var endElement = args.element.querySelector('#EndTime');
+            if (!endElement.classList.contains('e-datetimepicker')) {
+                new ej.calendars.DateTimePicker({ value: new Date(endElement.value) || new Date(), min: Date(endElement.value)  }, endElement);
+            }
+        }
+    }
+
+    
+
     function removeQueue() {
         var scheduleObj = document.getElementById('schedule').ej2_instances[0];
-        scheduleObj.removeResource(1,'Owners');
-        
-        var test = @ViewBag.Owners.Count;
-        console.log(test);
+        var scheduleResources = scheduleObj.resources[0].dataSource;
+
+        if (scheduleResources.length > 0) {
+            scheduleObj.removeResource(scheduleResources.length,'Owners');
+            scheduleResources.pop();
+            var label = document.getElementById('queue-count-label');
+            label.innerHTML = `There are ${scheduleResources.length} Queues at the moment!`;
+        }
     }
 
     function addQueue() {
         var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+        var scheduleResources = scheduleObj.resources[0].dataSource;
+        //ownerData.Add(new OwnerModel { Id = 3, Text = "Cutting Edge 3", Color  = "#7499e1" });
+        var collection = {Id: scheduleResources.length + 1, Text: `Cutting Edge ${scheduleResources.length + 1}`, Color: "#7499e1"}
+        
+        scheduleObj.addResource(collection,'Owners', scheduleResources.length);
+        scheduleResources.push(collection);
 
-        let numberofQueues = event.target.getAttribute('numberOfQueues');
-        //ownerData.Add(new OwnerModel { Id = 3, Text = "Cutting Edge 3", Color = "#7499e1" });
-        var collection = [
-            {Id: 4, Text: `Cutting Edge ${numberofQueues}`, Color: "#7499e1"}
-        ]
-        // addResource(resource object, resource name, index)
-        console.log(numberofQueues);
-        scheduleObj.addResource(collection[0],'Owners', numberofQueues);
+        var label = document.getElementById('queue-count-label');
+        label.innerHTML = `There are ${scheduleResources.length} Queues at the moment!`;
+
     }
 
-    function OwnerTest() {
-        var complexObject = {
-            Id: 1,
-            Text: 'Hello World!',
-            Color: 'Red'
-        };
+    function addAppointment() {
+        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+        var scheduleResources = scheduleObj.resources[0].dataSource;  // current queues in place
 
-        $.ajax({
-            type: "POST",
-            url: "Heijunka/TestFunction1",
-            data: complexObject,
-            //contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (arg) {
-              alert(arg);
-              console.log(arg);
-            },
-            error: function (xhr) {
-                alert("ERROR!!");
-                alert(xhr);
-            }
-        });
+
+
+        var scheduleEventsData = scheduleObj.eventsData;   // current appointments in place
+
+
+        var startDate = new Date();
+
+        var endDate = new Date();
+        endDate.setHours(endDate.getHours() + 3);
+
+
+        var newProcess = {Id: scheduleEventsData.length + 1, OwnerId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
+        //scheduleObj.openEditor(newProcess, 'Add', true);
+
+        scheduleObj.addEvent(newProcess);
+    
+
+        //scheduleEventsData.push(newProcess);
+        //scheduleObj.refreshLayout();
+    }
+
+    function addStaging() {
+        var treeView = document.getElementById('tree').ej2_instances[0];
+
+        var content = {
+            Id: 4,
+            Name: "Shear Web"
+        }
+
+        //treeView.addNodes(content);
+        treeView.fields.dataSource.push(content);
+        treeView.refresh();
+        console.log(treeView.fields.dataSource);
+
+
+    }
+
+    function printtoConsole() {
+        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+        var treeView = document.getElementById('tree').ej2_instances[0];
+        var scheduleResources = scheduleObj.resources[0].dataSource;
+        var scheduleEventsData = scheduleObj.eventsData;
+        console.log(scheduleObj);
+        console.log(treeView);
+        console.log(scheduleEventsData);
+        console.log(scheduleResources);
+        //var complexObject = {
+        //    Id: 1,
+        //    Text: 'Hello World!',
+        //    Color: 'Red'
+        //};
+
+        //$.ajax({
+        //    type: "POST",
+        //    url: "Heijunka/TestFunction1",
+        //    data: complexObject,
+        //    contentType: "application/json; charset=utf-8",
+        //    dataType: "json",
+        //    success: function (arg) {
+        //      alert(arg);
+        //      console.log(arg);
+        //    },
+        //    error: function (xhr) {
+        //        alert("ERROR!!");
+        //        alert(xhr);
+        //    }
+        //});
     };
-</script> -->
+</script>
