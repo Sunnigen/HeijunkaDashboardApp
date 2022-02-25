@@ -73,12 +73,19 @@
              .HeaderRows(headerRow => headerRow.Option(HeaderRowType.Hour).Add())
              .EventSettings(new ScheduleEventSettings{DataSource = ViewBag.Appointments})
              .ActionBegin("onActionBegin")
+             .Drag("OnItemDrag")
              .EventRendered("onEventRendered") 
-             .PopupOpen("onPopupOpen")
-             .EditorTemplate("#EventEditorTemplate")
+             
+             
              .ShowQuickInfo(false)
              .Render()
             )
+
+
+            <!--
+                .PopupOpen("onPopupOpen")
+    
+            .EditorTemplate("#EventEditorTemplate")-->
             
 
             <ejs-button id="addQueueButton" onclick="addQueue()" content="Add Queue"></ejs-button>
@@ -330,9 +337,9 @@
     <table class="custom-event-editor" width="100%" cellpadding="5">
         <tbody>
             <tr>
-                <td class="e-textlabel">Process</td>
+                <td class="e-textlabel">Part</td>
                 <td colspan="4">
-                    <input id="Process" class="e-field e-input" type="text" name="Process" style="width: 100%"></input>
+                    <input id="EventType" class="e-field e-input" type="text" name="EventType" style="width: 100%"></input>
                 </td>
             </tr>
             <tr>
@@ -431,15 +438,13 @@
                         StartTime: cellData.startTime,
                         EndTime: cellData.endTime,
                         QueueName: resourceDetails.resourceData.Text,
-                        Description: filteredData[0].Description,
-                        IsAllDay: cellData.isAllDay,
-                        OwnerId: resourceDetails.resourceData.Id
+                        OwnerId: resourceDetails.resourceData.Id,
+                        Id:resourceDetails.resourceData.Id
                     };
-                    //scheduleObj.openEditor(eventData, 'Add', true);
-                    
+                    scheduleObj.openEditor(eventData, 'Add');
                     isTreeItemDropped = true;
                     draggedItemId = event.draggedNodeData.id;
-                    scheduleProcess(eventData);
+                    //scheduleProcess(eventData);
                 }
             }
         }
@@ -467,17 +472,17 @@
     function onPopupOpen(args) {
         console.log(`onPopupOpen: ${args?.type}`);
         if (args.type === 'Editor') {
-            var processElement = args.element.querySelector('#Process');
+            var processElement = args.element.querySelector('#EventType');
             processElement.innerHTML = args.data.Subject;
+            if (!processElement.classList.contains('e-dropdownlist')){
+                var dropDownListObject = new ej.dropdowns.DropDownList({
+                    placeholder: "Schedule a part:",
+                    dataSource: ['Aileron', 'Wing Skin', 'Rib Bracket']
+                })
+                dropDownListObject.appendTo(processElement);
+                processElement.setAttribute('name', 'EventType');
+            }
 
-            //if (!statusElement.classList.contains('e-dropdownlist')) {
-            //    var dropDownListObject = new ej.dropdowns.DropDownList({
-            //        placeholder: 'Choose status', value: statusElement.value,
-            //        dataSource: ['New', 'Requested', 'Confirmed']
-            //    });
-            //    dropDownListObject.appendTo(statusElement);
-            //    statusElement.setAttribute('name', 'EventType');
-            //}
             var startElement = args.element.querySelector('#StartTime');
             if (!startElement.classList.contains('e-datetimepicker')) {
                 new ej.calendars.DateTimePicker({ value: new Date(startElement.value) || new Date(), min: Date(startElement.value) }, startElement);
@@ -486,6 +491,19 @@
             if (!endElement.classList.contains('e-datetimepicker')) {
                 new ej.calendars.DateTimePicker({ value: new Date(endElement.value) || new Date(), min: Date(endElement.value)  }, endElement);
             }
+
+            var queueElement = args.element.querySelector('#OwnerId');
+            scheduleObjResource = document.getElementById('schedule').ej2_instances[0].resources[0].dataSource;
+            if (!queueElement.classList.contains('e-dropdownlist')){
+                var dropDownListObject = new ej.dropdowns.DropDownList({
+                    placeholder: "Select a queue:",
+                    dataSource: scheduleObjResource,
+                    fields: {text: 'Text', value: 'Id', Id: "id"}
+                })
+                dropDownListObject.appendTo(queueElement);
+                //queueElement.setAttribute('name', 'OwnerId');
+            }
+
         }
     }
 
