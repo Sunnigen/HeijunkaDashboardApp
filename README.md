@@ -1,9 +1,12 @@
 # Digital Heijunka
+View product in use [here](https://digitalheijunkatest1.azurewebsites.net/).
 
 ## Application
 Digital Heijunka is a full stack application that allows production manangers to reduce unevenness in production processes and minimize the chance of overburden.
 
 Particularly in manufacturing industries where various processes like the CNC mills, 3D printers, chemical processesing, detail fabrication, etc., need to feed parts to different customers or higher assemblies, Digital Heijunka allows stakeholders to come together and queue up their deliverables in real-time within a collaborate environment.
+
+![DigitalHeijunka](https://github.com/Sunnigen/HeijunkaDashboardApp/blob/FrontEndStagingAreaEventEditor/DesignDocuments/progress-02272022.gif)
 
 ## Software Developer Details
 The project is created in ASP.NET MVC and utilizes:  

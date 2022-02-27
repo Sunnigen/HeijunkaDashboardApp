@@ -69,24 +69,23 @@
                 .AllowVirtualScrolling(true)
                 .Add()
              )
+             .TimeScale(ts => ts
+                .Enable(true)
+                .Interval(60)
+                .SlotCount(6)
+             )
              .SelectedDate(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day))
              .HeaderRows(headerRow => headerRow.Option(HeaderRowType.Hour).Add())
              .EventSettings(new ScheduleEventSettings{DataSource = ViewBag.Appointments})
              .ActionBegin("onActionBegin")
              .Drag("OnItemDrag")
              .EventRendered("onEventRendered") 
-             
-             
+             .PopupOpen("onPopupOpen")
+             .EditorTemplate("#EventEditorTemplate") 
              .ShowQuickInfo(false)
              .Render()
             )
 
-
-            <!--
-                .PopupOpen("onPopupOpen")
-    
-            .EditorTemplate("#EventEditorTemplate")-->
-            
 
             <ejs-button id="addQueueButton" onclick="addQueue()" content="Add Queue"></ejs-button>
             <ejs-button id="removeQueueButton" onclick="removeQueue()" content="Remove Queue"></ejs-button>
@@ -339,13 +338,13 @@
             <tr>
                 <td class="e-textlabel">Part</td>
                 <td colspan="4">
-                    <input id="EventType" class="e-field e-input" type="text" name="EventType" style="width: 100%"></input>
+                    <input id="Subject" class="e-field e-input" type="text" name="Subject" style="width: 100%"></input>
                 </td>
             </tr>
             <tr>
                 <td class="e-textlabel">Order Number</td>
                 <td colspan="4">
-                    <input id="OrderNumber" class="e-field e-input" type="text" name="OrderNumber" style="width: 100%"></input>
+                    <input id="OrderNumber" class="e-field e-input" type="number" name="OrderNumber" style="width: 100%"></input>
                 </td>
             </tr>
             <tr>
@@ -365,7 +364,7 @@
             <tr>
                 <td class="e-textlabel">Queue</td>
                 <td colspan="4">
-                    <label id="OwnerId" name="OwnerId">${QueueName}</label>
+                    <input id="OwnerId" class="e-field" name="OwnerId" />
                 </td>
             </tr>
 
@@ -437,14 +436,13 @@
                         OrderNumber: filteredData[0].OrderNumber,
                         StartTime: cellData.startTime,
                         EndTime: cellData.endTime,
-                        QueueName: resourceDetails.resourceData.Text,
                         OwnerId: resourceDetails.resourceData.Id,
                         Id:resourceDetails.resourceData.Id
                     };
-                    scheduleObj.openEditor(eventData, 'Add');
+                    //scheduleObj.openEditor(eventData, 'Add');
                     isTreeItemDropped = true;
                     draggedItemId = event.draggedNodeData.id;
-                    //scheduleProcess(eventData);
+                    scheduleProcess(eventData);
                 }
             }
         }
@@ -457,6 +455,7 @@
             Id: scheduleEventsData.length + 1, 
             OwnerId: args.OwnerId, 
             Subject: args.Name, 
+            OrderNumber: args.OrderNumber,
             StartTime: args.StartTime, 
             EndTime: args.EndTime
         }
@@ -466,22 +465,26 @@
     }
 
     function onEventRendered(args) {
-        console.log(`onEventRendered: ${args.data}`);
     }
 
     function onPopupOpen(args) {
-        console.log(`onPopupOpen: ${args?.type}`);
         if (args.type === 'Editor') {
-            var processElement = args.element.querySelector('#EventType');
-            processElement.innerHTML = args.data.Subject;
-            if (!processElement.classList.contains('e-dropdownlist')){
+            var processElement = args.element.querySelector('#Subject');
+            //processElement.innerHTML = args.data.Subject;
+
+            if (!processElement.classList.contains('e-dropdownlist'))
+            {
                 var dropDownListObject = new ej.dropdowns.DropDownList({
                     placeholder: "Schedule a part:",
-                    dataSource: ['Aileron', 'Wing Skin', 'Rib Bracket']
+                    dataSource: ['Aileron', 'Wing Skin', 'Hinge Flap', 'Rib Bracket', 'Winglet'],
+                    value: args.data.Subject
                 })
                 dropDownListObject.appendTo(processElement);
-                processElement.setAttribute('name', 'EventType');
+                processElement.setAttribute('name', 'Subject');
             }
+            var orderElement = args.element.querySelector('#OrderNumber');
+            console.log(`args.data.OrderNumber: ${args.data.OrderNumber}`);
+            orderElement.value = args.data.OrderNumber;
 
             var startElement = args.element.querySelector('#StartTime');
             if (!startElement.classList.contains('e-datetimepicker')) {
@@ -493,15 +496,25 @@
             }
 
             var queueElement = args.element.querySelector('#OwnerId');
-            scheduleObjResource = document.getElementById('schedule').ej2_instances[0].resources[0].dataSource;
+            var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+            var scheduleObjResource = scheduleObj.resources[0].dataSource;
+            console.log(`queueElement.value: ${queueElement.value}`);
+            //var cellData = scheduleObj.getCellDetails(event.target);
+            //if (cellData) {
+            //    var groupIndex = cellData.groupIndex + 1
+            //} else {
+            //    var groupIndex = queueElement.value;
+            //}
+
             if (!queueElement.classList.contains('e-dropdownlist')){
                 var dropDownListObject = new ej.dropdowns.DropDownList({
                     placeholder: "Select a queue:",
                     dataSource: scheduleObjResource,
-                    fields: {text: 'Text', value: 'Id', Id: "id"}
+                    fields: {text: 'Text', value: 'Id'},
+                    value: args.data.OwnerId
                 })
                 dropDownListObject.appendTo(queueElement);
-                //queueElement.setAttribute('name', 'OwnerId');
+                queueElement.setAttribute('name', 'OwnerId');
             }
 
         }
