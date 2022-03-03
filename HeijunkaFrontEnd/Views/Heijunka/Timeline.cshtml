@@ -89,7 +89,7 @@
 
             <ejs-button id="addQueueButton" onclick="addQueue()" content="Add Queue"></ejs-button>
             <ejs-button id="removeQueueButton" onclick="removeQueue()" content="Remove Queue"></ejs-button>
-            <ejs-button id="getDataButton" onclick="printtoConsole()" content="Print Data"></ejs-button>
+            <ejs-button id="getQueues" onclick="GetQueues()" content="Get Queues"></ejs-button>
             <ejs-button id="addAppointment" onclick="addAppointment()" content="Schedule Process"></ejs-button>
             <ejs-button id="addStagingButton" onclick="addStaging()" content="Stage Process"></ejs-button>
         </div>
@@ -104,9 +104,12 @@
                     .Id("Id")
                     .Text("Name")
                     .Text("OrderNumber")
+                    .Selected("is_selected")
+                    .HtmlAttributes("hasAttribute")
                 )
                 .AllowEditing(true)
                 .AllowDragAndDrop(true)
+                .NodeClicked("nodeClicked")
                 .NodeDragStop("OnTreeDragStop")
                 .NodeDragging("OnItemDrag")
                 .NodeTemplate("#treeTemplate")
@@ -114,9 +117,423 @@
                 .CssClass("treeview-external-drag")
                 .Render()
             )
+
+            <!-- Contextual Menu -->
+            @(Html.EJS().ContextMenu("menu")
+                .Target("#tree")
+                .Select("menuClick")
+                .BeforeOpen("beforeOpen")
+                .Items(ViewBag.menuOptions)
+                .Render()
+            )
         </div>
     </div>
 </div>
+
+
+<!-- Template to render tree node -->
+<script id="treeTemplate" type="text/x-template">
+    <div id="waiting">
+        <div id="waitdetails">
+            <div id="waitlist">${Name}</div>
+            <div id="ordernumber">
+                <label>Order Number:&ensp;</label>
+                <label> ${OrderNumber}</label>
+            </div>
+        </div>
+    </div>
+</script>
+
+
+<script id="EventEditorTemplate" type="text/x-template">
+    <table class="custom-event-editor" width="100%" cellpadding="5">
+        <tbody>
+            <tr>
+                <td class="e-textlabel">Part</td>
+                <td colspan="4">
+                    <input id="Subject" class="e-field e-input" type="text" name="Subject" style="width: 100%" />
+                </td>
+            </tr>
+            <tr>
+                <td class="e-textlabel">Order Number</td>
+                <td colspan="4">
+                    <input id="OrderNumber" class="e-field e-input" type="number" name="OrderNumber" style="width: 100%" />
+                </td>
+            </tr>
+            <tr>
+                <td class="e-textlabel">From</td>
+                <td colspan="4">
+                    <input id="StartTime" class="e-field" type="text" name="StartTime" />
+                </td>
+            </tr>
+            <tr>
+                <td class="e-textlabel">To</td>
+                <td colspan="4">
+                    <input id="EndTime" readonly class="e-field e-input" type="text" name="EndTime" />
+                </td>
+            </tr>
+
+
+            <tr>
+                <td class="e-textlabel">Queue</td>
+                <td colspan="4">
+                    <input id="OwnerId" class="e-field" name="OwnerId" />
+                </td>
+            </tr>
+
+
+        </tbody>
+    </table>
+</script>
+
+<script type="text/javascript">
+
+    var isTreeItemDropped = false;
+    var draggedItemId = '';
+    var index = 1;
+
+    function nodeClicked(args) {
+        //if (args.event.which === 3) {
+        //    var treeObj = document.getElementById('tree').ej2_instances[0];
+        //    treeObj.selectedNodes = [args.node.getAttribute('data-uid')];
+        //}
+    }
+
+    function menuClick(args) {
+        var treeObj = document.getElementById('tree').ej2_instances[0];
+        var menuObj = document.getElementById('menu').ej2_instances[0];
+        var targetNodeId = treeObj.selectedNodes[0];
+        if (args.item.text == "Stage Part") {
+            var nodeId = "tree_" + index; // i don't know what this is supposed to be used for
+            // TODO: Add 2nd Menu to Select Part and Add Order Number
+            var item = { Id: treeObj.fields.dataSource.length+ 1, Name: "Aileron", OrderNumber: "34211231"  };
+            treeObj.addNodes([item], null);
+            index++;
+            treeObj.fields.dataSource.push(item);
+            treeObj.refresh();
+            //treeObj.beginEdit(nodeId);
+        }
+        else if (args.item.text == "Remove Part") {
+            treeObj.removeNodes([targetNodeId]);
+        }
+        else if (args.item.text == "Rename Part") {
+            treeObj.beginEdit(targetNodeId);
+        }
+    }
+
+    function beforeOpen(args) {
+        var treeObj = document.getElementById('tree').ej2_instances[0];
+        var menuObj = document.getElementById('menu').ej2_instances[0];
+        var targetNodeId = treeObj.selectedNodes[0];
+
+        // Check if anything is even selected
+        if (targetNodeId == null) {
+            return;
+        }
+
+        var targetNode = document.getElementById('tree').querySelector('[data-uid="' + targetNodeId + '"]');
+        if (targetNode.classList.contains('remove')) {
+            menuObj.enableItems(['Remove Part'], false);
+        }
+        else {
+            menuObj.enableItems(['Remove Part'], true);
+        }
+    }
+
+    function OnItemDrag(event) {
+        var scheduleObj = document.querySelector(".e-schedule").ej2_instances[0];
+        if (scheduleObj.isAdaptive) {
+            var classElement = scheduleObj.element.querySelector('.e-device-hover');
+            if (classElement) {
+                classElement.classList.remove('e-device-hover');
+            }
+            if (event.event.target.classList.contains('e-work-cells')) {
+                ej.base.addClass([event.event.target], 'e-device-hover');
+            }
+        }
+        //document.body.style.position = 'fixed';   // this might cause problems later, right now it creates an empty column on right of entire page
+        if (document.body.style.cursor === 'not-allowed') {
+            document.body.style.cursor = '';
+        }
+        if (event.name == 'nodeDragging') {
+            var dragElementIcon = document.querySelectorAll('.e-drag-item .e-icon-expandable');
+            for (var i = 0; i < dragElementIcon.length; i++) {
+                dragElementIcon[i].style.display = 'none';
+            }
+        }
+    }
+
+    function onActionBegin(event) {
+        if (event.requestType === 'eventCreate' && isTreeItemDropped) {
+            var treeObj = document.querySelector(".e-treeview.treeview-external-drag").ej2_instances[0];
+            var treeViewdata = treeObj.fields.dataSource;
+            var filteredPeople = treeViewdata.filter(function (item) { return item.Id !== parseInt(draggedItemId, 10); });
+            treeObj.fields.dataSource = filteredPeople;
+            var elements = document.querySelectorAll('.e-drag-item.treeview-external-drag');
+            for (var i = 0; i < elements.length; i++) {
+                remove(elements[i]);
+            }
+        }
+    }
+
+    function OnTreeDragStop(event) {
+        var treeElement = ej.base.closest(event.target, '.e-treeview');
+        var scheduleObj = document.querySelector(".e-schedule").ej2_instances[0];
+        var classElement = scheduleObj.element.querySelector('.e-device-hover');
+        if (classElement) {
+            classElement.classList.remove('e-device-hover');
+        }
+        if (!treeElement) {
+            event.cancel = true;
+            var scheduleElement = ej.base.closest(event.target, '.e-content-wrap');
+            if (scheduleElement) {
+                var treeviewData = this.fields.dataSource;
+                if (event.target.classList.contains('e-work-cells')) {
+                    var filteredData =
+                        treeviewData.filter(function (item) { return item.Id === parseInt(event.draggedNodeData.id, 10); });
+                    var cellData = scheduleObj.getCellDetails(event.target);
+                    var resourceDetails = scheduleObj.getResourcesByIndex(cellData.groupIndex);
+                    console.log(`filteredData[0]: ${filteredData[0]}`);
+                    var eventData = {
+                        Name: filteredData[0].Name,
+                        OrderNumber: filteredData[0].OrderNumber,
+                        StartTime: cellData.startTime,
+                        EndTime: updateDate(cellData.startTime, filteredData[0].Name),
+                        OwnerId: resourceDetails.resourceData.Id,
+                        Id:resourceDetails.resourceData.Id
+                    };
+                    //scheduleObj.openEditor(eventData, 'Add');
+                    isTreeItemDropped = true;
+                    draggedItemId = event.draggedNodeData.id;
+                    scheduleProcess(eventData);
+                }
+            }
+        }
+    }
+
+    function scheduleProcess(args) {
+        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+        var scheduleEventsData = scheduleObj.eventsData;
+        var newProcess = {
+            Id: scheduleEventsData.length + 1, 
+            OwnerId: args.OwnerId, 
+            Subject: args.Name, 
+            OrderNumber: args.OrderNumber,
+            StartTime: args.StartTime, 
+            EndTime: args.EndTime
+        }
+        console.log(`scheduleProcess\n\tId: ${newProcess.Id}, OwnerId: ${newProcess.OwnerId}, Subject: ${newProcess.Subject}, StartTime: ${newProcess.StartTime}, EndTime: ${newProcess.EndTime}`);
+        scheduleObj.addEvent(newProcess);
+        //var newProcess = {Id: scheduleEventsData.length + 1, OwnerId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
+    }
+
+    function onEventRendered(args) {
+    }
+
+    function updateDate(startDateString, partNameString) {
+        console.log(`updateDate: startDateString:  ${startDateString}  partNameString: ${partNameString}`);
+
+        // Find PartModel and Obtain Duration
+        var partsList = @Json.Serialize(ViewBag.Parts);
+        console.log(partsList);
+        var duration = 0;
+        for (const p of partsList) {
+            console.log(` ${p.id} ${p.name} ${p.duration} ${p}`);
+            if (p.name === partNameString) {
+                duration = p.duration;
+                console.log(`Scheduling part name: ${p.name}  duration: ${p.duration}`);
+                break;
+            }
+        }
+
+        // Set End Date based on Start Date + Duration
+        var startDate = new Date(startDateString);
+        startDate = new Date(startDate.getTime() + duration*60000);
+        var year = startDate.getFullYear();
+        var month = startDate.getMonth() + 1;
+        var date = startDate.getDate();
+        var hours = startDate.getHours();
+        var minutes = startDate.getMinutes();
+        
+        // Format Date MM:DD:YYYY HH:MM
+        var ampm = hours >= 12 ? "PM" : "AM";
+
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+
+        var date = `${month}/${date}/${year} ${hours}:${minutes} ${ampm}`;
+        console.log(`date: ${date}`);
+        return date;
+    }
+
+    function onPopupOpen(args) {
+        if (args.type === 'Editor') {
+            var processElement = args.element.querySelector('#Subject');
+
+            // Order Number
+            var orderElement = args.element.querySelector('#OrderNumber');
+            orderElement.value = args.data.OrderNumber;
+
+            // Start Time
+            var startElement = args.element.querySelector('#StartTime');
+            if (!startElement.classList.contains('e-datetimepicker')) {
+                new ej.calendars.DateTimePicker({ 
+                    value: new Date(startElement.value) || new Date(), 
+                    min: Date(startElement.value),
+                    change: () => { endElement.value = updateDate(startElement.value, processElement.value); }}, startElement);
+            }
+
+            // End Time
+            var endElement = args.element.querySelector('#EndTime');
+            endElement.value = updateDate(startElement.value, processElement.value);
+
+            // Drop List to Select Existing Part to Process
+            
+            if (!processElement.classList.contains('e-dropdownlist'))
+            {
+                var dropDownListObject = new ej.dropdowns.DropDownList({
+                    placeholder: "Schedule a part:",
+                    dataSource: ['Aileron', 'Wing Skin', 'Hinge Flap', 'Rib Bracket', 'Winglet'],
+                    value: args.data.Subject,
+                    change: () => { endElement.value = updateDate(startElement.value, processElement.value); }
+                })
+                dropDownListObject.appendTo(processElement);
+                processElement.setAttribute('name', 'Subject');
+            }
+
+            // Drop List to Select Queue/Owner
+            var queueElement = args.element.querySelector('#OwnerId');
+            var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+            var scheduleObjResource = scheduleObj.resources[0].dataSource;
+
+            if (!queueElement.classList.contains('e-dropdownlist')){
+                var dropDownListObject = new ej.dropdowns.DropDownList({
+                    placeholder: "Select a queue:",
+                    dataSource: scheduleObjResource,
+                    fields: {text: 'Text', value: 'Id'},
+                    value: args.data.OwnerId
+                })
+                dropDownListObject.appendTo(queueElement);
+                queueElement.setAttribute('name', 'OwnerId');
+            }
+
+        }
+    }
+
+    
+
+    function removeQueue() {
+        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+        var scheduleResources = scheduleObj.resources[0].dataSource;
+
+        if (scheduleResources.length > 0) {
+            scheduleObj.removeResource(scheduleResources.length,'Owners');
+            scheduleResources.pop();
+            var label = document.getElementById('queue-count-label');
+            label.innerHTML = `There are ${scheduleResources.length} Queues at the moment!`;
+        }
+    }
+
+    function addQueue() {
+        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+        var scheduleResources = scheduleObj.resources[0].dataSource;
+        //ownerData.Add(new OwnerModel { Id = 3, Text = "Cutting Edge 3", Color  = "#7499e1" });
+        var collection = {Id: scheduleResources.length + 1, Text: `Cutting Edge ${scheduleResources.length + 1}`, Color: "#7499e1"}
+        
+        scheduleObj.addResource(collection,'Owners', scheduleResources.length);
+        scheduleResources.push(collection);
+
+        var label = document.getElementById('queue-count-label');
+        label.innerHTML = `There are ${scheduleResources.length} Queues at the moment!`;
+
+    }
+
+    function addAppointment() {
+        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+        var scheduleResources = scheduleObj.resources[0].dataSource;  // current queues in place
+
+
+
+        var scheduleEventsData = scheduleObj.eventsData;   // current appointments in place
+
+
+        var startDate = new Date();
+
+        var endDate = new Date();
+        endDate.setHours(endDate.getHours() + 3);
+
+
+        var newProcess = {Id: scheduleEventsData.length + 1, OwnerId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
+        //scheduleObj.openEditor(newProcess, 'Add', true);
+
+        scheduleObj.addEvent(newProcess);
+    
+
+        //scheduleEventsData.push(newProcess);
+        //scheduleObj.refreshLayout();
+    }
+
+    function addStaging() {
+        var treeView = document.getElementById('tree').ej2_instances[0];
+
+        var content = {
+            Id: treeView.fields.dataSource.length+ 1,
+            Name: "Shear Web"
+        }
+
+        //treeView.addNodes(content);
+        treeView.fields.dataSource.push(content);
+        treeView.refresh();
+        //console.log(treeView.fields.dataSource);
+
+
+    }
+
+    function GetQueues() {
+        var ajax = new ej.base.Ajax('/Heijunka/GetQueues', 'Get', false);
+        ajax.send().then(
+            function (value) {
+                console.log(value);
+                var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+                scheduleObj.resources.dataSource = JSON.parse(value);
+                scheduleObj.dataBind();
+            }
+        )
+    }
+
+    function printtoConsole() {
+        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+        var treeView = document.getElementById('tree').ej2_instances[0];
+        var scheduleResources = scheduleObj.resources[0].dataSource;
+        var scheduleEventsData = scheduleObj.eventsData;
+        console.log(scheduleObj);
+        console.log(treeView);
+        console.log(scheduleEventsData);
+        console.log(scheduleResources);
+        //var complexObject = {
+        //    Id: 1,
+        //    Text: 'Hello World!',
+        //    Color: 'Red'
+        //};
+
+        //$.ajax({
+        //    type: "POST",
+        //    url: "Heijunka/TestFunction1",
+        //    data: complexObject,
+        //    contentType: "application/json; charset=utf-8",
+        //    dataType: "json",
+        //    success: function (arg) {
+        //      alert(arg);
+        //      console.log(arg);
+        //    },
+        //    error: function (xhr) {
+        //        alert("ERROR!!");
+        //        alert(xhr);
+        //    }
+        //});
+    };
+</script>
 
 <style>
     .content-wrapper{
@@ -317,307 +734,3 @@
             }
     }
 </style>
-
-<!-- Template to render tree node -->
-<script id="treeTemplate" type="text/x-template">
-    <div id="waiting">
-        <div id="waitdetails">
-            <div id="waitlist">${Name}</div>
-            <div id="ordernumber">
-                <label>Order Number:&ensp;</label>
-                <label> ${OrderNumber}</label>
-            </div>
-        </div>
-    </div>
-</script>
-
-
-<script id="EventEditorTemplate" type="text/x-template">
-    <table class="custom-event-editor" width="100%" cellpadding="5">
-        <tbody>
-            <tr>
-                <td class="e-textlabel">Part</td>
-                <td colspan="4">
-                    <input id="Subject" class="e-field e-input" type="text" name="Subject" style="width: 100%"></input>
-                </td>
-            </tr>
-            <tr>
-                <td class="e-textlabel">Order Number</td>
-                <td colspan="4">
-                    <input id="OrderNumber" class="e-field e-input" type="number" name="OrderNumber" style="width: 100%"></input>
-                </td>
-            </tr>
-            <tr>
-                <td class="e-textlabel">From</td>
-                <td colspan="4">
-                    <input id="StartTime" class="e-field" type="text" name="StartTime" />
-                </td>
-            </tr>
-            <tr>
-                <td class="e-textlabel">To</td>
-                <td colspan="4">
-                    <input id="EndTime" class="e-field" type="text" name="EndTime" />
-                </td>
-            </tr>
-
-
-            <tr>
-                <td class="e-textlabel">Queue</td>
-                <td colspan="4">
-                    <input id="OwnerId" class="e-field" name="OwnerId" />
-                </td>
-            </tr>
-
-
-        </tbody>
-    </table>
-</script>
-
-<script type="text/javascript">
-
-    var isTreeItemDropped = false;
-    var draggedItemId = '';
-
-    function OnItemDrag(event) {
-        var scheduleObj = document.querySelector(".e-schedule").ej2_instances[0];
-        if (scheduleObj.isAdaptive) {
-            var classElement = scheduleObj.element.querySelector('.e-device-hover');
-            if (classElement) {
-                classElement.classList.remove('e-device-hover');
-            }
-            if (event.event.target.classList.contains('e-work-cells')) {
-                ej.base.addClass([event.event.target], 'e-device-hover');
-            }
-        }
-        //document.body.style.position = 'fixed';   // this might cause problems later, right now it creates an empty column on right of entire page
-        if (document.body.style.cursor === 'not-allowed') {
-            document.body.style.cursor = '';
-        }
-        if (event.name == 'nodeDragging') {
-            var dragElementIcon = document.querySelectorAll('.e-drag-item .e-icon-expandable');
-            for (var i = 0; i < dragElementIcon.length; i++) {
-                dragElementIcon[i].style.display = 'none';
-            }
-        }
-    }
-
-    function onActionBegin(event) {
-        if (event.requestType === 'eventCreate' && isTreeItemDropped) {
-            var treeObj = document.querySelector(".e-treeview.treeview-external-drag").ej2_instances[0];
-            var treeViewdata = treeObj.fields.dataSource;
-            var filteredPeople = treeViewdata.filter(function (item) { return item.Id !== parseInt(draggedItemId, 10); });
-            treeObj.fields.dataSource = filteredPeople;
-            var elements = document.querySelectorAll('.e-drag-item.treeview-external-drag');
-            for (var i = 0; i < elements.length; i++) {
-                remove(elements[i]);
-            }
-        }
-    }
-
-    function OnTreeDragStop(event) {
-        var treeElement = ej.base.closest(event.target, '.e-treeview');
-        var scheduleObj = document.querySelector(".e-schedule").ej2_instances[0];
-        var classElement = scheduleObj.element.querySelector('.e-device-hover');
-        if (classElement) {
-            classElement.classList.remove('e-device-hover');
-        }
-        if (!treeElement) {
-            event.cancel = true;
-            var scheduleElement = ej.base.closest(event.target, '.e-content-wrap');
-            if (scheduleElement) {
-                var treeviewData = this.fields.dataSource;
-                if (event.target.classList.contains('e-work-cells')) {
-                    var filteredData =
-                        treeviewData.filter(function (item) { return item.Id === parseInt(event.draggedNodeData.id, 10); });
-                    var cellData = scheduleObj.getCellDetails(event.target);
-                    var resourceDetails = scheduleObj.getResourcesByIndex(cellData.groupIndex);
-                    var eventData = {
-                        Name: filteredData[0].Name,
-                        OrderNumber: filteredData[0].OrderNumber,
-                        StartTime: cellData.startTime,
-                        EndTime: cellData.endTime,
-                        OwnerId: resourceDetails.resourceData.Id,
-                        Id:resourceDetails.resourceData.Id
-                    };
-                    //scheduleObj.openEditor(eventData, 'Add');
-                    isTreeItemDropped = true;
-                    draggedItemId = event.draggedNodeData.id;
-                    scheduleProcess(eventData);
-                }
-            }
-        }
-    }
-
-    function scheduleProcess(args) {
-        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
-        var scheduleEventsData = scheduleObj.eventsData;
-        var newProcess = {
-            Id: scheduleEventsData.length + 1, 
-            OwnerId: args.OwnerId, 
-            Subject: args.Name, 
-            OrderNumber: args.OrderNumber,
-            StartTime: args.StartTime, 
-            EndTime: args.EndTime
-        }
-        console.log(`scheduleProcess\n\tId: ${newProcess.Id}, OwnerId: ${newProcess.OwnerId}, Subject: ${newProcess.Subject}, StartTime: ${newProcess.StartTime}, EndTime: ${newProcess.EndTime}`);
-        scheduleObj.addEvent(newProcess);
-        //var newProcess = {Id: scheduleEventsData.length + 1, OwnerId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
-    }
-
-    function onEventRendered(args) {
-    }
-
-    function onPopupOpen(args) {
-        if (args.type === 'Editor') {
-            var processElement = args.element.querySelector('#Subject');
-            //processElement.innerHTML = args.data.Subject;
-
-            if (!processElement.classList.contains('e-dropdownlist'))
-            {
-                var dropDownListObject = new ej.dropdowns.DropDownList({
-                    placeholder: "Schedule a part:",
-                    dataSource: ['Aileron', 'Wing Skin', 'Hinge Flap', 'Rib Bracket', 'Winglet'],
-                    value: args.data.Subject
-                })
-                dropDownListObject.appendTo(processElement);
-                processElement.setAttribute('name', 'Subject');
-            }
-            var orderElement = args.element.querySelector('#OrderNumber');
-            console.log(`args.data.OrderNumber: ${args.data.OrderNumber}`);
-            orderElement.value = args.data.OrderNumber;
-
-            var startElement = args.element.querySelector('#StartTime');
-            if (!startElement.classList.contains('e-datetimepicker')) {
-                new ej.calendars.DateTimePicker({ value: new Date(startElement.value) || new Date(), min: Date(startElement.value) }, startElement);
-            }
-            var endElement = args.element.querySelector('#EndTime');
-            if (!endElement.classList.contains('e-datetimepicker')) {
-                new ej.calendars.DateTimePicker({ value: new Date(endElement.value) || new Date(), min: Date(endElement.value)  }, endElement);
-            }
-
-            var queueElement = args.element.querySelector('#OwnerId');
-            var scheduleObj = document.getElementById('schedule').ej2_instances[0];
-            var scheduleObjResource = scheduleObj.resources[0].dataSource;
-            console.log(`queueElement.value: ${queueElement.value}`);
-            //var cellData = scheduleObj.getCellDetails(event.target);
-            //if (cellData) {
-            //    var groupIndex = cellData.groupIndex + 1
-            //} else {
-            //    var groupIndex = queueElement.value;
-            //}
-
-            if (!queueElement.classList.contains('e-dropdownlist')){
-                var dropDownListObject = new ej.dropdowns.DropDownList({
-                    placeholder: "Select a queue:",
-                    dataSource: scheduleObjResource,
-                    fields: {text: 'Text', value: 'Id'},
-                    value: args.data.OwnerId
-                })
-                dropDownListObject.appendTo(queueElement);
-                queueElement.setAttribute('name', 'OwnerId');
-            }
-
-        }
-    }
-
-    
-
-    function removeQueue() {
-        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
-        var scheduleResources = scheduleObj.resources[0].dataSource;
-
-        if (scheduleResources.length > 0) {
-            scheduleObj.removeResource(scheduleResources.length,'Owners');
-            scheduleResources.pop();
-            var label = document.getElementById('queue-count-label');
-            label.innerHTML = `There are ${scheduleResources.length} Queues at the moment!`;
-        }
-    }
-
-    function addQueue() {
-        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
-        var scheduleResources = scheduleObj.resources[0].dataSource;
-        //ownerData.Add(new OwnerModel { Id = 3, Text = "Cutting Edge 3", Color  = "#7499e1" });
-        var collection = {Id: scheduleResources.length + 1, Text: `Cutting Edge ${scheduleResources.length + 1}`, Color: "#7499e1"}
-        
-        scheduleObj.addResource(collection,'Owners', scheduleResources.length);
-        scheduleResources.push(collection);
-
-        var label = document.getElementById('queue-count-label');
-        label.innerHTML = `There are ${scheduleResources.length} Queues at the moment!`;
-
-    }
-
-    function addAppointment() {
-        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
-        var scheduleResources = scheduleObj.resources[0].dataSource;  // current queues in place
-
-
-
-        var scheduleEventsData = scheduleObj.eventsData;   // current appointments in place
-
-
-        var startDate = new Date();
-
-        var endDate = new Date();
-        endDate.setHours(endDate.getHours() + 3);
-
-
-        var newProcess = {Id: scheduleEventsData.length + 1, OwnerId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
-        //scheduleObj.openEditor(newProcess, 'Add', true);
-
-        scheduleObj.addEvent(newProcess);
-    
-
-        //scheduleEventsData.push(newProcess);
-        //scheduleObj.refreshLayout();
-    }
-
-    function addStaging() {
-        var treeView = document.getElementById('tree').ej2_instances[0];
-
-        var content = {
-            Id: 4,
-            Name: "Shear Web"
-        }
-
-        //treeView.addNodes(content);
-        treeView.fields.dataSource.push(content);
-        treeView.refresh();
-        console.log(treeView.fields.dataSource);
-
-
-    }
-
-    function printtoConsole() {
-        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
-        var treeView = document.getElementById('tree').ej2_instances[0];
-        var scheduleResources = scheduleObj.resources[0].dataSource;
-        var scheduleEventsData = scheduleObj.eventsData;
-        console.log(scheduleObj);
-        console.log(treeView);
-        console.log(scheduleEventsData);
-        console.log(scheduleResources);
-        //var complexObject = {
-        //    Id: 1,
-        //    Text: 'Hello World!',
-        //    Color: 'Red'
-        //};
-
-        //$.ajax({
-        //    type: "POST",
-        //    url: "Heijunka/TestFunction1",
-        //    data: complexObject,
-        //    contentType: "application/json; charset=utf-8",
-        //    dataType: "json",
-        //    success: function (arg) {
-        //      alert(arg);
-        //      console.log(arg);
-        //    },
-        //    error: function (xhr) {
-        //        alert("ERROR!!");
-        //        alert(xhr);
-        //    }
-        //});
-    };
-</script>

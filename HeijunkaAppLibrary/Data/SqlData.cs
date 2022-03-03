@@ -134,7 +134,10 @@ namespace HeijunkaAppLibrary.Data
 
         public List<QueueModel> FindActiveQueues()
         {
-            throw new NotImplementedException();
+            string sql = @"select Id, QueueName, Description
+                           from Queues
+                           where IsActive = 1";
+            return _db.LoadData<QueueModel, dynamic>(sql, new { }, connectionStringName);
         }
 
         public List<QueueModel> FindAllQueues()

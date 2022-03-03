@@ -3,49 +3,113 @@ using HeijunkaTest.Models;
 using Syncfusion.EJ2.Schedule;
 using Syncfusion.EJ2.Navigations;
 using HeijunkaFrontEnd.Models;
+using HeijunkaAppLibrary.Data;
+using HeijunkaAppLibrary.Models;
 
 namespace HeijunkaTest.Controllers
 {
     public class HeijunkaController : Controller
     {
-        [BindProperty]
-        public List<OwnerModel> ownerData { get; set; } = new List<OwnerModel>();
-        public List<AppointmentData> appointmentData { get; set; } = new List<AppointmentData>();
+        private IDatabaseData _db;
 
-        private List<ScheduleView> viewOptions { get; set; } = new List<ScheduleView>() 
+        public HeijunkaController(IDatabaseData db)
         {
-            new ScheduleView { Option = Syncfusion.EJ2.Schedule.View.Agenda}
-        }; 
+            _db = db;  // dependency injection for database queries
+        }
 
-        public HeijunkaController()
+        public ActionResult GetQueues()
         {
-            // Set to Timeline Day
-            ViewBag.view = this.viewOptions;
+            List<QueueModel> q = _db.FindActiveQueues();
+            return Json(q);
         }
 
         public ActionResult TestFunction1(OwnerModel owner)
         {
-
-            return Json(this.ownerData);
+            return Json(this.SetOwnerQueues());
         }
 
-        public IActionResult Timeline(List<OwnerModel> oData = null, List<AppointmentData> apData = null)
+        public IActionResult Timeline()
         {
-            // Set Queue Column
-            string[] resources = new string[] { "Owners" };
-            ViewBag.Resources = resources;
-            this.ownerData = this.SetOwnerQueues();
-            ViewBag.Owners = this.ownerData;
+            // View
+            ViewBag.view = new ScheduleView { Option = Syncfusion.EJ2.Schedule.View.Agenda };
 
+            // Set Queue Column
+            ViewBag.Resources = new string[] { "Owners" };
+            
             // Existing Parts in Process Data
-            this.appointmentData = GetScheduleData();
-            ViewBag.Appointments = this.appointmentData;
+            ViewBag.Appointments = GetScheduleData();
+
+            // Owners/Queues
+            ViewBag.Owners = this.SetOwnerQueues();
 
             // Set Staging Area
             ViewBag.DataSource = GetStagedParts();
 
-            return View(this.ownerData);
-            //return View(this.ownerData, this.appointmentData);
+            // Set Parts
+            ViewBag.Parts = CreateParts();
+
+            // Staging Area Menu Options
+            ViewBag.menuOptions = CreateMenuOptions();
+
+            return View();
+        }
+
+        private List<object> CreateMenuOptions()
+        {
+            return new List<object>()
+            {
+                new
+                {
+                    text = "Stage Part"
+                },
+                new
+                {
+                    text = "Remove Part"
+                }
+            };
+        }
+
+        private List<PartModel> CreateParts()
+        {
+            return new List<PartModel>()
+            {   
+                new PartModel
+                {
+                    Id = 1,
+                    Name = "Aileron",
+                    Duration = 45
+                },
+                new PartModel
+                {
+                    Id = 2,
+                    Name = "Wing Skin",
+                    Duration = 180,
+                },
+                new PartModel
+                {
+                    Id = 3,
+                    Name = "Hinge Flap",
+                    Duration = 25,
+                },
+                new PartModel
+                {
+                    Id = 4,
+                    Name = "Rib Bracket",
+                    Duration = 75,
+                },
+                new PartModel
+                {
+                    Id = 5,
+                    Name = "Winglet",
+                    Duration = 65,
+                },
+                new PartModel
+                {
+                    Id = 7,
+                    Name = "Shear Web",
+                    Duration = 30,
+                }
+            };
         }
 
         private List<StagingObjectModel> GetStagedParts()
@@ -91,30 +155,27 @@ namespace HeijunkaTest.Controllers
             {
                 Id = 1,
                 OwnerId = 1,
-                Subject = "Gathering Wood",
+                PartModel = new PartModel { Id = 1, Name = "Aileron", Duration = 60},
                 StartTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 9, 30, 0),
-                EndTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 10, 30, 0),
+                
             });
 
             appointmentData.Add(new AppointmentData
             {
                 Id = 2,
                 OwnerId = 1,
-                Subject = "Chopping Wood",
+                PartModel = new PartModel { Id = 1, Name = "Wing Skin", Duration = 45 },
                 StartTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 10, 30, 0),
-                EndTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 11, 45, 0),
+                
             });
 
             appointmentData.Add(new AppointmentData
             {
                 Id = 3,
                 OwnerId = 2,
-                Subject = "Taking a Nap",
+                PartModel = new PartModel { Id = 1, Name = "Hinge Flap", Duration = 25 },
                 StartTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 12, 0, 0),
-                EndTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 14, 0, 0),
             });
-
-
 
             return appointmentData;
         }
