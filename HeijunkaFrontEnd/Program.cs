@@ -1,9 +1,15 @@
+using HeijunkaAppLibrary.Data;
+using HeijunkaAppLibrary.Databases;
 using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Dependency Injection
+builder.Services.AddTransient<ISqlDataAccess, SqlDataAccess>();
+builder.Services.AddTransient<IDatabaseData, SqlData>();
 
 if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), @"node_modules", @"@syncfusion")))
 {

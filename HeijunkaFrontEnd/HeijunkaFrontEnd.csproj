@@ -9,5 +9,9 @@
   <ItemGroup>
          <PackageReference Include="Syncfusion.EJ2.AspNet.Core" Version="19.4.0.38" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\HeijunkaAppLibrary\HeijunkaAppLibrary.csproj" />
+  </ItemGroup>
 
 </Project>
