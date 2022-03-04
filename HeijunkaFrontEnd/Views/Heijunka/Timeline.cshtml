@@ -59,7 +59,7 @@
                  .Field("OwnerId")
                  .Title("Owners")
                  .Name("Owners")
-                 .TextField("Text")
+                 .TextField("QueueName")
                  .IdField("Id")
                  .ColorField("Color")
                  .Add();
@@ -215,6 +215,9 @@
         }
         else if (args.item.text == "Remove Part") {
             treeObj.removeNodes([targetNodeId]);
+            console.log(`targetNodeId: ${targetNodeId}   ${treeObj.fields.dataSource[targetNodeId - 1]}`);
+            var removed = treeObj.fields.dataSource.splice(targetNodeId - 1, 1);
+            console.log(treeObj.fields.dataSource);
         }
         else if (args.item.text == "Rename Part") {
             treeObj.beginEdit(targetNodeId);
@@ -327,8 +330,7 @@
         //var newProcess = {Id: scheduleEventsData.length + 1, OwnerId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
     }
 
-    function onEventRendered(args) {
-    }
+    function onEventRendered(args) { }
 
     function updateDate(startDateString, partNameString) {
         console.log(`updateDate: startDateString:  ${startDateString}  partNameString: ${partNameString}`);
@@ -338,10 +340,10 @@
         console.log(partsList);
         var duration = 0;
         for (const p of partsList) {
-            console.log(` ${p.id} ${p.name} ${p.duration} ${p}`);
-            if (p.name === partNameString) {
-                duration = p.duration;
-                console.log(`Scheduling part name: ${p.name}  duration: ${p.duration}`);
+            console.log(` ${p.Id} ${p.Name} ${p.Duration} ${p}`);
+            if (p.Name === partNameString) {
+                duration = p.Duration;
+                console.log(`Scheduling part name: ${p.Name}  duration: ${p.Duration}`);
                 break;
             }
         }
@@ -389,7 +391,6 @@
             endElement.value = updateDate(startElement.value, processElement.value);
 
             // Drop List to Select Existing Part to Process
-            
             if (!processElement.classList.contains('e-dropdownlist'))
             {
                 var dropDownListObject = new ej.dropdowns.DropDownList({
@@ -411,7 +412,7 @@
                 var dropDownListObject = new ej.dropdowns.DropDownList({
                     placeholder: "Select a queue:",
                     dataSource: scheduleObjResource,
-                    fields: {text: 'Text', value: 'Id'},
+                    fields: {text: 'QueueName', value: 'Id'},
                     value: args.data.OwnerId
                 })
                 dropDownListObject.appendTo(queueElement);
@@ -420,8 +421,6 @@
 
         }
     }
-
-    
 
     function removeQueue() {
         var scheduleObj = document.getElementById('schedule').ej2_instances[0];
@@ -439,7 +438,7 @@
         var scheduleObj = document.getElementById('schedule').ej2_instances[0];
         var scheduleResources = scheduleObj.resources[0].dataSource;
         //ownerData.Add(new OwnerModel { Id = 3, Text = "Cutting Edge 3", Color  = "#7499e1" });
-        var collection = {Id: scheduleResources.length + 1, Text: `Cutting Edge ${scheduleResources.length + 1}`, Color: "#7499e1"}
+        var collection = {Id: scheduleResources.length + 1, QueueName: `Cutting Edge ${scheduleResources.length + 1}`, Color: "#7499e1"}
         
         scheduleObj.addResource(collection,'Owners', scheduleResources.length);
         scheduleResources.push(collection);
@@ -479,7 +478,8 @@
 
         var content = {
             Id: treeView.fields.dataSource.length+ 1,
-            Name: "Shear Web"
+            Name: "Shear Web",
+            OrderNumber: "321421442"
         }
 
         //treeView.addNodes(content);
@@ -490,14 +490,25 @@
 
     }
 
+    // Generate a random string with the format "X000000"
+    function GetRandomColor() { return "#" + Math.floor(Math.random()*16777215).toString(16); }
+
     function GetQueues() {
         var ajax = new ej.base.Ajax('/Heijunka/GetQueues', 'Get', false);
         ajax.send().then(
             function (value) {
-                console.log(value);
                 var scheduleObj = document.getElementById('schedule').ej2_instances[0];
-                scheduleObj.resources.dataSource = JSON.parse(value);
-                scheduleObj.dataBind();
+                //var scheduleResources = scheduleObj.resources[0].dataSource;
+
+                // Correct Format
+                var data = JSON.parse(value);
+
+                for (const d of data) {
+                    d["Color"] = GetRandomColor();
+                }
+
+                // Load Active Queues
+                scheduleObj.resources[0].dataSource = data;
             }
         )
     }
