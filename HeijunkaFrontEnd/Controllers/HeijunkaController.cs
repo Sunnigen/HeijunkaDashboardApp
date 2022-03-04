@@ -18,14 +18,14 @@ namespace HeijunkaTest.Controllers
         }
 
         public ActionResult GetQueues()
-        {
+        {   // Get A List of all ACTIVE Queues
             List<QueueModel> q = _db.FindActiveQueues();
             return Json(q);
         }
 
-        public ActionResult TestFunction1(OwnerModel owner)
+        public ActionResult TestFunction1()
         {
-            return Json(this.SetOwnerQueues());
+            return Json(SetOwnerQueues());
         }
 
         public IActionResult Timeline()
@@ -40,7 +40,7 @@ namespace HeijunkaTest.Controllers
             ViewBag.Appointments = GetScheduleData();
 
             // Owners/Queues
-            ViewBag.Owners = this.SetOwnerQueues();
+            ViewBag.Owners = SetOwnerQueues();
 
             // Set Staging Area
             ViewBag.DataSource = GetStagedParts();
@@ -141,9 +141,9 @@ namespace HeijunkaTest.Controllers
         {
             return new List<OwnerModel>()
             {
-               new OwnerModel { Id = 1, Text = "Cutting Edge 1", Color = "#ffaa00" },
-               new OwnerModel { Id = 2, Text = "Cutting Edge 2", Color = "#f8a398" },
-               new OwnerModel { Id = 3, Text = "Cutting Edge 3", Color = "#7499e1" }
+               new OwnerModel { Id = 1, QueueName = "Cutting Edge 1", Color = "#ffaa00" },
+               new OwnerModel { Id = 2, QueueName = "Cutting Edge 2", Color = "#f8a398" },
+               new OwnerModel { Id = 3, QueueName = "Cutting Edge 3", Color = "#7499e1" }
             };
         }
 

@@ -5,7 +5,11 @@ using System.IO;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddJsonOptions(options =>
+{
+    // Values travelling from Controller to View view ActionResult will use Pascal Case
+    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+});
 
 // Dependency Injection
 builder.Services.AddTransient<ISqlDataAccess, SqlDataAccess>();
