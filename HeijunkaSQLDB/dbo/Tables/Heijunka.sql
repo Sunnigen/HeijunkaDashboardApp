@@ -3,7 +3,7 @@
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [QueueId] INT NOT NULL, 
     [UserLastModifiedId] INT NOT NULL, 
-    [ProductId] INT NOT NULL, 
+    [ProcessId] INT NOT NULL, 
     [OrderNumber] NVARCHAR(10) NOT NULL, 
     [CreatedDate] DATE NOT NULL, 
     [LastModifiedDate] DATE NOT NULL, 
@@ -15,5 +15,5 @@
     [TimetoComplete] INT NOT NULL, 
     CONSTRAINT [FK_Heijunka_Queues] FOREIGN KEY (QueueId) REFERENCES Queues(Id), 
     CONSTRAINT [FK_Heijunka_Users] FOREIGN KEY (UserLastModifiedId) REFERENCES Users(Id), 
-    CONSTRAINT [FK_Heijunka_Products] FOREIGN KEY (ProductId) REFERENCES Products(Id)
+    CONSTRAINT [FK_Heijunka_Products] FOREIGN KEY (ProcessId) REFERENCES Processes(Id)
 )

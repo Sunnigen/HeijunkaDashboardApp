@@ -17,9 +17,9 @@ begin
     ('cool.guy', 'test123', 1, '12/21/2021');
 end
 
-if not exists(select 1 from dbo.Products)
+if not exists(select 1 from dbo.Processes)
 begin
-    insert into dbo.Products(ProductName, TimetoComplete, Description)
+    insert into dbo.Processes(Name, Duration, Description)
     values ('StrongEagle 333 Right Wing Winglets', 240, 'Uses 8-Harness, Style #108 Glass, Peel Ply'),
     ('Newsom LightEngine Inlet Bond Panel', 220, 'Uses Plainweave, Graphite Tape, #221 Glass, #494 Surface Master'),
     ('Aegis 880 Fuselage Connectors', 60, 'Uses Satinweave, #221 Glass, Peel Ply'),

@@ -42,29 +42,29 @@ namespace HeijunkaAppLibrary.Data
 
         public void AddtoKanban(QueueModel queue,
                                 UserModel user,
-                                ProductModel product,
+                                ProcessModel process,
                                 DateTime startDate,
                                 string orderNumber,
                                 string notes)
         {
             int queueId = queue.Id;
             int userLastModifiedId = user.Id;
-            int productId = product.Id;
+            int partId = process.Id;
             DateTime createdDate = DateTime.Today;
             DateTime lastModifiedDate = DateTime.Today;
-            DateTime endDate = startDate.AddMinutes((double)product.TimetoComplete);
+            DateTime endDate = startDate.AddMinutes((double)process.Duration);
             bool isComplete = false;
             bool isActive = true;
-            decimal timetoComplete = product.TimetoComplete;
+            decimal timetoComplete = process.Duration;
 
 
-            string sql = @"insert into Heijunka(QueueId, UserLastModifiedId, ProductId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, EndDate, IsComplete, IsActive, Notes, TimetoComplete)"
-                + @"values (@queueId, @userLastModifiedId, @productId, @orderNumber, @createdDate, @lastModifiedDate, @startDate, @endDate, @isComplete, @isActive, @notes, @timetoComplete)";
+            string sql = @"insert into Heijunka(QueueId, UserLastModifiedId, partId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, EndDate, IsComplete, IsActive, Notes, TimetoComplete)"
+                + @"values (@queueId, @userLastModifiedId, @partId, @orderNumber, @createdDate, @lastModifiedDate, @startDate, @endDate, @isComplete, @isActive, @notes, @timetoComplete)";
 
             _db.SaveData(sql,
                          new { queueId, 
                              userLastModifiedId, 
-                             productId, 
+                             partId, 
                              orderNumber, 
                              createdDate, 
                              lastModifiedDate, 
@@ -80,7 +80,7 @@ namespace HeijunkaAppLibrary.Data
         }
 
         public void AddtoKanban(UserModel user,
-                                ProductModel product,
+                                ProcessModel process,
                                 DateTime startDate,
                                 string orderNumber,
                                 string notes)
@@ -88,11 +88,19 @@ namespace HeijunkaAppLibrary.Data
             throw new NotImplementedException();
         }
 
-        public void CreateProduct(string ProductName,
-                                  decimal TimetoComplete,
-                                  string Description)
+        public void CreateProcess(string ProductName,
+                               decimal TimetoComplete,
+                               string Description)
         {
             throw new NotImplementedException();
+        }
+        public List<ProcessModel> GetAllProcesses()
+        {
+            // Get List of Processes/Products to be Used for Staging and Scheduling
+            string sql = @"select Id, Name, Duration, Description
+                           from Processes";
+            return _db.LoadData<ProcessModel, dynamic>(sql, new { }, connectionStringName);
+
         }
 
         public void CreateQueue(string QueueName,
@@ -134,6 +142,7 @@ namespace HeijunkaAppLibrary.Data
 
         public List<QueueModel> FindActiveQueues()
         {
+            // Find onlys Queues that should be displayed
             string sql = @"select Id, QueueName, Description
                            from Queues
                            where IsActive = 1";
@@ -142,20 +151,27 @@ namespace HeijunkaAppLibrary.Data
 
         public List<QueueModel> FindAllQueues()
         {
-            throw new NotImplementedException();
+            // Find all Queues, both Displayed and Inactive
+            string sql = @"select Id, QueueName, Description
+                           from Queues";
+            return _db.LoadData<QueueModel, dynamic>(sql, new { }, connectionStringName);
         }
 
         public List<QueueModel> FindInActiveQueues()
         {
-            throw new NotImplementedException();
+            // Find all Queues that Shouldn't be Displayed 
+            string sql = @"select Id, QueueName, Description
+                           from Queues
+                           where IsActive = 0";
+            return _db.LoadData<QueueModel, dynamic>(sql, new { }, connectionStringName);
         }
 
-        public ProductModel FindProduct()
+        public ProcessModel FindProduct()
         {
             throw new NotImplementedException();
         }
 
-        public List<ProductModel> GetAllProducts()
+        public List<ProcessModel> GetAllProducts()
         {
             throw new NotImplementedException();
         }
@@ -170,27 +186,37 @@ namespace HeijunkaAppLibrary.Data
             throw new NotImplementedException();
         }
 
-        public void UpdateProduct(string ProductName, decimal TimetoComplete, string Description)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void UpdateProduct(string ProductName, string Description)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void UpdateProduct(string ProductName, decimal TimetoComplete)
-        {
-            throw new NotImplementedException();
-        }
-
         public void UpdateUserAuthenticalLevel(string UserName, string CurrentPassword, AuthenticationLevel NewLevel)
         {
             throw new NotImplementedException();
         }
 
         public void UpdateUserPassword(string UserName, string CurrentPassword, string NewPassword)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CreateProduct(string productName, decimal timetoComplete, string description)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateProcess(string productName, decimal timetoComplete, string description)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateProcess(string productName, string description)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateProcess(string productName, decimal timetoComplete)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ProcessModel FindProcess()
         {
             throw new NotImplementedException();
         }
