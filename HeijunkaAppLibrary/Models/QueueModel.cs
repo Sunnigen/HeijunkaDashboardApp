@@ -10,5 +10,7 @@ namespace HeijunkaAppLibrary.Models
         public int UserLastModifiedId { get; set; }
         public DateTime UserLastModifiedDate { get; set; }
         public bool IsActive { get; set; } = false;
+        public string ClassName { get; set; } = "e-child-node";
+        public string Color { get; set; }
     }
 }

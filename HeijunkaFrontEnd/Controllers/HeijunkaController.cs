@@ -23,6 +23,13 @@ namespace HeijunkaTest.Controllers
             return Json(q);
         }
 
+        public ActionResult GetProcesses()
+        {
+            // Get A List of all Processes
+            List<ProcessModel> p = _db.GetAllProcesses();
+            return Json(p);
+        }
+
         public ActionResult TestFunction1()
         {
             return Json(SetOwnerQueues());
@@ -40,13 +47,32 @@ namespace HeijunkaTest.Controllers
             ViewBag.Appointments = GetScheduleData();
 
             // Owners/Queues
-            ViewBag.Owners = SetOwnerQueues();
+            List<QueueModel> queues = _db.FindActiveQueues();
+            Random rnd = new Random();
+            foreach (QueueModel q in queues) {
+                string hexOutput = String.Format("{0:X}", rnd.Next(0, 0xFFFFFF));
+                while (hexOutput.Length < 6)
+                {
+                    hexOutput = "0" + hexOutput;
+                }
+                q.Color = "#" + hexOutput;
+            }
+        
+    
+            ViewBag.Owners = queues;
 
             // Set Staging Area
             ViewBag.DataSource = GetStagedParts();
 
             // Set Parts
-            ViewBag.Parts = CreateParts();
+            //ViewBag.Parts = CreateParts();
+            ViewBag.Parts = _db.GetAllProcesses();
+            List<string> names = new List<string>();
+            foreach (ProcessModel m in ViewBag.Parts)
+            {
+                names.Add(m.Name);  
+            }
+            ViewBag.PartNames = names;
 
             // Staging Area Menu Options
             ViewBag.menuOptions = CreateMenuOptions();
@@ -69,48 +95,48 @@ namespace HeijunkaTest.Controllers
             };
         }
 
-        private List<PartModel> CreateParts()
-        {
-            return new List<PartModel>()
-            {   
-                new PartModel
-                {
-                    Id = 1,
-                    Name = "Aileron",
-                    Duration = 45
-                },
-                new PartModel
-                {
-                    Id = 2,
-                    Name = "Wing Skin",
-                    Duration = 180,
-                },
-                new PartModel
-                {
-                    Id = 3,
-                    Name = "Hinge Flap",
-                    Duration = 25,
-                },
-                new PartModel
-                {
-                    Id = 4,
-                    Name = "Rib Bracket",
-                    Duration = 75,
-                },
-                new PartModel
-                {
-                    Id = 5,
-                    Name = "Winglet",
-                    Duration = 65,
-                },
-                new PartModel
-                {
-                    Id = 7,
-                    Name = "Shear Web",
-                    Duration = 30,
-                }
-            };
-        }
+        //private List<PartModel> CreateParts()
+        //{
+        //    return new List<PartModel>()
+        //    {   
+        //        new PartModel
+        //        {
+        //            Id = 1,
+        //            Name = "StrongEagle 333 Right Wing Winglets",
+        //            Duration = 240
+        //        },
+        //        new PartModel
+        //        {
+        //            Id = 2,
+        //            Name = "Newsom LightEngine Inlet Bond Panel",
+        //            Duration = 220,
+        //        },
+        //        new PartModel
+        //        {
+        //            Id = 3,
+        //            Name = "Aegis 880 Fuselage Connectors",
+        //            Duration = 60,
+        //        },
+        //        new PartModel
+        //        {
+        //            Id = 4,
+        //            Name = "Rib Bracket",
+        //            Duration = 75,
+        //        },
+        //        new PartModel
+        //        {
+        //            Id = 5,
+        //            Name = "Winglet",
+        //            Duration = 65,
+        //        },
+        //        new PartModel
+        //        {
+        //            Id = 7,
+        //            Name = "Shear Web",
+        //            Duration = 30,
+        //        }
+        //    };
+        //}
 
         private List<StagingObjectModel> GetStagedParts()
         {
@@ -119,19 +145,19 @@ namespace HeijunkaTest.Controllers
                 new StagingObjectModel
                 {
                     Id = 1,
-                    Name = "Aileron",
+                    Name = "StrongEagle 333 Left Wing Winglets",
                     OrderNumber = "33334444"
                 },
                 new StagingObjectModel
                 {
                     Id = 2,
-                    Name = "Hinge Flap",
+                    Name = "Newsom LightEngine Repair Kit",
                     OrderNumber = "11112222"
                 },
                 new StagingObjectModel
                 {
                     Id = 3,
-                    Name = "Winglet",
+                    Name = "Boeing 444 Fuselage Door",
                     OrderNumber = "12345678"
                 }
             };

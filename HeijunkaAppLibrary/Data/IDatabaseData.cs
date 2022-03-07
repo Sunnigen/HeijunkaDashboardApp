@@ -29,27 +29,27 @@ namespace HeijunkaAppLibrary.Data
 
 
         void CreateProduct(string productName,
-                           decimal timetoComplete,
-                           string description);
-        void UpdateProduct(string productName, decimal timetoComplete, string description);
-        void UpdateProduct(string productName, string description);
-        void UpdateProduct(string productName, decimal timetoComplete);
+                             decimal timetoComplete,
+                             string description);
+        void UpdateProcess(string productName, decimal timetoComplete, string description);
+        void UpdateProcess(string productName, string description);
+        void UpdateProcess(string productName, decimal timetoComplete);
         void DeleteProduct(string productName);
-        List<ProductModel> GetAllProducts();
-        ProductModel FindProduct();
+        List<ProcessModel> GetAllProcesses();
+        ProcessModel FindProcess();
 
         void AddtoKanban(QueueModel queue,   // specific queue
                          UserModel user,
-                         ProductModel product,
+                         ProcessModel process,
                          DateTime startDate,
                          string orderNumber,
                          string notes);
         void AddtoKanban(UserModel user,   // any queue
-                         ProductModel product,
+                         ProcessModel process,
                          DateTime startDate,
                          string orderNumber,
                          string notes);
-        void DeletefromKanban(ProcessModel item);
+        void DeletefromKanban(ProcessModel process);
 
     }
 }

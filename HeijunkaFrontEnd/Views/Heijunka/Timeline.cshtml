@@ -390,12 +390,17 @@
             var endElement = args.element.querySelector('#EndTime');
             endElement.value = updateDate(startElement.value, processElement.value);
 
+
+            // Get Parts List Only
+
             // Drop List to Select Existing Part to Process
+            var partsListNames = @Json.Serialize(ViewBag.Partnames);
             if (!processElement.classList.contains('e-dropdownlist'))
             {
                 var dropDownListObject = new ej.dropdowns.DropDownList({
                     placeholder: "Schedule a part:",
-                    dataSource: ['Aileron', 'Wing Skin', 'Hinge Flap', 'Rib Bracket', 'Winglet'],
+                    // dataSource: ['Aileron', 'Wing Skin', 'Hinge Flap', 'Rib Bracket', 'Winglet'],
+                    dataSource: partsListNames,
                     value: args.data.Subject,
                     change: () => { endElement.value = updateDate(startElement.value, processElement.value); }
                 })
