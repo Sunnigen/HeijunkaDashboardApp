@@ -37,3 +37,13 @@ begin
     ('10/15/2021', '2', '12/2/2021', 1, 'Bldg 94 Column C', 'Cutting Edge 4'),
     ('10/15/2021', '2', '12/15/2021', 0, 'Bldg 5', 'Bldg 44 Cutting Edge 1');
 end
+
+if not exists(select 1 from dbo.Heijunka)
+begin
+    insert into dbo.Heijunka(QueueId, UserLastModifiedId, ProcessId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, IsComplete, IsActive, Notes)
+    values ('1', '1' ,'6', '123456798', '3/7/2022 15:00:00', '3/7/2022 15:00:00', '3/8/2022 06:00:00', 0, 1, 'Needed for R&D Test #94'),
+           ('2', '2' ,'2', '987654321', '3/7/2022 15:00:00', '3/7/2022 15:00:00', '3/8/2022 06:00:00', 0, 1, 'N/A'),
+           ('3', '3' ,'3', '178223131', '3/7/2022 15:00:00', '3/7/2022 15:00:00', '3/8/2022 06:00:00', 0, 1, 'Contact Jeremy x8111'),
+           ('4', '1' ,'4', '178324815', '3/7/2022 15:00:00', '3/7/2022 15:00:00', '3/8/2022 06:30:00', 0, 1, 'Needed to meet 07/2022 demand.'),
+           ('1', '1' ,'4', '321213844', '3/7/2022 15:00:00', '3/7/2022 15:00:00', '3/8/2022 06:30:00', 0, 0, 'No longer needed.');
+end

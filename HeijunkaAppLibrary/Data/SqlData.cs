@@ -55,7 +55,7 @@ namespace HeijunkaAppLibrary.Data
             DateTime endDate = startDate.AddMinutes((double)process.Duration);
             bool isComplete = false;
             bool isActive = true;
-            decimal timetoComplete = process.Duration;
+            double timetoComplete = process.Duration;
 
 
             string sql = @"insert into Heijunka(QueueId, UserLastModifiedId, partId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, EndDate, IsComplete, IsActive, Notes, TimetoComplete)"
@@ -100,7 +100,39 @@ namespace HeijunkaAppLibrary.Data
             string sql = @"select Id, Name, Duration, Description
                            from Processes";
             return _db.LoadData<ProcessModel, dynamic>(sql, new { }, connectionStringName);
+        }
 
+        public List<ScheduleDataModel> GetScheduleData(DateTime date)
+        {
+            string dateString = date.ToShortDateString();
+
+            // Get List of Existing Scheduled Processes
+            string sql = @"select Id, QueueId, UserLastModifiedId, ProcessId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, IsComplete, IsActive, Notes
+                           from Heijunka
+                           where @dateString = convert(date, StartDate, 110)";
+            List<ScheduleDataModel> scheduleData = _db.LoadData<ScheduleDataModel, dynamic>(sql, new { dateString }, connectionStringName);
+
+            // Get Process Data to Obtain Duration
+            List<ProcessModel> processList = GetAllProcesses();
+
+            var processId = 0;
+            foreach (ScheduleDataModel s in scheduleData)
+            {
+                processId = s.ProcessId;
+                foreach (ProcessModel p in processList)
+                {
+                    if (processId == p.Id)
+                    {
+                        s.SetEndDate((double)p.Duration);
+                        s.StartTime = s.StartDate;
+                        s.EndTime = s.StartTime.AddMinutes(p.Duration);
+                        s.Subject = p.Name;
+                        break;
+                    }
+                }
+            }
+
+            return scheduleData;
         }
 
         public void CreateQueue(string QueueName,
