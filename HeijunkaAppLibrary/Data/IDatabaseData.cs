@@ -50,6 +50,6 @@ namespace HeijunkaAppLibrary.Data
                          string orderNumber,
                          string notes);
         void DeletefromKanban(ProcessModel process);
-
+        List<ScheduleDataModel> GetScheduleData(DateTime date);
     }
 }

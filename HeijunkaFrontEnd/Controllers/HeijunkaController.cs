@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using HeijunkaTest.Models;
 using Syncfusion.EJ2.Schedule;
 using Syncfusion.EJ2.Navigations;
 using HeijunkaFrontEnd.Models;
@@ -30,11 +29,6 @@ namespace HeijunkaTest.Controllers
             return Json(p);
         }
 
-        public ActionResult TestFunction1()
-        {
-            return Json(SetOwnerQueues());
-        }
-
         public IActionResult Timeline()
         {
             // View
@@ -42,9 +36,10 @@ namespace HeijunkaTest.Controllers
 
             // Set Queue Column
             ViewBag.Resources = new string[] { "Owners" };
-            
+
             // Existing Parts in Process Data
-            ViewBag.Appointments = GetScheduleData();
+            DateTime d = DateTime.Parse("3/8/2022");
+            ViewBag.Appointments = _db.GetScheduleData(d);
 
             // Owners/Queues
             List<QueueModel> queues = _db.FindActiveQueues();
@@ -57,7 +52,6 @@ namespace HeijunkaTest.Controllers
                 }
                 q.Color = "#" + hexOutput;
             }
-        
     
             ViewBag.Owners = queues;
 
@@ -84,59 +78,10 @@ namespace HeijunkaTest.Controllers
         {
             return new List<object>()
             {
-                new
-                {
-                    text = "Stage Part"
-                },
-                new
-                {
-                    text = "Remove Part"
-                }
+                new { text = "Stage Part" },
+                new { text = "Remove Part" }
             };
         }
-
-        //private List<PartModel> CreateParts()
-        //{
-        //    return new List<PartModel>()
-        //    {   
-        //        new PartModel
-        //        {
-        //            Id = 1,
-        //            Name = "StrongEagle 333 Right Wing Winglets",
-        //            Duration = 240
-        //        },
-        //        new PartModel
-        //        {
-        //            Id = 2,
-        //            Name = "Newsom LightEngine Inlet Bond Panel",
-        //            Duration = 220,
-        //        },
-        //        new PartModel
-        //        {
-        //            Id = 3,
-        //            Name = "Aegis 880 Fuselage Connectors",
-        //            Duration = 60,
-        //        },
-        //        new PartModel
-        //        {
-        //            Id = 4,
-        //            Name = "Rib Bracket",
-        //            Duration = 75,
-        //        },
-        //        new PartModel
-        //        {
-        //            Id = 5,
-        //            Name = "Winglet",
-        //            Duration = 65,
-        //        },
-        //        new PartModel
-        //        {
-        //            Id = 7,
-        //            Name = "Shear Web",
-        //            Duration = 30,
-        //        }
-        //    };
-        //}
 
         private List<StagingObjectModel> GetStagedParts()
         {
@@ -161,49 +106,6 @@ namespace HeijunkaTest.Controllers
                     OrderNumber = "12345678"
                 }
             };
-    }
-
-        private List<OwnerModel> SetOwnerQueues()
-        {
-            return new List<OwnerModel>()
-            {
-               new OwnerModel { Id = 1, QueueName = "Cutting Edge 1", Color = "#ffaa00" },
-               new OwnerModel { Id = 2, QueueName = "Cutting Edge 2", Color = "#f8a398" },
-               new OwnerModel { Id = 3, QueueName = "Cutting Edge 3", Color = "#7499e1" }
-            };
-        }
-
-        private List<AppointmentData> GetScheduleData()
-        {
-            List<AppointmentData> appointmentData = new List<AppointmentData>();
-
-            appointmentData.Add(new AppointmentData
-            {
-                Id = 1,
-                OwnerId = 1,
-                PartModel = new PartModel { Id = 1, Name = "Aileron", Duration = 60},
-                StartTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 9, 30, 0),
-                
-            });
-
-            appointmentData.Add(new AppointmentData
-            {
-                Id = 2,
-                OwnerId = 1,
-                PartModel = new PartModel { Id = 1, Name = "Wing Skin", Duration = 45 },
-                StartTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 10, 30, 0),
-                
-            });
-
-            appointmentData.Add(new AppointmentData
-            {
-                Id = 3,
-                OwnerId = 2,
-                PartModel = new PartModel { Id = 1, Name = "Hinge Flap", Duration = 25 },
-                StartTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 12, 0, 0),
-            });
-
-            return appointmentData;
         }
     }
 }

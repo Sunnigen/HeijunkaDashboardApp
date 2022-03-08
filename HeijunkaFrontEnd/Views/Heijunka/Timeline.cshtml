@@ -4,7 +4,6 @@
 @{
     ViewData["Title"] = "Timeline";
 }
-@using HeijunkaTest.Models
 @using Syncfusion.EJ2
 @using Syncfusion.EJ2.Schedule
 <div class="control-section">
@@ -50,13 +49,13 @@
              .Render()
            )  -->
                         
-           <!--field="OwnerId" title="Owners" name="Owners" textField="Text" idField="Id" colorField="Color" -->
+           <!--field="QueueId" title="Owners" name="Owners" textField="Text" idField="Id" colorField="Color" -->
             @(Html.EJS().Schedule("schedule")
              .Width("100%")
              .Height("550px")
              .Group(group => group.Resources(ViewBag.Resources))
              .Resources(res => {res.DataSource(ViewBag.Owners)
-                 .Field("OwnerId")
+                 .Field("QueueId")
                  .Title("Owners")
                  .Name("Owners")
                  .TextField("QueueName")
@@ -86,10 +85,8 @@
              .Render()
             )
 
-
             <ejs-button id="addQueueButton" onclick="addQueue()" content="Add Queue"></ejs-button>
             <ejs-button id="removeQueueButton" onclick="removeQueue()" content="Remove Queue"></ejs-button>
-            <ejs-button id="getQueues" onclick="GetQueues()" content="Get Queues"></ejs-button>
             <ejs-button id="addAppointment" onclick="addAppointment()" content="Schedule Process"></ejs-button>
             <ejs-button id="addStagingButton" onclick="addStaging()" content="Stage Process"></ejs-button>
         </div>
@@ -177,7 +174,7 @@
             <tr>
                 <td class="e-textlabel">Queue</td>
                 <td colspan="4">
-                    <input id="OwnerId" class="e-field" name="OwnerId" />
+                    <input id="QueueId" class="e-field" name="QueueId" />
                 </td>
             </tr>
 
@@ -302,7 +299,7 @@
                         OrderNumber: filteredData[0].OrderNumber,
                         StartTime: cellData.startTime,
                         EndTime: updateDate(cellData.startTime, filteredData[0].Name),
-                        OwnerId: resourceDetails.resourceData.Id,
+                        QueueId: resourceDetails.resourceData.Id,
                         Id:resourceDetails.resourceData.Id
                     };
                     //scheduleObj.openEditor(eventData, 'Add');
@@ -319,15 +316,15 @@
         var scheduleEventsData = scheduleObj.eventsData;
         var newProcess = {
             Id: scheduleEventsData.length + 1, 
-            OwnerId: args.OwnerId, 
+            QueueId: args.QueueId, 
             Subject: args.Name, 
             OrderNumber: args.OrderNumber,
             StartTime: args.StartTime, 
             EndTime: args.EndTime
         }
-        console.log(`scheduleProcess\n\tId: ${newProcess.Id}, OwnerId: ${newProcess.OwnerId}, Subject: ${newProcess.Subject}, StartTime: ${newProcess.StartTime}, EndTime: ${newProcess.EndTime}`);
+        console.log(`scheduleProcess\n\tId: ${newProcess.Id}, QueueId: ${newProcess.QueueId}, Subject: ${newProcess.Subject}, StartTime: ${newProcess.StartTime}, EndTime: ${newProcess.EndTime}`);
         scheduleObj.addEvent(newProcess);
-        //var newProcess = {Id: scheduleEventsData.length + 1, OwnerId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
+        //var newProcess = {Id: scheduleEventsData.length + 1, QueueId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
     }
 
     function onEventRendered(args) { }
@@ -409,7 +406,7 @@
             }
 
             // Drop List to Select Queue/Owner
-            var queueElement = args.element.querySelector('#OwnerId');
+            var queueElement = args.element.querySelector('#QueueId');
             var scheduleObj = document.getElementById('schedule').ej2_instances[0];
             var scheduleObjResource = scheduleObj.resources[0].dataSource;
 
@@ -418,10 +415,10 @@
                     placeholder: "Select a queue:",
                     dataSource: scheduleObjResource,
                     fields: {text: 'QueueName', value: 'Id'},
-                    value: args.data.OwnerId
+                    value: args.data.QueueId
                 })
                 dropDownListObject.appendTo(queueElement);
-                queueElement.setAttribute('name', 'OwnerId');
+                queueElement.setAttribute('name', 'QueueId');
             }
 
         }
@@ -468,7 +465,7 @@
         endDate.setHours(endDate.getHours() + 3);
 
 
-        var newProcess = {Id: scheduleEventsData.length + 1, OwnerId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
+        var newProcess = {Id: scheduleEventsData.length + 1, QueueId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
         //scheduleObj.openEditor(newProcess, 'Add', true);
 
         scheduleObj.addEvent(newProcess);
