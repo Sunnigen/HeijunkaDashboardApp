@@ -75,7 +75,14 @@
              )
              .SelectedDate(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day))
              .HeaderRows(headerRow => headerRow.Option(HeaderRowType.Hour).Add())
-             .EventSettings(new ScheduleEventSettings{DataSource = ViewBag.Appointments})
+             .EventSettings(e => e.DataSource(
+                 d => d
+                    .Url("Heijunka/GetScheduleData")
+                    .CrudUrl("Heijunka/UpdateScheduleData")
+                    .Adaptor("UrlAdaptor")
+                    .CrossDomain(true)
+                 )
+             )
              .ActionBegin("onActionBegin")
              .Drag("OnItemDrag")
              .EventRendered("onEventRendered") 
@@ -293,7 +300,6 @@
                         treeviewData.filter(function (item) { return item.Id === parseInt(event.draggedNodeData.id, 10); });
                     var cellData = scheduleObj.getCellDetails(event.target);
                     var resourceDetails = scheduleObj.getResourcesByIndex(cellData.groupIndex);
-                    console.log(`filteredData[0]: ${filteredData[0]}`);
                     var eventData = {
                         Name: filteredData[0].Name,
                         OrderNumber: filteredData[0].OrderNumber,
@@ -322,7 +328,7 @@
             StartTime: args.StartTime, 
             EndTime: args.EndTime
         }
-        console.log(`scheduleProcess\n\tId: ${newProcess.Id}, QueueId: ${newProcess.QueueId}, Subject: ${newProcess.Subject}, StartTime: ${newProcess.StartTime}, EndTime: ${newProcess.EndTime}`);
+        //console.log(`scheduleProcess\n\tId: ${newProcess.Id}, QueueId: ${newProcess.QueueId}, Subject: ${newProcess.Subject}, StartTime: ${newProcess.StartTime}, EndTime: ${newProcess.EndTime}`);
         scheduleObj.addEvent(newProcess);
         //var newProcess = {Id: scheduleEventsData.length + 1, QueueId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
     }
@@ -330,17 +336,17 @@
     function onEventRendered(args) { }
 
     function updateDate(startDateString, partNameString) {
-        console.log(`updateDate: startDateString:  ${startDateString}  partNameString: ${partNameString}`);
+        //console.log(`updateDate: startDateString:  ${startDateString}  partNameString: ${partNameString}`);
 
         // Find PartModel and Obtain Duration
         var partsList = @Json.Serialize(ViewBag.Parts);
-        console.log(partsList);
+        //console.log(partsList);
         var duration = 0;
         for (const p of partsList) {
-            console.log(` ${p.Id} ${p.Name} ${p.Duration} ${p}`);
+            //console.log(` ${p.Id} ${p.Name} ${p.Duration} ${p}`);
             if (p.Name === partNameString) {
                 duration = p.Duration;
-                console.log(`Scheduling part name: ${p.Name}  duration: ${p.Duration}`);
+                //console.log(`Scheduling part name: ${p.Name}  duration: ${p.Duration}`);
                 break;
             }
         }

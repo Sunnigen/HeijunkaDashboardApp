@@ -40,54 +40,6 @@ namespace HeijunkaAppLibrary.Data
             return _db.LoadData<UserModel, dynamic>(sql, new { userName }, connectionStringName).First();
         }
 
-        public void AddtoKanban(QueueModel queue,
-                                UserModel user,
-                                ProcessModel process,
-                                DateTime startDate,
-                                string orderNumber,
-                                string notes)
-        {
-            int queueId = queue.Id;
-            int userLastModifiedId = user.Id;
-            int partId = process.Id;
-            DateTime createdDate = DateTime.Today;
-            DateTime lastModifiedDate = DateTime.Today;
-            DateTime endDate = startDate.AddMinutes((double)process.Duration);
-            bool isComplete = false;
-            bool isActive = true;
-            double timetoComplete = process.Duration;
-
-
-            string sql = @"insert into Heijunka(QueueId, UserLastModifiedId, partId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, EndDate, IsComplete, IsActive, Notes, TimetoComplete)"
-                + @"values (@queueId, @userLastModifiedId, @partId, @orderNumber, @createdDate, @lastModifiedDate, @startDate, @endDate, @isComplete, @isActive, @notes, @timetoComplete)";
-
-            _db.SaveData(sql,
-                         new { queueId, 
-                             userLastModifiedId, 
-                             partId, 
-                             orderNumber, 
-                             createdDate, 
-                             lastModifiedDate, 
-                             startDate, 
-                             endDate, 
-                             isComplete, 
-                             isActive, 
-                             notes, 
-                             timetoComplete 
-                         },
-                         connectionStringName);
-                          
-        }
-
-        public void AddtoKanban(UserModel user,
-                                ProcessModel process,
-                                DateTime startDate,
-                                string orderNumber,
-                                string notes)
-        {
-            throw new NotImplementedException();
-        }
-
         public void CreateProcess(string ProductName,
                                decimal TimetoComplete,
                                string Description)
@@ -101,6 +53,27 @@ namespace HeijunkaAppLibrary.Data
                            from Processes";
             return _db.LoadData<ProcessModel, dynamic>(sql, new { }, connectionStringName);
         }
+
+        public void InsertScheduleData(SFScheduleDataModel data)
+        {
+            int userLastModifiedId = 1;
+            string processNameString = data.Subject;
+            int processId = 1;
+            int queueId = data.QueueId;
+            string orderNumber = data.OrderNumber;
+            DateTime startTime = data.StartTime;
+            DateTime createdDate = DateTime.Now;
+            DateTime lastModifiedDate = DateTime.Now;
+            int isComplete = 0;
+            int isActive = 0;
+            string notes = "Test";
+
+            string sql = @"insert into dbo.Heijunka(QueueId, UserLastModifiedId, ProcessId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, IsComplete, IsActive, Notes)
+                                             values(@queueId, @userLastModifiedId, @processId, @orderNumber, @createdDate, @lastModifiedDate, @startTime, @isComplete, @isActive, @notes)";
+            _db.SaveData(sql, new { queueId, userLastModifiedId, processId, orderNumber, createdDate, lastModifiedDate, startTime, isComplete, isActive, notes }, connectionStringName);
+        }
+
+
 
         public List<ScheduleDataModel> GetScheduleData(DateTime date)
         {
@@ -138,11 +111,6 @@ namespace HeijunkaAppLibrary.Data
         public void CreateQueue(string QueueName,
                                 string Description,
                                 int RowNumber)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeletefromKanban(ProcessModel item)
         {
             throw new NotImplementedException();
         }

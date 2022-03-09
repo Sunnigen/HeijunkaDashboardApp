@@ -29,6 +29,82 @@ namespace HeijunkaTest.Controllers
             return Json(p);
         }
 
+        public ActionResult GetScheduleData()
+        {
+            // Obtain Existing Parts in Process Data
+            DateTime date = DateTime.Parse("3/8/2022");
+            var data = _db.GetScheduleData(date);
+            return Json(data);
+        }
+        [HttpPost]
+        public IActionResult UpdateScheduleData([FromBody] EditParams param)
+        {
+            if (param.action == "insert" || (param.action == "batch" && param.added != null)) // this block of code will execute while inserting the appointments
+            {
+                var value = (param.action == "insert") ? param.value : param.added[0];
+                DateTime startTime = Convert.ToDateTime(value.StartTime);
+                DateTime endTime = Convert.ToDateTime(value.EndTime);
+                SFScheduleDataModel appointment = new SFScheduleDataModel()
+                {
+                    Subject = value.Subject,
+                    OrderNumber = value.OrderNumber,
+                    QueueId = value.QueueId,
+                    StartTime = startTime,
+                    EndTime = endTime,
+                    
+                    IsAllDay = value.IsAllDay,
+                    StartTimezone = value.StartTimezone,
+                    EndTimezone = value.EndTimezone,
+                    RecurrenceRule = value.RecurrenceRule,
+                    RecurrenceID = value.RecurrenceID,
+                    RecurrenceException = value.RecurrenceException
+                };
+                _db.InsertScheduleData(appointment);
+                return Json(appointment);
+            }
+            if (param.action == "update" || (param.action == "batch" && param.changed != null)) // this block of code will execute while updating the appointment
+            {
+                //var value = (param.action == "update") ? param.value : param.changed[0];
+                //var filterData = db.ScheduleEventDatas.Where(c => c.Id == Convert.ToInt32(value.Id));
+                //if (filterData.Count() > 0)
+                //{
+                //    DateTime startTime = Convert.ToDateTime(value.StartTime);
+                //    DateTime endTime = Convert.ToDateTime(value.EndTime);
+                //    ScheduleEventData appointment = db.ScheduleEventDatas.Single(A => A.Id == Convert.ToInt32(value.Id));
+                //    appointment.StartTime = startTime;
+                //    appointment.EndTime = endTime;
+                //    appointment.StartTimezone = value.StartTimezone;
+                //    appointment.EndTimezone = value.EndTimezone;
+                //    appointment.Subject = value.Subject;
+                //    appointment.IsAllDay = value.IsAllDay;
+                //    appointment.RecurrenceRule = value.RecurrenceRule;
+                //    appointment.RecurrenceID = value.RecurrenceID;
+                //    appointment.RecurrenceException = value.RecurrenceException;
+                //}
+                //db.SubmitChanges();
+            }
+            if (param.action == "remove" || (param.action == "batch" && param.deleted != null)) // this block of code will execute while removing the appointment
+            {
+                //if (param.action == "remove")
+                //{
+                //    int key = Convert.ToInt32(param.key);
+                //    ScheduleEventData appointment = db.ScheduleEventDatas.Where(c => c.Id == key).FirstOrDefault();
+                //    if (appointment != null) db.ScheduleEventDatas.DeleteOnSubmit(appointment);
+                //}
+                //else
+                //{
+                //    foreach (var apps in param.deleted)
+                //    {
+                //        ScheduleEventData appointment = db.ScheduleEventDatas.Where(c => c.Id == apps.Id).FirstOrDefault();
+                //        if (appointment != null) db.ScheduleEventDatas.DeleteOnSubmit(appointment);
+                //    }
+                //}
+                //db.SubmitChanges();
+            }
+            
+            return Json(null);
+        }
+
         public IActionResult Timeline()
         {
             // View
@@ -36,10 +112,6 @@ namespace HeijunkaTest.Controllers
 
             // Set Queue Column
             ViewBag.Resources = new string[] { "Owners" };
-
-            // Existing Parts in Process Data
-            DateTime d = DateTime.Parse("3/8/2022");
-            ViewBag.Appointments = _db.GetScheduleData(d);
 
             // Owners/Queues
             List<QueueModel> queues = _db.FindActiveQueues();
@@ -106,6 +178,16 @@ namespace HeijunkaTest.Controllers
                     OrderNumber = "12345678"
                 }
             };
+        }
+
+        public class EditParams
+        {
+            public string key { get; set; }
+            public string action { get; set; }
+            public List<SFScheduleDataModel> added { get; set; }
+            public List<SFScheduleDataModel> changed { get; set; }
+            public List<SFScheduleDataModel> deleted { get; set; }
+            public SFScheduleDataModel value { get; set; }
         }
     }
 }
