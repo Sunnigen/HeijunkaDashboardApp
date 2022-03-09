@@ -37,19 +37,7 @@ namespace HeijunkaAppLibrary.Data
         void DeleteProduct(string productName);
         List<ProcessModel> GetAllProcesses();
         ProcessModel FindProcess();
-
-        void AddtoKanban(QueueModel queue,   // specific queue
-                         UserModel user,
-                         ProcessModel process,
-                         DateTime startDate,
-                         string orderNumber,
-                         string notes);
-        void AddtoKanban(UserModel user,   // any queue
-                         ProcessModel process,
-                         DateTime startDate,
-                         string orderNumber,
-                         string notes);
-        void DeletefromKanban(ProcessModel process);
         List<ScheduleDataModel> GetScheduleData(DateTime date);
+        void InsertScheduleData(SFScheduleDataModel data);
     }
 }
