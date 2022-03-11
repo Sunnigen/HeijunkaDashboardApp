@@ -29,13 +29,13 @@ namespace HeijunkaTest.Controllers
             return Json(p);
         }
 
-        public ActionResult GetScheduleData()
+        public ActionResult GetScheduleData([FromBody] GetParams param)
         {
             // Obtain Existing Parts in Process Data
-            DateTime date = DateTime.Parse("3/8/2022");
-            var data = _db.GetScheduleData(date);
+            var data = _db.GetScheduleData(param.StartDate);
             return Json(data);
         }
+         
         [HttpPost]
         public IActionResult UpdateScheduleData([FromBody] EditParams param)
         {
@@ -178,6 +178,11 @@ namespace HeijunkaTest.Controllers
                     OrderNumber = "12345678"
                 }
             };
+        }
+        public class GetParams
+        {
+            public DateTime StartDate { get; set; }
+            public DateTime EndDate { get; set; }
         }
 
         public class EditParams
