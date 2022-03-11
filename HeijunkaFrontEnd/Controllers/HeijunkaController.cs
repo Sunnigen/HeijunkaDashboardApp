@@ -39,7 +39,7 @@ namespace HeijunkaTest.Controllers
         [HttpPost]
         public IActionResult UpdateScheduleData([FromBody] EditParams param)
         {
-            if (param.action == "insert" || (param.action == "batch" && param.added != null)) // this block of code will execute while inserting the appointments
+            if (param.action == "insert" || (param.action == "batch" && param.added.Count != 0)) // this block of code will execute while inserting the appointments
             {
                 var value = (param.action == "insert") ? param.value : param.added[0];
                 DateTime startTime = Convert.ToDateTime(value.StartTime);
@@ -62,44 +62,33 @@ namespace HeijunkaTest.Controllers
                 _db.InsertScheduleData(appointment);
                 return Json(appointment);
             }
-            if (param.action == "update" || (param.action == "batch" && param.changed != null)) // this block of code will execute while updating the appointment
+            if (param.action == "update" || (param.action == "batch" && param.changed.Count != 0)) // this block of code will execute while updating the appointment
             {
-                //var value = (param.action == "update") ? param.value : param.changed[0];
-                //var filterData = db.ScheduleEventDatas.Where(c => c.Id == Convert.ToInt32(value.Id));
-                //if (filterData.Count() > 0)
-                //{
-                //    DateTime startTime = Convert.ToDateTime(value.StartTime);
-                //    DateTime endTime = Convert.ToDateTime(value.EndTime);
-                //    ScheduleEventData appointment = db.ScheduleEventDatas.Single(A => A.Id == Convert.ToInt32(value.Id));
-                //    appointment.StartTime = startTime;
-                //    appointment.EndTime = endTime;
-                //    appointment.StartTimezone = value.StartTimezone;
-                //    appointment.EndTimezone = value.EndTimezone;
-                //    appointment.Subject = value.Subject;
-                //    appointment.IsAllDay = value.IsAllDay;
-                //    appointment.RecurrenceRule = value.RecurrenceRule;
-                //    appointment.RecurrenceID = value.RecurrenceID;
-                //    appointment.RecurrenceException = value.RecurrenceException;
-                //}
-                //db.SubmitChanges();
+                var value = (param.action == "update") ? param.value : param.changed[0];
+                ScheduleDataModel appointment = _db.GetScheduleById(value.Id);
+                if (appointment != null)
+                {
+                    
+                    _db.UpdateScheduleData(value);
+
+                };
+
+                return Json(value);
+
             }
-            if (param.action == "remove" || (param.action == "batch" && param.deleted != null)) // this block of code will execute while removing the appointment
+            
+            if (param.action == "remove" || (param.action == "batch" && param.deleted.Count != 0)) // this block of code will execute while removing the appointment
             {
-                //if (param.action == "remove")
-                //{
-                //    int key = Convert.ToInt32(param.key);
-                //    ScheduleEventData appointment = db.ScheduleEventDatas.Where(c => c.Id == key).FirstOrDefault();
-                //    if (appointment != null) db.ScheduleEventDatas.DeleteOnSubmit(appointment);
-                //}
-                //else
-                //{
-                //    foreach (var apps in param.deleted)
-                //    {
-                //        ScheduleEventData appointment = db.ScheduleEventDatas.Where(c => c.Id == apps.Id).FirstOrDefault();
-                //        if (appointment != null) db.ScheduleEventDatas.DeleteOnSubmit(appointment);
-                //    }
-                //}
-                //db.SubmitChanges();
+                var value = (param.action == "remove") ? param.value : param.deleted[0];
+                ScheduleDataModel appointment = _db.GetScheduleById(value.Id);
+                if (appointment != null)
+                {
+
+                    _db.DeleteScheduleData(value);
+
+                };
+
+                return Json(value);
             }
             
             return Json(null);
