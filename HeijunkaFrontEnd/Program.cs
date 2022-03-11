@@ -1,15 +1,25 @@
 using HeijunkaAppLibrary.Data;
 using HeijunkaAppLibrary.Databases;
+using Newtonsoft.Json.Serialization;
 using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+// Values travelling from Controller to View view ActionResult will use Pascal Case
 builder.Services.AddControllersWithViews().AddJsonOptions(options =>
-{
-    // Values travelling from Controller to View view ActionResult will use Pascal Case
-    options.JsonSerializerOptions.PropertyNamingPolicy = null;
-});
+    options.JsonSerializerOptions.PropertyNamingPolicy = null
+);
+
+// Resolve Time Zone Issue
+builder.Services.AddMvc();
+builder.Services.AddMvc(option => option.EnableEndpointRouting = false).AddNewtonsoftJson();
+builder.Services.AddMvc()
+    .AddNewtonsoftJson(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver())
+    .AddNewtonsoftJson(opt => opt.SerializerSettings.DateFormatHandling = Newtonsoft.Json.DateFormatHandling.MicrosoftDateFormat)
+    .AddNewtonsoftJson(opt => opt.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local);
+
 
 // Dependency Injection
 builder.Services.AddTransient<ISqlDataAccess, SqlDataAccess>();
