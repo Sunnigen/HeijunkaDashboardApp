@@ -94,7 +94,7 @@
 
             <ejs-button id="addQueueButton" onclick="addQueue()" content="Add Queue"></ejs-button>
             <ejs-button id="removeQueueButton" onclick="removeQueue()" content="Remove Queue"></ejs-button>
-            <ejs-button id="addAppointment" onclick="addAppointment()" content="Schedule Process"></ejs-button>
+            <ejs-button id="listAppoints" onclick="listAllActiveProcess()" content="Appointment Data"></ejs-button>
             <ejs-button id="addStagingButton" onclick="addStaging()" content="Stage Process"></ejs-button>
         </div>
         <!-- Staging Area for Parts to Process -->
@@ -368,7 +368,7 @@
         minutes = minutes < 10 ? '0' + minutes : minutes;
 
         var date = `${month}/${date}/${year} ${hours}:${minutes} ${ampm}`;
-        console.log(`date: ${date}`);
+        //console.log(`date: ${date}`);
         return date;
     }
 
@@ -427,6 +427,15 @@
                 queueElement.setAttribute('name', 'QueueId');
             }
 
+        }
+    }
+
+    function listAllActiveProcess() {
+        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+        var scheduleEventsData = scheduleObj.eventsData;   // current appointments in place
+
+        for (const d of scheduleEventsData){
+            console.log(d);
         }
     }
 

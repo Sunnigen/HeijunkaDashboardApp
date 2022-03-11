@@ -54,6 +54,45 @@ namespace HeijunkaAppLibrary.Data
             return _db.LoadData<ProcessModel, dynamic>(sql, new { }, connectionStringName);
         }
 
+        public void DeleteScheduleData(SFScheduleDataModel data)
+        {
+            int id = data.Id;
+
+            string sql = @"delete from dbo.Heijunka
+                           where Id = @id";
+            _db.SaveData(sql, new { id }, connectionStringName);
+
+        }
+
+        public void UpdateScheduleData(SFScheduleDataModel data)
+        {
+            int id = data.Id;
+            int userLastModifiedId = 2;
+            string processNameString = data.Subject;
+            int processId = 2;
+            int queueId = data.QueueId;
+            string orderNumber = data.OrderNumber;
+            DateTime startTime = Convert.ToDateTime(data.StartTime);
+            DateTime lastModifiedDate = DateTime.Now;
+            int isComplete = 1;
+            int isActive = 1;
+            string notes = "Updated";
+
+            string sql = @"update dbo.Heijunka
+                           set QueueId = @queueId, 
+                               UserLastModifiedId = @userLastModifiedId,
+                               ProcessId = @processId, 
+                               OrderNumber = @orderNumber, 
+                               LastModifiedDate = @lastModifiedDate, 
+                               StartDate = @startTime, 
+                               IsComplete = @isComplete, 
+                               IsActive = @isActive, 
+                               Notes = @notes
+                           where Id = @id";
+            _db.SaveData(sql, new { queueId, userLastModifiedId, processId, orderNumber, lastModifiedDate, startTime, isComplete, isActive, notes, id }, connectionStringName);
+
+        }
+
         public void InsertScheduleData(SFScheduleDataModel data)
         {
             int userLastModifiedId = 1;
@@ -73,7 +112,15 @@ namespace HeijunkaAppLibrary.Data
             _db.SaveData(sql, new { queueId, userLastModifiedId, processId, orderNumber, createdDate, lastModifiedDate, startTime, isComplete, isActive, notes }, connectionStringName);
         }
 
-
+        public ScheduleDataModel GetScheduleById(int id)
+        {
+            // Get Existing Scheduled Process
+            string sql = @"select Id, QueueId, UserLastModifiedId, ProcessId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, IsComplete, IsActive, Notes
+                           from Heijunka
+                           where @id = Id";
+            ScheduleDataModel scheduleData = _db.LoadData<ScheduleDataModel, dynamic>(sql, new { id }, connectionStringName).First();
+            return scheduleData;
+        }
 
         public List<ScheduleDataModel> GetScheduleData(DateTime date)
         {
