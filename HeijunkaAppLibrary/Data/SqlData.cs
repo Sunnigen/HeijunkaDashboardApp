@@ -40,12 +40,6 @@ namespace HeijunkaAppLibrary.Data
             return _db.LoadData<UserModel, dynamic>(sql, new { userName }, connectionStringName).First();
         }
 
-        public void CreateProcess(string ProductName,
-                               decimal TimetoComplete,
-                               string Description)
-        {
-            throw new NotImplementedException();
-        }
         public List<ProcessModel> GetAllProcesses()
         {
             // Get List of Processes/Products to be Used for Staging and Scheduling
@@ -53,11 +47,27 @@ namespace HeijunkaAppLibrary.Data
                            from Processes";
             return _db.LoadData<ProcessModel, dynamic>(sql, new { }, connectionStringName);
         }
+        public ProcessModel GetProcessById(int id)
+        {
+            // Get List of Processes/Products to be Used for Staging and Scheduling
+            string sql = @"select Id, Name, Duration, Description
+                           from Processes
+                           where Id = @id";
+            return _db.LoadData<ProcessModel, dynamic>(sql, new { id }, connectionStringName).First();
+        }
+
+        public ProcessModel GetProcessByName(string processName)
+        {
+            // Get List of Processes/Products to be Used for Staging and Scheduling
+            string sql = @"select Id, Name, Duration, Description
+                           from Processes
+                           where Name = @processName";
+            return _db.LoadData<ProcessModel, dynamic>(sql, new { processName }, connectionStringName).First();
+        }
 
         public void DeleteScheduleData(SFScheduleDataModel data)
         {
             int id = data.Id;
-
             string sql = @"delete from dbo.Heijunka
                            where Id = @id";
             _db.SaveData(sql, new { id }, connectionStringName);
@@ -68,8 +78,7 @@ namespace HeijunkaAppLibrary.Data
         {
             int id = data.Id;
             int userLastModifiedId = 2;
-            string processNameString = data.Subject;
-            int processId = 2;
+            int processId = GetProcessByName(data.Subject).Id;
             int queueId = data.QueueId;
             string orderNumber = data.OrderNumber;
             DateTime startTime = Convert.ToDateTime(data.StartTime);
@@ -96,8 +105,7 @@ namespace HeijunkaAppLibrary.Data
         public void InsertScheduleData(SFScheduleDataModel data)
         {
             int userLastModifiedId = 1;
-            string processNameString = data.Subject;
-            int processId = 1;
+            int processId = GetProcessByName(data.Subject).Id;
             int queueId = data.QueueId;
             string orderNumber = data.OrderNumber;
             DateTime startTime = data.StartTime;
@@ -214,11 +222,6 @@ namespace HeijunkaAppLibrary.Data
         }
 
         public ProcessModel FindProduct()
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<ProcessModel> GetAllProducts()
         {
             throw new NotImplementedException();
         }

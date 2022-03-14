@@ -42,25 +42,25 @@ namespace HeijunkaTest.Controllers
             if (param.action == "insert" || (param.action == "batch" && param.added.Count != 0)) // this block of code will execute while inserting the appointments
             {
                 var value = (param.action == "insert") ? param.value : param.added[0];
-                DateTime startTime = Convert.ToDateTime(value.StartTime);
-                DateTime endTime = Convert.ToDateTime(value.EndTime);
-                SFScheduleDataModel appointment = new SFScheduleDataModel()
-                {
-                    Subject = value.Subject,
-                    OrderNumber = value.OrderNumber,
-                    QueueId = value.QueueId,
-                    StartTime = startTime,
-                    EndTime = endTime,
+                //DateTime startTime = Convert.ToDateTime(value.StartTime);
+                //DateTime endTime = Convert.ToDateTime(value.EndTime);
+                //SFScheduleDataModel appointment = new SFScheduleDataModel()
+                //{
+                //    Subject = value.Subject,
+                //    OrderNumber = value.OrderNumber,
+                //    QueueId = value.QueueId,
+                //    StartTime = startTime,
+                //    EndTime = endTime,
                     
-                    IsAllDay = value.IsAllDay,
-                    StartTimezone = value.StartTimezone,
-                    EndTimezone = value.EndTimezone,
-                    RecurrenceRule = value.RecurrenceRule,
-                    RecurrenceID = value.RecurrenceID,
-                    RecurrenceException = value.RecurrenceException
-                };
-                _db.InsertScheduleData(appointment);
-                return Json(appointment);
+                //    IsAllDay = value.IsAllDay,
+                //    StartTimezone = value.StartTimezone,
+                //    EndTimezone = value.EndTimezone,
+                //    RecurrenceRule = value.RecurrenceRule,
+                //    RecurrenceID = value.RecurrenceID,
+                //    RecurrenceException = value.RecurrenceException
+                //};
+                _db.InsertScheduleData(value);
+                return Json(value);
             }
             if (param.action == "update" || (param.action == "batch" && param.changed.Count != 0)) // this block of code will execute while updating the appointment
             {

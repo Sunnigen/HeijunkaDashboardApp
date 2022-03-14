@@ -19,35 +19,7 @@
         <div class="schedule-container">
             <div class="title-container">
                 <h2 class="title-text">Digital Heijunka</h2>
-            </div>           
-            
-            <!--
-           (Html.EJS().Schedule("schedule")
-             .Width("100%")
-             .Height("650px")
-             .CssClass("schedule-drag-drop")
-             .Views(view => { 
-                 view.Option(View.TimelineDay).Add(); 
-                 view.Option(View.TimelineMonth).Add(); 
-             })
-             .CurrentView(View.TimelineDay)
-             .SelectedDate(new DateTime(DateTime.Today.Year, 7, 2))             
-             .Group(group => group.EnableCompactView(false)
-             .Resources(ViewBag.Resources)).Resources(res =>
-                    {
-                        res.DataSource(ViewBag.Departments).Field("DepartmentID").Title("Department").Name("Departments").TextField("text").IdField("id").ColorField("color").Add();
-                        res.DataSource(ViewBag.Consultants).Field("ConsultantID").Title("Consultant").Name("Consultants").TextField("text").IdField("id").ColorField("color").GroupIDField("groupId").AllowMultiple(false).Add();
-                    })
-             .ResourceHeaderTemplate("#resource-template")
-             .ActionBegin("OnActionBegin")
-             .Drag("OnItemDrag")
-             .EventSettings(e => e.Fields(f => f.Subject(sub => sub.Name("Name").Title("Patient Name"))
-             .StartTime(start => start.Name("StartTime").Title("From"))
-             .EndTime(end => end.Name("EndTime").Title("To"))
-             .Description(des => des.Name("Description").Title("Reason")))
-             .DataSource(ViewBag.datasource))
-             .Render()
-           )  -->
+            </div>
                         
            <!--field="QueueId" title="Owners" name="Owners" textField="Text" idField="Id" colorField="Color" -->
             @(Html.EJS().Schedule("schedule")
@@ -63,18 +35,18 @@
                  .ColorField("Color")
                  .Add();
              })
-             .Views(view => view
+             .Views(view => {view
                 .Option(View.TimelineDay)
                 .AllowVirtualScrolling(true)
-                .Add()
-             )
+                .Add();
+             })
              .TimeScale(ts => ts
                 .Enable(true)
                 .Interval(60)
                 .SlotCount(6)
              )
-             .SelectedDate(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day))
-             .HeaderRows(headerRow => headerRow.Option(HeaderRowType.Hour).Add())
+             //.SelectedDate(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day))
+             //.HeaderRows(headerRow => headerRow.Option(HeaderRowType.Hour).Add())
              .EventSettings(e => e.DataSource(
                  d => d
                     .Url("Heijunka/GetScheduleData")
