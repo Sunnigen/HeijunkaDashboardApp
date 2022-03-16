@@ -55,6 +55,8 @@
                     .CrossDomain(true)
                  )
              )
+             .AllowDragAndDrop(false)
+             .AllowResizing(false)
              .ActionBegin("onActionBegin")
              .Drag("OnItemDrag")
              .EventRendered("onEventRendered") 
@@ -94,7 +96,7 @@
                 .Render()
             )
 
-            <!-- Contextual Menu -->
+            <!-- Contextual Menu for Staging Area-->
             @(Html.EJS().ContextMenu("menu")
                 .Target("#tree")
                 .Select("menuClick")
@@ -102,10 +104,33 @@
                 .Items(ViewBag.menuOptions)
                 .Render()
             )
+
+            <!-- Contextual Menu for Queues-->
+            @(Html.EJS().ContextMenu("schedulerMenu")
+                .Target("#schedule")
+                .Select("confirmSchedulerSelection")
+                .BeforeOpen("onSchedulerRightClick")
+                .Items(ViewBag.menuItems)
+                .Render()
+            )
         </div>
     </div>
 </div>
 
+<!-- Popup to Add New Queues/Appointments -->
+<div id="schedulerPopupContainer">
+    @(Html.EJS().Dialog("schedulerDialog")
+        .Content("insert content here")
+        .Target("#schedulerPopupContainer")
+        .Height("300px")
+        .Width("200px")
+        .AllowDragging(true)
+        .Visible(false)
+        .IsModal(true)
+        .ShowCloseIcon(true)
+        .Render()
+    )
+</div>
 
 <!-- Template to render tree node -->
 <script id="treeTemplate" type="text/x-template">
@@ -167,6 +192,7 @@
     var isTreeItemDropped = false;
     var draggedItemId = '';
     var index = 1;
+    var rightClickLocation = null;
 
     function nodeClicked(args) {
         //if (args.event.which === 3) {
@@ -416,7 +442,7 @@
         var scheduleResources = scheduleObj.resources[0].dataSource;
 
         if (scheduleResources.length > 0) {
-            scheduleObj.removeResource(scheduleResources.length,'Owners');
+            scheduleObj.removeResource(scheduleResources.length + 1,'Owners');
             scheduleResources.pop();
             var label = document.getElementById('queue-count-label');
             label.innerHTML = `There are ${scheduleResources.length} Queues at the moment!`;
@@ -429,7 +455,7 @@
         //ownerData.Add(new OwnerModel { Id = 3, Text = "Cutting Edge 3", Color  = "#7499e1" });
         var collection = {Id: scheduleResources.length + 1, QueueName: `Cutting Edge ${scheduleResources.length + 1}`, Color: "#7499e1"}
         
-        scheduleObj.addResource(collection,'Owners', scheduleResources.length);
+        scheduleObj.addResource(collection,'Owners', scheduleResources.length + 1);
         scheduleResources.push(collection);
 
         var label = document.getElementById('queue-count-label');
@@ -498,6 +524,79 @@
 
                 // Load Active Queues
                 scheduleObj.resources[0].dataSource = data;
+            }
+        )
+    }
+
+    function schedulerDialogPopup(positionData, collection, rightClickLocation) {
+        console.log("schedulerDialogPopup");
+        console.log(positionData);
+        console.log(collection);
+        console.log(rightClickLocation);
+
+        // Open Dialog to Create/Modify Queue/Appointment
+        var dialog = document.getElementById("schedulerDialog").ej2_instances[0];
+        dialog.position = positionData;  // save position from original mouse click event
+        dialog.show();
+    }
+
+    function confirmSchedulerSelection(args) {
+        console.log("confirmSchedulerSelection");
+        console.log(args);
+
+        var selection = args.item.properties.text;
+        var positionData = {X: args.event.pageX, Y: args.event.pageY};
+
+        console.log(`Selection: ${selection}`);
+        console.log("rightClickLocation:");
+        console.log(rightClickLocation);
+        if (selection === "Schedule New Part") {
+
+        } else if (selection === "Modify Part") {
+
+        } else if (selection === "Add New Queue") {
+            insertQueue(positionData, rightClickLocation);
+        } else if (selection === "Modify Queue") {
+
+        }
+
+        rightClickLocation = null;
+    }
+
+    function onSchedulerRightClick(event) {
+        var scheduleObj = document.querySelector(".e-schedule").ej2_instances[0];
+        console.log("Right Click Information:");
+
+        // Get Scheduler Information at Right Click Location
+        var cellData = scheduleObj.getCellDetails(event.event.target);
+        var resourceDetails = scheduleObj.getResourcesByIndex(cellData.groupIndex);
+        console.log(resourceDetails);
+        rightClickLocation = resourceDetails;
+    }
+
+    function insertQueue(positionData, rightClickLocation) {
+        var scheduleObj = document.querySelector(".e-schedule").ej2_instances[0];
+        var scheduleResources = scheduleObj.resources[0].dataSource;
+        var queueData = {
+            QueueName: `Cutting Edge ${scheduleResources.length + 1}`,
+            Description: "Test description"
+        }
+
+        var ajax = new ej.base.Ajax({
+            url: '/Heijunka/InsertQueue',
+            data: JSON.stringify(queueData),
+            type: "POST",
+            contentType: 'application/json'
+        });
+
+        ajax.send().then(
+            function (value) {
+                console.log("Adding New Queue:");
+                value = JSON.parse(value);
+                console.log(value);
+
+                collection = {Id: scheduleResources + 1, QueueName: value.QueueName, Color: "#7499e1"};
+                schedulerDialogPopup(positionData, collection, rightClickLocation);
             }
         )
     }

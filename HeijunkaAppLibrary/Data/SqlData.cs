@@ -163,11 +163,17 @@ namespace HeijunkaAppLibrary.Data
             return scheduleData;
         }
 
-        public void CreateQueue(string QueueName,
-                                string Description,
-                                int RowNumber)
+        public void InsertQueue(string queueName,
+                                string description)
         {
-            throw new NotImplementedException();
+            string dateString = DateTime.Today.ToString();
+            int userLastModifiedId = 1;
+            string userLastModifiedDate = DateTime.Today.ToString();
+            int isActive = 1;
+
+            string sql = @"insert into dbo.Queues(CreationDate, UserLastModifiedId, UserLastModifiedDate, IsActive, Description, QueueName)
+                           values (@dateString, @userLastModifiedId, @userLastModifiedDate, @isActive, @description, @queueName)";
+            _db.SaveData(sql, new { dateString, userLastModifiedId, userLastModifiedDate, isActive, description, queueName}, connectionStringName);
         }
 
         public void DeleteProduct(string ProductName)
