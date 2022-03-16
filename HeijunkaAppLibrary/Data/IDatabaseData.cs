@@ -19,7 +19,7 @@ namespace HeijunkaAppLibrary.Data
         UserModel GetUser(string userName);
 
 
-        void CreateQueue(string queueName, string description, int rowNumber);
+        void InsertQueue(string queueName, string description);
         void DeleteQueue(string queueName);
         void EnableQueue(string queueName);
         void DisableQueue(string queueName);
