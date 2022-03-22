@@ -54,6 +54,7 @@
                     .Adaptor("UrlAdaptor")
                     .CrossDomain(true)
                  )
+                 .EnableTooltip(true)
              )
              .AllowDragAndDrop(false)
              .AllowResizing(false)
@@ -61,13 +62,11 @@
              .Drag("OnItemDrag")
              .EventRendered("onEventRendered") 
              .PopupOpen("onPopupOpen")
+             .PopupClose("onPopupClose")
              .EditorTemplate("#EventEditorTemplate") 
              .ShowQuickInfo(false)
              .Render()
             )
-
-            <ejs-button id="addQueueButton" onclick="addQueue()" content="Add Queue"></ejs-button>
-            <ejs-button id="removeQueueButton" onclick="removeQueue()" content="Remove Queue"></ejs-button>
             <ejs-button id="listAppoints" onclick="listAllActiveProcess()" content="Appointment Data"></ejs-button>
             <ejs-button id="addStagingButton" onclick="addStaging()" content="Stage Process"></ejs-button>
         </div>
@@ -124,30 +123,8 @@
         .Target("#schedulerPopupContainer")
         .Height("300px")
         .Width("200px")
-        .AllowDragging(true)
-        .Visible(false)
-        .IsModal(true)
-        .ShowCloseIcon(true)
-        .Render()
-    )
-</div>
-
-<!-- Template to render tree node -->
-<script id="treeTemplate" type="text/x-template">
-    <div id="waiting">
-        <div id="waitdetails">
-            <div id="waitlist">${Name}</div>
-            <div id="ordernumber">
-                <label>Order Number:&ensp;</label>
-                <label> ${OrderNumber}</label>
-            </div>
-        </div>
-    </div>
-</script>
-
-
-<script id="EventEditorTemplate" type="text/x-template">
-    <table class="custom-event-editor" width="100%" cellpadding="5">
+        .Header("Add Something")
+        .ContentTemplate(@<table class="custom-event-editor" width="100%" cellpadding="5">
         <tbody>
             <tr>
                 <td class="e-textlabel">Part</td>
@@ -184,7 +161,72 @@
 
 
         </tbody>
-    </table>
+    </table>)
+        .AllowDragging(true)
+        .Visible(false)
+        .IsModal(true)
+        .ShowCloseIcon(true)
+        .Render()
+    )
+</div>
+
+<!-- Template to render tree node -->
+<script id="treeTemplate" type="text/x-template">
+    <div id="waiting">
+        <div id="waitdetails">
+            <div id="waitlist">${Name}</div>
+            <div id="ordernumber">
+                <label>Order Number:&ensp;</label>
+                <label> ${OrderNumber}</label>
+            </div>
+        </div>
+    </div>
+</script>
+
+
+<script id="EventEditorTemplate" type="text/x-template">
+    <form id="form-element">
+        <table class="custom-event-editor" width="100%" cellpadding="5">
+            <tbody>
+                <tr>
+                    <td class="e-textlabel">Part</td>
+                    <td colspan="4">
+                        <input id="Subject" class="e-field e-input" type="text" name="Subject" style="width: 100%" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="e-textlabel">Order Number</td>
+                    <td colspan="4">
+                        <input id="OrderNumber" class="e-field e-input" type="number" name="OrderNumber" style="width: 100%" />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="e-textlabel">Queue</td>
+                    <td colspan="4">
+                        <input id="QueueId" class="e-field e-input" name="QueueId" type="text" style="width: 100%" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="e-textlabel">From</td>
+                    <td colspan="4">
+                        <input id="StartTime" class="e-field" type="text" name="StartTime" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="e-textlabel">To</td>
+                    <td colspan="4">
+                        <input id="EndTime" readonly class="e-field e-input" type="text" name="EndTime" />
+                    </td>
+                </tr>
+
+
+                
+
+
+            </tbody>
+        </table>
+    </form>
 </script>
 
 <script type="text/javascript">
@@ -192,7 +234,8 @@
     var isTreeItemDropped = false;
     var draggedItemId = '';
     var index = 1;
-    var rightClickLocation = null;
+    var rightClickResource = null;
+    var rightClickCellData = null;
 
     function nodeClicked(args) {
         //if (args.event.which === 3) {
@@ -306,7 +349,7 @@
                         QueueId: resourceDetails.resourceData.Id,
                         Id:resourceDetails.resourceData.Id
                     };
-                    //scheduleObj.openEditor(eventData, 'Add');
+                    //scheduleObj.openEditor(eventData, 'Save');
                     isTreeItemDropped = true;
                     draggedItemId = event.draggedNodeData.id;
                     scheduleProcess(eventData);
@@ -370,8 +413,34 @@
         return date;
     }
 
-    function onPopupOpen(args) {
-        if (args.type === 'Editor') {
+    var formObject = null;
+    var formObject2 = null;
+
+    function onPopupClose(args) {
+        rightClickCellData = null;
+        rightClickResource = null;
+
+        // Check if Save Button was Clicked
+        var buttonType = args.event.target.innerHTML;
+        console.log("Form Validations:");
+        console.log(!formObject.validate());
+        console.log(!formObject2.validate());
+        if ((!formObject.validate() || !formObject2.validate()) && buttonType === "Save") {
+            console.log("Preventing popup close.");
+            args.cancel = true;
+        } else {
+            // Allow Form to Properly Close
+            // formObject = null;
+        }
+    }
+
+    function onPopupOpen(args, eventData) {
+        //console.log("onPopupOpen");
+        //console.log(args, eventData);
+        if (args.type === 'Editor')
+        {
+            formObject = null;
+            formObject2 = null;
             var processElement = args.element.querySelector('#Subject');
 
             // Order Number
@@ -414,7 +483,10 @@
             var scheduleObj = document.getElementById('schedule').ej2_instances[0];
             var scheduleObjResource = scheduleObj.resources[0].dataSource;
 
-            if (!queueElement.classList.contains('e-dropdownlist')){
+            // If there is no target, keep Queue Default Value Blank
+            var val = null
+            if (args.target){
+                if (!queueElement.classList.contains('e-dropdownlist')){
                 var dropDownListObject = new ej.dropdowns.DropDownList({
                     placeholder: "Select a queue:",
                     dataSource: scheduleObjResource,
@@ -423,7 +495,54 @@
                 })
                 dropDownListObject.appendTo(queueElement);
                 queueElement.setAttribute('name', 'QueueId');
+                }
+            } else {
+                if (!queueElement.classList.contains('e-dropdownlist')){
+                var dropDownListObject = new ej.dropdowns.DropDownList({
+                    placeholder: "Select a queue:",
+                    dataSource: scheduleObjResource,
+                    fields: {text: 'QueueName', value: 'Id'},
+                    value: ""
+                })
+                dropDownListObject.appendTo(queueElement);
+                queueElement.setAttribute('name', 'QueueId');
+                }
             }
+            
+            
+
+            console.log(args.data.Subject, args.data.QueueId);
+
+
+             // Order Number & Part Selected Validation
+            var options = {
+                rules: {
+                    // name attribute: validating rule
+                    'Subject': {required: true},
+                    'QueueId': {required: true},
+
+                },
+            
+                customPlacement: (inputElement, errorElement) => {
+                    /* to place the error message in custom position
+                    *  inputElement - target element where the error text will be appended
+                    *  errorElement - error text which will be displayed
+                    */ 
+                    inputElement.parentElement.parentElement.appendChild(errorElement);
+                }
+            }
+            formObject = new ej.inputs.FormValidator("#form-element", options);
+
+
+            var options = {
+                rules: {
+                    // name attribute: validating rule
+                    'OrderNumber': {required: true, maxLength: 11},
+
+                }
+            }
+            formObject2 = new ej.inputs.FormValidator("#form-element", options);
+
 
         }
     }
@@ -449,15 +568,15 @@
         }
     }
 
-    function addQueue() {
+    function addQueuetoScheduler(collection) {
+
+        // Add Queue to Scheduler and Update Scheduler Queues
         var scheduleObj = document.getElementById('schedule').ej2_instances[0];
         var scheduleResources = scheduleObj.resources[0].dataSource;
-        //ownerData.Add(new OwnerModel { Id = 3, Text = "Cutting Edge 3", Color  = "#7499e1" });
-        var collection = {Id: scheduleResources.length + 1, QueueName: `Cutting Edge ${scheduleResources.length + 1}`, Color: "#7499e1"}
-        
         scheduleObj.addResource(collection,'Owners', scheduleResources.length + 1);
         scheduleResources.push(collection);
-
+        
+        // Update Event Panel
         var label = document.getElementById('queue-count-label');
         label.innerHTML = `There are ${scheduleResources.length} Queues at the moment!`;
 
@@ -528,11 +647,11 @@
         )
     }
 
-    function schedulerDialogPopup(positionData, collection, rightClickLocation) {
-        console.log("schedulerDialogPopup");
-        console.log(positionData);
-        console.log(collection);
-        console.log(rightClickLocation);
+    function schedulerDialogPopup(positionData, collection) {
+        //console.log("schedulerDialogPopup");
+        //console.log(positionData);
+        //console.log(collection);
+        //console.log(rightClickResource);
 
         // Open Dialog to Create/Modify Queue/Appointment
         var dialog = document.getElementById("schedulerDialog").ej2_instances[0];
@@ -541,40 +660,50 @@
     }
 
     function confirmSchedulerSelection(args) {
-        console.log("confirmSchedulerSelection");
-        console.log(args);
+        //console.log("confirmSchedulerSelection");
+        //console.log(args);
+        scheduleObj = scheduleObj = document.getElementById('schedule').ej2_instances[0];
 
         var selection = args.item.properties.text;
         var positionData = {X: args.event.pageX, Y: args.event.pageY};
 
-        console.log(`Selection: ${selection}`);
-        console.log("rightClickLocation:");
-        console.log(rightClickLocation);
+        //console.log(`Selection: ${selection}`);
+        //console.log("rightClickResource:");
+        //console.log(rightClickResource);
+        //console.log("rightClickCellData:");
+        //console.log(rightClickCellData);
+
         if (selection === "Schedule New Part") {
-
+            console.log("Schedule New Part");
+            var eventData = {
+                startTime: rightClickCellData.startTime,
+                queueId: rightClickResource.resourceData.Id,
+                endTime: rightClickCellData.startTime,
+            }
+            scheduleObj.openEditor(eventData, "Add");
         } else if (selection === "Modify Part") {
-
+            console.log("Modify Part");
         } else if (selection === "Add New Queue") {
-            insertQueue(positionData, rightClickLocation);
+            console.log("Add New Queue");
+            insertQueue(positionData, rightClickResource);
         } else if (selection === "Modify Queue") {
+            console.log("Modify Queue");
 
         }
-
-        rightClickLocation = null;
+        rightClickCellData = null;
+        rightClickResource = null;
     }
 
     function onSchedulerRightClick(event) {
-        var scheduleObj = document.querySelector(".e-schedule").ej2_instances[0];
-        console.log("Right Click Information:");
-
         // Get Scheduler Information at Right Click Location
+        var scheduleObj = document.querySelector(".e-schedule").ej2_instances[0];
         var cellData = scheduleObj.getCellDetails(event.event.target);
         var resourceDetails = scheduleObj.getResourcesByIndex(cellData.groupIndex);
-        console.log(resourceDetails);
-        rightClickLocation = resourceDetails;
+        rightClickCellData = cellData;
+        rightClickResource = resourceDetails;
     }
 
-    function insertQueue(positionData, rightClickLocation) {
+    function insertQueue(positionData, rightClickResource) {
         var scheduleObj = document.querySelector(".e-schedule").ej2_instances[0];
         var scheduleResources = scheduleObj.resources[0].dataSource;
         var queueData = {
@@ -596,7 +725,7 @@
                 console.log(value);
 
                 collection = {Id: scheduleResources + 1, QueueName: value.QueueName, Color: "#7499e1"};
-                schedulerDialogPopup(positionData, collection, rightClickLocation);
+                schedulerDialogPopup(positionData, collection);
             }
         )
     }
