@@ -72,17 +72,18 @@ namespace HeijunkaTest.Controllers
             if (param.action == "remove" || (param.action == "batch" && param.deleted.Count != 0)) // this block of code will execute while removing the appointment
             {
                 var value = (param.action == "remove") ? param.value : param.deleted[0];
-                ScheduleDataModel appointment = _db.GetScheduleById(value.Id);
-                if (appointment != null)
+                ScheduleDataModel appointment = null;
+                
+                if (value == null)
                 {
-
-                    _db.DeleteScheduleData(value);
-
-                };
-
-                return Json(value);
+                    int data = Int32.Parse(param.key);
+                    _db.DeleteScheduleData(data);
+                    return Json(param);
+                } else {
+                    _db.DeleteScheduleData(value.Id);
+                    return Json(value);
+                }
             }
-            
             return Json(null);
         }
 
@@ -135,6 +136,7 @@ namespace HeijunkaTest.Controllers
             {
                 new { text = "Schedule New Part" },
                 new { text = "Modify Part" },
+                new { text = "Delete Part" },
                 new { text = "Add New Queue" },
                 new { text = "Modify Queue" }
             };

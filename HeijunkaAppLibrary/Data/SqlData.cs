@@ -65,13 +65,11 @@ namespace HeijunkaAppLibrary.Data
             return _db.LoadData<ProcessModel, dynamic>(sql, new { processName }, connectionStringName).First();
         }
 
-        public void DeleteScheduleData(SFScheduleDataModel data)
+        public void DeleteScheduleData(int id)
         {
-            int id = data.Id;
             string sql = @"delete from dbo.Heijunka
                            where Id = @id";
             _db.SaveData(sql, new { id }, connectionStringName);
-
         }
 
         public void UpdateScheduleData(SFScheduleDataModel data)

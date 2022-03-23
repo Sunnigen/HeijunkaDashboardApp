@@ -41,7 +41,7 @@ namespace HeijunkaAppLibrary.Data
         void InsertScheduleData(SFScheduleDataModel data);
         ScheduleDataModel GetScheduleById(int id);
         void UpdateScheduleData(SFScheduleDataModel data);
-        void DeleteScheduleData(SFScheduleDataModel data);
+        void DeleteScheduleData(int id);
         ProcessModel GetProcessById(int id);
     }
 }
