@@ -6,6 +6,11 @@
 }
 @using Syncfusion.EJ2
 @using Syncfusion.EJ2.Schedule
+
+<div>
+    @Html.EJS().Toolbar("menuToolbar").Clicked("toolbarClicked").Items(ViewBag.MenuToolItems).Render()
+</div>
+
 <div class="control-section">
     <div class="content-wrapper">
 
@@ -24,7 +29,7 @@
            <!--field="QueueId" title="Owners" name="Owners" textField="Text" idField="Id" colorField="Color" -->
             @(Html.EJS().Schedule("schedule")
              .Width("100%")
-             .Height("550px")
+             .Height("700px")
              .Group(group => group.Resources(ViewBag.Resources))
              .Resources(res => {res.DataSource(ViewBag.Owners)
                  .Field("QueueId")
@@ -112,6 +117,17 @@
                 .Render()
             )
         </div>
+
+        <!-- Sidebar -->
+        @{Html.EJS().Sidebar("menuSidebar").Width("145px").Target(".content-wrapper").EnableDock(false).IsOpen(false).ContentTemplate(@<div>
+            <div class="main-menu">
+                <div>
+                    @Html.EJS().Menu("dockMenu").Orientation(Syncfusion.EJ2.Navigations.Orientation.Vertical).CssClass("dock-menu").Items(ViewBag.Items).Render()
+                </div>
+            </div>
+        </div>)
+        .HtmlAttributes(ViewBag.HtmlAttribute).Render();}
+
     </div>
 </div>
 
@@ -119,8 +135,8 @@
 <div id="schedulerPopupContainer">
     @(Html.EJS().Dialog("schedulerDialog")
         .Target("#schedulerPopupContainer")
-        .Height("200px")
-        .Width("300px")
+        .Height("250px")
+        .Width("350px")
         .Header("Add New Queue")
         .ContentTemplate(@<div> <table class="custom-event-editor" width="100%" cellpadding="5">
             <tbody>
@@ -138,12 +154,63 @@
                 </tr>
             </tbody>
         </table>
-        <ejs-button id="submitQueue" onclick="insertQueue({QueueName, QueueDescription})" content="Submit"></ejs-button>
         </div>)
         .AllowDragging(true)
         .Visible(false)
         .IsModal(true)
         .ShowCloseIcon(true)
+        .AnimationSettings(e => e.Effect(Syncfusion.EJ2.Popups.DialogEffect.Zoom).Duration(400).Delay(0))
+        .Buttons(btn => {
+            btn.Click("insertQueueConfirm").ButtonModel(ViewBag.DialogButton1).Add();
+            btn.Click("schedulerDialogClose").ButtonModel(ViewBag.DialogButton2).Add();
+        })
+        .Render()
+    )
+</div>
+
+<!-- Popup to Modify Existing Queues-->
+<div id="schedulerPopupContainer">
+    @(Html.EJS().Dialog("modifyQueueDialog")
+        .Target("#schedulerPopupContainer")
+        .Height("250px")
+        .Width("350px")
+        .Header("Modify Existing Queue")
+        .ContentTemplate(@<div> <table class="custom-event-editor" width="100%" cellpadding="5">
+            <tbody>
+                <tr>
+                    <td class="e-textlabel">Queue Title:</td>
+                    <td colspan="4">
+                        <input id="ModifyQueueName" class="e-field e-input" type="text" name="ModifyQueueName" style="width: 100%" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="e-textlabel">Description:</td>
+                    <td colspan="4">
+                        <input id="ModifyQueueDescription" class="e-field e-input" type="text" name="ModifyQueueDescription" style="width: 100%" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class='lSize'><label for='ModifyQueueSwitch'>Display this Queue?</label></td>
+                    <td>
+                        @(Html.EJS().Switch("ModifyQueueSwitch")
+                            .OnLabel("Turn On?")
+                            .Checked(true)
+                            .Render()
+                        )
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>)
+        .AllowDragging(true)
+        .Visible(false)
+        .IsModal(true)
+        .ShowCloseIcon(true)
+        .AnimationSettings(e => e.Effect(Syncfusion.EJ2.Popups.DialogEffect.Zoom).Duration(400).Delay(0))
+        .Buttons(btn => {
+            btn.Click("modifyQueueConfirm").ButtonModel(ViewBag.DialogButton3).Add();
+            btn.Click("modifyQueueDialogClose").ButtonModel(ViewBag.DialogButton2).Add();
+        })
         .Render()
     )
 </div>
@@ -197,11 +264,6 @@
                         <input id="EndTime" readonly class="e-field e-input" type="text" name="EndTime" />
                     </td>
                 </tr>
-
-
-                
-
-
             </tbody>
         </table>
     </form>
@@ -353,7 +415,17 @@
         //var newProcess = {Id: scheduleEventsData.length + 1, QueueId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
     }
 
-    function onEventRendered(args) { }
+    function onEventRendered(args) { 
+        var scheduleObj = document.querySelector('.e-schedule').ej2_instances[0];
+        if (args.data.EndTime < scheduleObj.selectedDate) {
+            args.element.classList.add('e-past-app');
+        }
+
+        let cellHeight = (scheduleObj.element.querySelector('.e-work-cells')).offsetHeight;
+        args.element.style.height = (cellHeight/3) + 'px';
+        const top = parseInt(args.element.style.top.substring(0, args.element.style.top.length - 2)) + cellHeight/3;
+        args.element.style.top = top + 'px';
+    }
 
     function updateDate(startDateString, partNameString) {
         //console.log(`updateDate: startDateString:  ${startDateString}  partNameString: ${partNameString}`);
@@ -429,14 +501,14 @@
             var startElement = args.element.querySelector('#StartTime');
             if (!startElement.classList.contains('e-datetimepicker')) {
                 new ej.calendars.DateTimePicker({ 
-                    value: new Date(startElement.value) || new Date(), 
-                    min: Date(startElement.value),
-                    change: () => { endElement.value = updateDate(startElement.value, processElement.value); }}, startElement);
+                    value: new Date(args.data.StartDate), 
+                    min: Date(args.data.StartDate),
+                    change: () => { endElement.value = updateDate(args.data.StartDate, processElement.value); }}, startElement);
             }
 
             // End Time
             var endElement = args.element.querySelector('#EndTime');
-            endElement.value = updateDate(startElement.value, processElement.value);
+            endElement.value = updateDate(args.data.StartDate, processElement.value);
 
 
             // Get Parts List Only
@@ -626,20 +698,40 @@
     }
 
     function schedulerDialogPopup(positionData, data) {
-        console.log("schedulerDialogPopup");
-        console.log(positionData);
-        console.log(data);
 
-        // Open Dialog to Create/Modify Queue/Appointment
-        var dialog = document.getElementById("schedulerDialog").ej2_instances[0];
+        if (data) {
+            var dialog = document.getElementById("modifyQueueDialog").ej2_instances[0];
+
+            // Open Dialog to Create/Modify Queue
+            dialog.header = `Modify ${data.QueueName}`;
+            var queueName = document.getElementById("ModifyQueueName");
+            var queueDescription = document.getElementById("ModifyQueueDescription");
+            var queueSwitch = document.getElementById("ModifyQueueSwitch").ej2_instances[0];
+            queueName.value = data.QueueName;
+            queueDescription.value = data.QueueDescription;
+            queueSwitch.checked = true;
+            queueSwitch.properties.checked = true;
+            dialog.QueueId = data.QueueId;
+        } else {
+            // New Queue Dialog
+            var dialog = document.getElementById("schedulerDialog").ej2_instances[0];
+        }
         dialog.position = positionData;  // save position from original mouse click event
         dialog.show();
+    }
+
+    function modifyQueueDialogClose(args) {
+        // Close Dialog to Modify Queue
+        var dialog = document.getElementById("modifyQueueDialog").ej2_instances[0];
+        dialog.hide();
+        resetRightClickData();
     }
 
     function schedulerDialogClose() {
         // Close Dialog to Create/Modify Queue/Appointment
         var dialog = document.getElementById("schedulerDialog").ej2_instances[0];
         dialog.hide();
+        resetRightClickData();
     }
 
     function confirmSchedulerSelection(args) {
@@ -657,7 +749,7 @@
         //console.log(rightClickCellData);
 
         if (selection === "Schedule New Part") {
-            console.log("Schedule New Part");
+            // console.log("Schedule New Part");
             var eventData = {
                 startTime: rightClickCellData.startTime,
                 queueId: rightClickResource.resourceData.Id,
@@ -665,20 +757,22 @@
             }
             scheduleObj.openEditor(eventData, "Add");
         } else if (selection === "Modify Part") {
-            console.log("Modify Part");
+            // console.log("Modify Part");
             //scheduleObj.modifyEventDialog(positionData);
+            resetRightClickData();
         } else if (selection === "Delete Part") {
-            console.log("Delete Part");
+            // console.log("Delete Part");
             const data = parseInt(rightClickAppointmentId);
             scheduleObj.deleteEvent(data);
         } else if (selection === "Add New Queue") {
-            console.log("Add New Queue");
+            // console.log("Add New Queue");
             insertQueueDialog(positionData);
         } else if (selection === "Modify Queue") {
-            console.log("Modify Queue");
+            // console.log("Modify Queue");
             modifyQueueDialog(positionData);
+        } else {
+            resetRightClickData();
         }
-        resetRightClickData();
     }
 
     function resetRightClickData() {
@@ -690,70 +784,139 @@
 
     function onSchedulerRightClick(args) {
         // Before Popup Open, Define which Menu Items should Exist
+        console.log("onSchedulerRightClick | cellData");
         var scheduleObj = document.querySelector(".e-schedule").ej2_instances[0];
         var schedulerMenu = document.getElementById("schedulerMenu").ej2_instances[0];
         var cellData = scheduleObj.getCellDetails(args.event.target);
-
+        var items = @Json.Serialize(ViewBag.menuItems);
 
         // No CellData if an Appointment is Targetted
         if (!cellData) {
-            //console.log("Appointment is selected.");
-            var items = @Json.Serialize(ViewBag.menuItems);
-            items.splice(0, 1);
-            items.splice(2, 2);
-            console.log("event");
+            var uiType = args.event.target.className;
 
-            // Id
-            console.log(args.event.srcElement.offsetParent);
-            const arr = args.event.srcElement.offsetParent.dataset.id.split("_");
-            var idAppointment = arr[1];
-            rightClickAppointmentId = idAppointment;
-            console.log(`AppointmentId: ${idAppointment}`);
+            // Appointment is Selected
+            if (uiType === "e-time" || uiType === "e-subject") {
+                items.splice(0, 1);
+                const arr = args.event.srcElement.offsetParent.dataset.id.split("_");
+                var idAppointment = arr[1];
+                rightClickAppointmentId = idAppointment;
+                var groupIndex = event.srcElement.offsetParent.dataset.groupIndex;
+                var resourceDetails = scheduleObj.getResourcesByIndex(groupIndex);
+                cellData = {groupIndex: groupIndex, labelElement: event.path[9].children[0].children[0].children[0].children[0].children[0].children[0].children[groupIndex]};
 
-            // Queue
-            var queueId = args.event.srcElement.offsetParent.dataset.groupIndex;
-
-            // Subject
-            var subject = "StrongEagle 333 Left Wing Winglets";
+            } else {
+                // Queue Row Left Column is Selected
+                items.splice(0, 3);
+                // Group Index appears depending on which object within Queue Column is Selected
+                var groupIndex = event.srcElement.offsetParent.dataset.groupIndex;
+                if (!groupIndex) {
+                    groupIndex = event.srcElement.dataset.groupIndex;
+                }
+                
+                var resourceDetails = scheduleObj.getResourcesByIndex(groupIndex);
+                cellData = {groupIndex: groupIndex, labelElement: event.srcElement};
+            }
             
-            var eventData = {
-                Subject: subject,
-                QueueId: "Cutting Edge 2",
-                queueId: "Cutting Edge 2",
-                Id: idAppointment,
-                groupIndex: "Cutting Edge 2",
-                GroupIndex: "Cutting Edge 2"
-            };
-            console.log("Event Data:");
-            console.log(eventData);
-            //scheduleObj.openEditor(eventData, "Save");
         } else {
             var items = @Json.Serialize(ViewBag.menuItems);
             items.splice(1, 2);
             var resourceDetails = scheduleObj.getResourcesByIndex(cellData.groupIndex);
+            console.log(event.path[6].children[0].children[0].children[0].children[0]);
+            cellData["labelElement"] = event.path[6].children[0].children[0].children[0].children[0].children[cellData.groupIndex];
         }
         schedulerMenu.items = items;
 
         rightClickCellData = cellData;
         rightClickResource = resourceDetails;
+        console.log(rightClickCellData);
+        console.log(rightClickResource);
     }
 
     function modifyQueueDialog(positionData) {
         // Edit or Turn Off Queue
-        schedulerDialogPopup(positionData);
+        console.log("modifyQueueDialog");
+        console.log(rightClickResource);
+        var data = {
+            QueueId: rightClickResource.resourceData.Id,
+            QueueName: rightClickResource.resourceData.QueueName,
+            QueueDescription: rightClickResource.resourceData.Description,
+            SlotNumber: rightClickResource.groupData.QueueId
+        }
+
+        schedulerDialogPopup(positionData, data);
+    }
+
+    function modifyQueueConfirm(args) {
+        var dialog = document.getElementById("modifyQueueDialog").ej2_instances[0];
+
+        var queueName = document.getElementById("ModifyQueueName");
+        var queueDescription = document.getElementById("ModifyQueueDescription");
+
+        var queueSwitch = document.getElementById("ModifyQueueSwitch").ej2_instances[0];
+        var queueId = dialog.QueueId;
+        var queueData = {QueueName: queueName.value, QueueDescription: queueDescription.value, IsActive: queueSwitch.properties.checked, QueueId: dialog.QueueId };
+        modifyQueue(queueData);
+    }
+
+    function modifyQueue(queueData) {
+        collection = {QueueName: queueData.QueueName, Description: queueData.QueueDescription, IsActive: queueData.IsActive, Id: queueData.QueueId};
+        var scheduleObj = document.querySelector(".e-schedule").ej2_instances[0];
+        var scheduleResources = scheduleObj.resources[0].dataSource;
+        var groupIndex = rightClickCellData.groupIndex;
+
+       // Check If Existing Queue 
+
+       var ajax = new ej.base.Ajax({
+           url: '/Heijunka/ModifyQueue',
+           data: JSON.stringify(collection),
+           type: "POST",
+           contentType: 'application/json'
+       });
+
+       ajax.send().then(
+           function (value) {
+               value = JSON.parse(value);
+               
+               // Add Queue to Scheduler and Update Scheduler Queue
+               if (!value.IsActive) {
+                   scheduleObj.removeResource(value.Id, 'Owners'); // remove from UI 
+                   scheduleResources.splice(groupIndex, 1);  // remove from data
+               } else {
+                   var r = scheduleResources[rightClickCellData.groupIndex];
+
+                   r.QueueName = value.QueueName;
+                   r.Description = value.Description;
+                   rightClickCellData.labelElement.innerText = value.QueueName;
+               }
+
+               modifyQueueDialogClose();
+           }
+       )
     }
     
     function insertQueueDialog(positionData) {
         schedulerDialogPopup(positionData);
     }
+
+    function insertQueueConfirm(args) {
+
+        var queueName = document.getElementById("QueueName").value;
+        var queueDescription = document.getElementById("QueueDescription").value;
+        var queueData = {QueueName: queueName, QueueDescription: queueDescription};
+
+        insertQueue(queueData);
+
+    }
     
     function insertQueue(queueData) {
-        collection = {QueueName: queueData.QueueName.value, Description: queueData.QueueDescription.value};
+        collection = {QueueName: queueData.QueueName, Description: queueData.QueueDescription};
         console.log(collection);
         var scheduleObj = document.querySelector(".e-schedule").ej2_instances[0];
         var scheduleResources = scheduleObj.resources[0].dataSource;
 
+        // Check if Existing Queue
 
+        // Insert New Queue
         var ajax = new ej.base.Ajax({
             url: '/Heijunka/InsertQueue',
             data: JSON.stringify(collection),
@@ -801,6 +964,16 @@
         //    }
         //});
     };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        sidebarObj = document.getElementById("menuSidebar").ej2_instances[0];
+    });
+
+    function toolbarClicked(args) {
+        if (args.item.tooltipText == "Menu") {
+            sidebarObj.toggle();
+        }
+    }
 </script>
 
 <style>

@@ -160,7 +160,20 @@ namespace HeijunkaAppLibrary.Data
 
             return scheduleData;
         }
+        public void UpdateQueue(int queueId, string queueName, string description, bool isActive)
+        {
+            int userLastModifiedId = 1;
+            string userLastModifiedDate = DateTime.Today.ToString();
 
+            string sql = @"update dbo.Queues
+                            set UserLastModifiedId = @userLastModifiedId,
+                                UserLastModifiedDate = @userLastModifiedDate,
+                                IsActive = @isActive,
+                                Description = @description,
+                                QueueName = @queueName
+                            where Id = @queueId";
+            _db.SaveData(sql, new { userLastModifiedId, userLastModifiedDate, isActive, description, queueName, queueId }, connectionStringName);
+        }
         public void InsertQueue(string queueName,
                                 string description)
         {
@@ -202,7 +215,7 @@ namespace HeijunkaAppLibrary.Data
         public List<QueueModel> FindActiveQueues()
         {
             // Find onlys Queues that should be displayed
-            string sql = @"select Id, QueueName, Description
+            string sql = @"select Id, QueueName, Description, IsActive
                            from Queues
                            where IsActive = 1";
             return _db.LoadData<QueueModel, dynamic>(sql, new { }, connectionStringName);

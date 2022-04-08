@@ -18,7 +18,7 @@ namespace HeijunkaAppLibrary.Data
         void DeleteUser(string userName);
         UserModel GetUser(string userName);
 
-
+        void UpdateQueue(int id, string queueName, string description, bool isActive);
         void InsertQueue(string queueName, string description);
         void DeleteQueue(string queueName);
         void EnableQueue(string queueName);
