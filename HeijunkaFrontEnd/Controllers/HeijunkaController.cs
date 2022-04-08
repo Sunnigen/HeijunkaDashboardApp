@@ -31,6 +31,13 @@ namespace HeijunkaTest.Controllers
 
         }
 
+        [HttpPost]
+        public ActionResult ModifyQueue([FromBody] ModifyQueueParams data)
+        {
+            // Update Queue at Database
+            _db.UpdateQueue(data.Id, data.QueueName, data.Description, data.IsActive);
+            return Json(data);
+        }
         public ActionResult GetProcesses()
         {
             // Get A List of all Processes
@@ -98,14 +105,14 @@ namespace HeijunkaTest.Controllers
             // Owners/Queues
             List<QueueModel> queues = _db.FindActiveQueues();
             Random rnd = new Random();
-            foreach (QueueModel q in queues) {
-                string hexOutput = String.Format("{0:X}", rnd.Next(0, 0xFFFFFF));
-                while (hexOutput.Length < 6)
-                {
-                    hexOutput = "0" + hexOutput;
-                }
-                q.Color = "#" + hexOutput;
-            }
+            //foreach (QueueModel q in queues) {
+            //    string hexOutput = String.Format("{0:X}", rnd.Next(0, 0xFFFFFF));
+            //    while (hexOutput.Length < 6)
+            //    {
+            //        hexOutput = "0" + hexOutput;
+            //    }
+            //    q.Color = "#" + hexOutput;
+            //}
     
             ViewBag.Owners = queues;
 
@@ -127,6 +134,41 @@ namespace HeijunkaTest.Controllers
 
             // Scheduler Right Click Menu Options
             ViewBag.menuItems = CreateMenuItems();
+
+            // Dialog Buttons
+            ViewBag.DialogButton1 = new ButtonModel() { content = "Create Queue", cssClass = "e-flat" };
+            ViewBag.DialogButton2 = new ButtonModel() { content = "Cancel", cssClass = "e-flat" };
+            ViewBag.DialogButton3 = new ButtonModel() { content = "Save Settings", cssClass = "e-flat" };
+
+            // Sidebar Items
+            List<ToolbarItem> popItems = new List<ToolbarItem>();
+            var folderTemplate = "<div><div class='e-folder-name'>Navigation Pane</div></div>";
+            popItems.Add(new ToolbarItem { PrefixIcon = "e-menu", TooltipText = "Menu" });
+            popItems.Add(new ToolbarItem { Template = folderTemplate });
+            Dictionary<string, object> HtmlAttribute = new Dictionary<string, object>()
+            {   {"class", "sidebar-menu" } };
+            List<MenuItem> MainMenuItems = new List<MenuItem>{
+                new MenuItem {
+                    Text = "Overview", IconCss = "e-btn-icon e-menu e-icons",
+                    Items = new List<MenuItem> {
+                        new MenuItem{ Text = "All Data" },
+                        new MenuItem{ Text = "Category2" },
+                        new MenuItem{ Text = "Category3" }
+                    }
+                },
+                new MenuItem {
+                    Text = "Notification",
+                    IconCss = "icon-bell-alt icon",
+                    Items = new List<MenuItem> {
+                        new MenuItem{ Text = "Change Profile" },
+                        new MenuItem{ Text = "Add Name" },
+                        new MenuItem{ Text = "Add Details" }
+                    }
+                }
+            };
+            ViewBag.HtmlAttribute = HtmlAttribute;
+            ViewBag.MenuToolItems = popItems;
+            ViewBag.Items = MainMenuItems;
 
             return View();
         }
@@ -176,6 +218,18 @@ namespace HeijunkaTest.Controllers
             };
         }
 
+        public class ButtonModel
+        {
+            public string content { get; set; }
+            public string cssClass { get; set; }
+        }
+        public class ModifyQueueParams
+        {
+            public int Id { get; set; }
+            public string QueueName { get; set; }
+            public string Description { get; set; }
+            public bool IsActive { get; set; }
+        }
 
         public class InsertQueueParams
         {
