@@ -9,9 +9,9 @@ namespace HeijunkaTest.Controllers
 {
     public class HeijunkaController : Controller
     {
-        private IDatabaseData _db;
+        private IHerokuDatabaseData _db;
 
-        public HeijunkaController(IDatabaseData db)
+        public HeijunkaController(IHerokuDatabaseData db)
         {
             _db = db;  // dependency injection for database queries
         }
@@ -51,7 +51,7 @@ namespace HeijunkaTest.Controllers
             var data = _db.GetScheduleData(param.StartDate);
             return Json(data);
         }
-         
+
         [HttpPost]
         public IActionResult UpdateScheduleData([FromBody] EditParams param)
         {
@@ -67,7 +67,7 @@ namespace HeijunkaTest.Controllers
                 ScheduleDataModel appointment = _db.GetScheduleById(value.Id);
                 if (appointment != null)
                 {
-                    
+
                     _db.UpdateScheduleData(value);
 
                 };
@@ -75,12 +75,12 @@ namespace HeijunkaTest.Controllers
                 return Json(value);
 
             }
-            
+
             if (param.action == "remove" || (param.action == "batch" && param.deleted.Count != 0)) // this block of code will execute while removing the appointment
             {
                 var value = (param.action == "remove") ? param.value : param.deleted[0];
                 ScheduleDataModel appointment = null;
-                
+
                 if (value == null)
                 {
                     int data = Int32.Parse(param.key);
@@ -94,7 +94,17 @@ namespace HeijunkaTest.Controllers
             return Json(null);
         }
 
-        public IActionResult Timeline()
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        public IActionResult Timeline(dynamic obj)
         {
             // View
             ViewBag.view = new ScheduleView { Option = Syncfusion.EJ2.Schedule.View.Agenda };
@@ -170,6 +180,8 @@ namespace HeijunkaTest.Controllers
             ViewBag.MenuToolItems = popItems;
             ViewBag.Items = MainMenuItems;
 
+            Console.WriteLine("obj");
+            Console.WriteLine(obj);
             return View();
         }
         private List<object> CreateMenuItems()

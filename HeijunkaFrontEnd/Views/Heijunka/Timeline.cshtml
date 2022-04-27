@@ -7,11 +7,9 @@
 @using Syncfusion.EJ2
 @using Syncfusion.EJ2.Schedule
 
-<div>
-    @Html.EJS().Toolbar("menuToolbar").Clicked("toolbarClicked").Items(ViewBag.MenuToolItems).Render()
-</div>
 
-<div class="control-section">
+
+<div class="control-section" id="animation">
     <div class="content-wrapper">
 
         <div class="event-container">
@@ -25,8 +23,9 @@
             <div class="title-container">
                 <h2 class="title-text">Digital Heijunka</h2>
             </div>
-                        
-           <!--field="QueueId" title="Owners" name="Owners" textField="Text" idField="Id" colorField="Color" -->
+
+            <div>
+                <!--field="QueueId" title="Owners" name="Owners" textField="Text" idField="Id" colorField="Color" -->
             @(Html.EJS().Schedule("schedule")
              .Width("100%")
              .Height("700px")
@@ -72,8 +71,12 @@
              .ShowQuickInfo(false)
              .Render()
             )
+
+            </div>
+                        
+           
             <!-- <ejs-button id="listAppoints" onclick="listAllActiveProcess()" content="Appointment Data"></ejs-button> -->
-            <ejs-button id="addStagingButton" onclick="addStaging()" content="Stage Process"></ejs-button>
+            
         </div>
         <!-- Staging Area for Parts to Process -->
         <div class="treeview-container">
@@ -99,27 +102,13 @@
                 .CssClass("treeview-external-drag")
                 .Render()
             )
+            <ejs-button id="addStagingButton" onclick="addStaging()" content="Stage Process"></ejs-button>
 
-            <!-- Contextual Menu for Staging Area-->
-            @(Html.EJS().ContextMenu("menu")
-                .Target("#tree")
-                .Select("menuClick")
-                .BeforeOpen("beforeOpen")
-                .Items(ViewBag.menuOptions)
-                .Render()
-            )
-
-            <!-- Contextual Menu for Queues-->
-            @(Html.EJS().ContextMenu("schedulerMenu")
-                .Target("#schedule")
-                .Select("confirmSchedulerSelection")
-                .BeforeOpen("onSchedulerRightClick")
-                .Render()
-            )
         </div>
 
         <!-- Sidebar -->
-        @{Html.EJS().Sidebar("menuSidebar").Width("145px").Target(".content-wrapper").EnableDock(false).IsOpen(false).ContentTemplate(@<div>
+        <!--
+        @{Html.EJS().Sidebar("menuSidebar").Width("145px").Target(".content-wrapper").EnableDock(true).ShowBackdrop(false).DockSize("50px").IsOpen(false).ContentTemplate(@<div>
             <div class="main-menu">
                 <div>
                     @Html.EJS().Menu("dockMenu").Orientation(Syncfusion.EJ2.Navigations.Orientation.Vertical).CssClass("dock-menu").Items(ViewBag.Items).Render()
@@ -127,9 +116,29 @@
             </div>
         </div>)
         .HtmlAttributes(ViewBag.HtmlAttribute).Render();}
+        -->
 
     </div>
 </div>
+
+
+<!-- Contextual Menu for Staging Area-->
+@(Html.EJS().ContextMenu("menu")
+    .Target("#tree")
+    .Select("menuClick")
+    .BeforeOpen("beforeOpen")
+    .Items(ViewBag.menuOptions)
+    .Render()
+)
+
+<!-- Contextual Menu for Queues-->
+@(Html.EJS().ContextMenu("schedulerMenu")
+    .Target("#schedule")
+    .Select("confirmSchedulerSelection")
+    .BeforeOpen("onSchedulerRightClick")
+    .Render()
+)
+
 
 <!-- Popup to Add New Queues/Appointments -->
 <div id="schedulerPopupContainer">
@@ -821,8 +830,9 @@
             var items = @Json.Serialize(ViewBag.menuItems);
             items.splice(1, 2);
             var resourceDetails = scheduleObj.getResourcesByIndex(cellData.groupIndex);
-            console.log(event.path[6].children[0].children[0].children[0].children[0]);
-            cellData["labelElement"] = event.path[6].children[0].children[0].children[0].children[0].children[cellData.groupIndex];
+            //console.log(event.path[6].children[0].children[0].children[0].children[0].children[0].children[cellData.groupIndex]);
+            //console.log(event.path[6].children[0].children[0].children[0].children[0].children[0].children[0].children[cellData.groupIndex]);
+            cellData["labelElement"] = event.path[6].children[0].children[0].children[0].children[0].children[0].children[0].children[cellData.groupIndex];
         }
         schedulerMenu.items = items;
 
@@ -879,14 +889,26 @@
                
                // Add Queue to Scheduler and Update Scheduler Queue
                if (!value.IsActive) {
+                   console.log("Remove Queue");
+                   console.log(!value.IsActive);
+                   console.log(rightClickCellData.labelElement.innerText);
+
                    scheduleObj.removeResource(value.Id, 'Owners'); // remove from UI 
                    scheduleResources.splice(groupIndex, 1);  // remove from data
+                   
+
                } else {
+                   
                    var r = scheduleResources[rightClickCellData.groupIndex];
+
+                   console.log("Modify Queue Label");
+                   console.log(r);
+                   console.log(rightClickCellData.labelElement);
 
                    r.QueueName = value.QueueName;
                    r.Description = value.Description;
                    rightClickCellData.labelElement.innerText = value.QueueName;
+                   
                }
 
                modifyQueueDialogClose();
@@ -1174,4 +1196,6 @@
                 position: relative !important;
             }
     }
+
+
 </style>
