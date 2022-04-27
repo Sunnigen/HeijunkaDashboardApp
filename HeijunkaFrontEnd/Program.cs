@@ -2,10 +2,17 @@ using HeijunkaAppLibrary.Data;
 using HeijunkaAppLibrary.Databases;
 using Newtonsoft.Json.Serialization;
 using System.IO;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using HeijunkaFrontEnd.Models;
+using HeijunkaFrontEnd.Areas.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
+var connectionString = builder.Configuration.GetConnectionString("HeijunkaFrontEndContextConnection"); builder.Services.AddDbContext<HeijunkaFrontEndContext>(options =>
+     options.UseSqlServer(connectionString)); builder.Services.AddDefaultIdentity<HeijunkaUser>(options => options.SignIn.RequireConfirmedAccount = true)
+      .AddEntityFrameworkStores<HeijunkaFrontEndContext>();
+//// Add services to the container.
 
 // Values travelling from Controller to View view ActionResult will use Pascal Case
 builder.Services.AddControllersWithViews().AddJsonOptions(options =>
@@ -20,11 +27,21 @@ builder.Services.AddMvc()
     .AddNewtonsoftJson(opt => opt.SerializerSettings.DateFormatHandling = Newtonsoft.Json.DateFormatHandling.MicrosoftDateFormat)
     .AddNewtonsoftJson(opt => opt.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local);
 
+//builder.Services.AddMvc()
+//        .AddRazorPagesOptions(options =>
+//        {
+//            //options.AllowAreas = true; //--working after add this line
+//            options.Conventions.AddAreaPageRoute("Identity", "/Account/Login", "");
+//        });
+
+builder.Services.AddRazorPages();
 
 // Dependency Injection
-builder.Services.AddTransient<ISqlDataAccess, SqlDataAccess>();
-builder.Services.AddTransient<IDatabaseData, SqlData>();
+builder.Services.AddTransient<IHerokuDataAccess, HerokuDataAccess>();
+builder.Services.AddTransient<IHerokuDatabaseData, HerokuData>();
 
+
+// SyncFusion Framework
 if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), @"node_modules", @"@syncfusion")))
 {
     if (!Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot", @"js", @"ej2")))
@@ -59,12 +76,21 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
+
+
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Heijunka}/{action=Timeline}/{id?}");
+pattern: "{controller=Heijunka}/{action=Timeline}/{id?}");
+//pattern: "{controller=Account}/{action=Login}/{id?}");
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapRazorPages();
+});
 
 app.Run();
 
