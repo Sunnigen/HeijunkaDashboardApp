@@ -7,11 +7,29 @@ using Microsoft.EntityFrameworkCore;
 using HeijunkaFrontEnd.Models;
 using HeijunkaFrontEnd.Areas.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using Npgsql;
+
+string TranslateDatabaseUrl(string connectionString)
+{
+    var databaseUri = new Uri(connectionString);
+    var userInfo = databaseUri.UserInfo.Split(':');
+
+    var builder = new NpgsqlConnectionStringBuilder
+    {
+        Host = databaseUri.Host,
+        Port = databaseUri.Port,
+        Username = userInfo[0],
+        Password = userInfo[1],
+        Database = databaseUri.LocalPath.TrimStart('/')
+    };
+
+    return builder.ToString();
+}
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("HeijunkaFrontEndContextConnection"); builder.Services.AddDbContext<HeijunkaFrontEndContext>(options =>
-     options.UseSqlServer(connectionString)); builder.Services.AddDefaultIdentity<HeijunkaUser>(options => options.SignIn.RequireConfirmedAccount = true)
-      .AddEntityFrameworkStores<HeijunkaFrontEndContext>();
+var connectionString = TranslateDatabaseUrl(builder.Configuration.GetConnectionString("DATABASE_URL"));
+builder.Services.AddDbContext<HeijunkaFrontEndContext>(options => options.UseNpgsql(connectionString)); 
+builder.Services.AddDefaultIdentity<HeijunkaUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<HeijunkaFrontEndContext>();
 //// Add services to the container.
 
 // Values travelling from Controller to View view ActionResult will use Pascal Case
@@ -27,12 +45,12 @@ builder.Services.AddMvc()
     .AddNewtonsoftJson(opt => opt.SerializerSettings.DateFormatHandling = Newtonsoft.Json.DateFormatHandling.MicrosoftDateFormat)
     .AddNewtonsoftJson(opt => opt.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local);
 
-//builder.Services.AddMvc()
-//        .AddRazorPagesOptions(options =>
-//        {
-//            //options.AllowAreas = true; //--working after add this line
-//            options.Conventions.AddAreaPageRoute("Identity", "/Account/Login", "");
-//        });
+builder.Services.AddMvc()
+        .AddRazorPagesOptions(options =>
+        {
+            //options.AllowAreas = true; //--working after add this line
+            options.Conventions.AddAreaPageRoute("Identity", "/Account/Login", "");
+        });
 
 builder.Services.AddRazorPages();
 
@@ -83,8 +101,8 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-pattern: "{controller=Heijunka}/{action=Timeline}/{id?}");
-//pattern: "{controller=Account}/{action=Login}/{id?}");
+//pattern: "{controller=Heijunka}/{action=Timeline}/{id?}");
+pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.UseEndpoints(endpoints =>
 {
