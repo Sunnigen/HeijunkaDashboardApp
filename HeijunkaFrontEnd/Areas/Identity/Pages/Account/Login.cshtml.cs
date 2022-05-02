@@ -104,7 +104,10 @@ namespace HeijunkaFrontEnd.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
+            returnUrl ??= Url.Content("~/Heijunka/Timeline");
+
+            returnUrl ??= Url.Content("/Heijunka/Timeline");
+
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
