@@ -28,8 +28,14 @@ string TranslateDatabaseUrl(string connectionString)
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = TranslateDatabaseUrl(builder.Configuration.GetConnectionString("DATABASE_URL"));
-builder.Services.AddDbContext<HeijunkaFrontEndContext>(options => options.UseNpgsql(connectionString)); 
-builder.Services.AddDefaultIdentity<HeijunkaUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<HeijunkaFrontEndContext>();
+builder.Services.AddDbContext<HeijunkaFrontEndContext>(options => options.UseNpgsql(connectionString));
+//builder.Services.AddDefaultIdentity<HeijunkaUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<HeijunkaFrontEndContext>();
+builder.Services.AddIdentity<HeijunkaUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddDefaultUI()
+    .AddEntityFrameworkStores<HeijunkaFrontEndContext>()
+    .AddDefaultTokenProviders();
+
+//builder.Services.AddScoped<UserClaimsPrincipalFactory<HeijunkaUser>, ApplicationUserClaimsPrincipalFactory>();
 //// Add services to the container.
 
 // Values travelling from Controller to View view ActionResult will use Pascal Case
@@ -81,6 +87,29 @@ if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), @"node_module
     }
 }
 var app = builder.Build();
+
+// Check if Default User Roles are Present in Db
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+    try
+    {
+        var context = services.GetRequiredService<HeijunkaFrontEndContext>();
+        var userManager = services.GetRequiredService<UserManager<HeijunkaUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        await ContextSeed.SeedRolesAsync(userManager, roleManager);
+        await ContextSeed.SeedSuperAdminAsync(userManager, roleManager);
+
+    }
+    catch (Exception ex)
+    {
+        var logger = loggerFactory.CreateLogger<Program>();
+        logger.LogError(ex, "An error occurred seeding the DB.");
+    }
+}
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -16,30 +16,6 @@ namespace HeijunkaAppLibrary.Data
         {
             _db = db;
         }
-        public void AddNewUser(string userName,
-                               string password,
-                               AuthenticationLevel level)
-        {
-            // Check if User Already Exists within System
-            UserModel? userModel = GetUser(userName);
-
-            if (userModel != null)
-            {
-                DateTime currDate = DateTime.Today;
-                string sql = @"insert into users(UserName, Password, RoleLevel, LastLoggedIn)
-                               values (@userName, @password, @level, @currDate)";
-                _db.SaveData(sql, new { userName, password, level, currDate }, connectionStringName);
-            }
-
-        }
-        public UserModel GetUser(string userName)
-        {
-            string sql = @"select Id, UserName, Password, RoleLevel, LastLoggedin
-                           from users
-                           where Username = @userName";
-            return _db.LoadData<UserModel, dynamic>(sql, new { userName }, connectionStringName).First();
-        }
-
         public List<ProcessModel> GetAllProcesses()
         {
             // Get List of Processes/Products to be Used for Staging and Scheduling
@@ -186,32 +162,6 @@ namespace HeijunkaAppLibrary.Data
                            values (@date, @userLastModifiedId, @userLastModifiedDate, @isActive, @description, @queueName)";
             _db.SaveData(sql, new { date, userLastModifiedId, userLastModifiedDate, isActive, description, queueName}, connectionStringName);
         }
-
-        public void DeleteProduct(string ProductName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteQueue(string QueueName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteUser(string UserName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DisableQueue(string QueueName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnableQueue(string QueueName)
-        {
-            throw new NotImplementedException();
-        }
-
         public List<QueueModel> FindActiveQueues()
         {
             // Find onlys Queues that should be displayed
@@ -238,34 +188,12 @@ namespace HeijunkaAppLibrary.Data
             return _db.LoadData<QueueModel, dynamic>(sql, new { }, connectionStringName);
         }
 
-        public ProcessModel FindProduct()
+        public void InsertProcess(string productName, decimal timetoComplete, string processDescription)
         {
-            throw new NotImplementedException();
-        }
+            string sql = "INSERT into processes(description, duration, name)" +
+                         "VALUES (@processDescription, @timetoComplete, @productName)";
 
-        public void Logoff(string UserName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Logon(string UserName, string Password)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void UpdateUserAuthenticalLevel(string UserName, string CurrentPassword, AuthenticationLevel NewLevel)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void UpdateUserPassword(string UserName, string CurrentPassword, string NewPassword)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void CreateProduct(string productName, decimal timetoComplete, string description)
-        {
-            throw new NotImplementedException();
+            _db.SaveData(sql, new { processDescription, timetoComplete, productName}, connectionStringName);
         }
 
         public void UpdateProcess(string productName, decimal timetoComplete, string description)
@@ -279,11 +207,6 @@ namespace HeijunkaAppLibrary.Data
         }
 
         public void UpdateProcess(string productName, decimal timetoComplete)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ProcessModel FindProcess()
         {
             throw new NotImplementedException();
         }

@@ -21,13 +21,24 @@ class HerokuConsole
 
         //PrintTableInfo(); 
 
-        CreateQueues();
+        //CreateQueues();
 
-
+        //CreateParts();
 
         PrintTests();
 
         Console.ReadLine();
+    }
+
+    private static void CreateParts()
+    {
+        var _db = serviceProvider.GetService<IHerokuDatabaseData>();
+        _db.InsertProcess(processDescription: "RW part, double-decker plane. Requires extra inspection.", productName: "StrongEagle 333 RW Winglets", timetoComplete: 200);
+        _db.InsertProcess(processDescription: "Customer commercial jet.", productName: "Newsom LightEngine Inlet", timetoComplete: 120);
+        _db.InsertProcess(processDescription: "Fuselage connectors for Bldg 55.", productName: "Aegis 880 Fuselage Connectors", timetoComplete: 30);
+        _db.InsertProcess(processDescription: "Legacy Boeing Spares.", productName: "Boeing 444 Fuselage Door", timetoComplete: 90);
+        _db.InsertProcess(processDescription: "LW Part, double-decker plane. Requires extra inspection.", productName: "StrongEagle 333 LW Winglets", timetoComplete: 180);
+        _db.InsertProcess(processDescription: "Repair kit for Newsom Lightengine R&D.", productName: "Newsom LightEngine Repair Kit", timetoComplete: 30);
     }
 
     private static void CreateQueues()
@@ -77,7 +88,11 @@ class HerokuConsole
             Console.WriteLine($"\t{s.Subject} From: {s.StartDate} {s.StartTime}, To: {s.EndDate} {s.EndTime}");
         }
 
-        
+        Console.WriteLine("\n\nExisting Processes:");
+        foreach (ProcessModel s in _db.GetAllProcesses())
+        {
+            Console.WriteLine($"\n{s.Name}  Total Time: {s.Duration}  Description: {s.Description}");
+        }
 
     }
 
