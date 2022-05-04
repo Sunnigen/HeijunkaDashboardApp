@@ -286,5 +286,12 @@ CREATE TABLE users(
 
             _db.SaveData(sql, new { }, connectionStringName);
         }
+
+        public void DeleteAllUsers()
+        {
+            string sql = "DELETE FROM heijunkauser;";
+            _db.SaveData(sql, new { }, connectionStringName);
+
+        }
     }
 }

@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HeijunkaAppLibrary\HeijunkaAppLibrary.csproj" />
+    <ProjectReference Include="..\HeijunkaFrontEnd\HeijunkaFrontEnd.csproj" />
   </ItemGroup>
 
 </Project>
