@@ -98,8 +98,10 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<HeijunkaFrontEndContext>();
         var userManager = services.GetRequiredService<UserManager<HeijunkaUser>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        await ContextSeed.SeedRolesAsync(userManager, roleManager);
-        await ContextSeed.SeedSuperAdminAsync(userManager, roleManager);
+
+        // The below is to automatically seed superusers/admins/etc.
+        //await ContextSeed.SeedRolesAsync(userManager, roleManager);
+        //await ContextSeed.SeedSuperAdminAsync(userManager, roleManager);
 
     }
     catch (Exception ex)

@@ -28,8 +28,8 @@ namespace HeijunkaFrontEnd.Areas.Identity.Data
             //Seed Default User
             var defaultUser = new HeijunkaUser
             {
-                UserName = "superadmin",
-                Email = "superadmin@gmail.com",
+                UserName = "superuser@gmail.com",
+                Email = "superuser@gmail.com",
                 //FirstName = "k",
                 //LastName = "a",
                 EmailConfirmed = true,
@@ -40,12 +40,11 @@ namespace HeijunkaFrontEnd.Areas.Identity.Data
                 var user = await userManager.FindByEmailAsync(defaultUser.Email);
                 if (user == null)
                 {
-                    await userManager.CreateAsync(defaultUser, "super");
-                    //await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.Observer.ToString());
-                    //await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.Assembler.ToString());
-                    //await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.ProductionControl.ToString());
-                    //await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.Supervisor.ToString());
-                    //await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.Admin.ToString());
+                    await userManager.CreateAsync(defaultUser, "123Pa$$word.");
+                    await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.Assembler.ToString());
+                    await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.ProductionControl.ToString());
+                    await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.Supervisor.ToString());
+                    await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.Admin.ToString());
                     await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.SuperUser.ToString());
                 }
 

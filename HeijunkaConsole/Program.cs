@@ -1,6 +1,7 @@
 ﻿using HeijunkaAppLibrary.Data;
 using HeijunkaAppLibrary.Databases;
 using HeijunkaAppLibrary.Models;
+using HeijunkaFrontEnd.Areas.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,9 +26,18 @@ class HerokuConsole
 
         //CreateParts();
 
+        DeleteAllUsers();  // DANGEROUS!!!
+
         PrintTests();
 
         Console.ReadLine();
+    }
+
+    private static void DeleteAllUsers()
+    {
+        /*DANGEROUS*/
+        var _db = serviceProvider.GetService<IHerokuDatabaseData>();
+        _db.DeleteAllUsers();
     }
 
     private static void CreateParts()
@@ -93,6 +103,12 @@ class HerokuConsole
         {
             Console.WriteLine($"\n{s.Name}  Total Time: {s.Duration}  Description: {s.Description}");
         }
+
+        //Console.WriteLine("\n\nUsers:");
+        //foreach (HeijunkaUser h in _db.GetAllUsers())
+        //{
+        //    Console.WriteLine($"\n{h.UserName}");
+        //}
 
     }
 

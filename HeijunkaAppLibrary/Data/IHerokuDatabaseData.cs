@@ -1,4 +1,5 @@
 ﻿using HeijunkaAppLibrary.Models;
+
 using System;
 using System.Collections.Generic;
 
@@ -10,6 +11,7 @@ namespace HeijunkaAppLibrary.Data
      */
     public interface IHerokuDatabaseData
     {
+        void DeleteAllUsers();
         void PrintTables();
         void UpdateQueue(int id, string queueName, string description, bool isActive);
         void InsertQueue(string queueName, string description);
