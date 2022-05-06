@@ -4,9 +4,31 @@
 @{
     ViewData["Title"] = "Timeline";
 }
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@using HeijunkaFrontEnd.Areas.Identity.Data
+
 @using Syncfusion.EJ2
 @using Syncfusion.EJ2.Schedule
 
+
+
+@if (User.IsInRole("SuperUser")) {
+    <h6>If you see this you are a Superuser!</h6>
+}
+@if (User.IsInRole("Admin")) {
+    <h6>If you see this you are an Admin!</h6>
+}
+@if (User.IsInRole("Supervisor")) {
+    <h6>If you see this you are a Supervisor!</h6>
+}
+@if (User.IsInRole("ProductionControl")) {
+    <h6>If you see this you are a Production Control!</h6>
+}
+@if (User.IsInRole("Assembler")) {
+    <h6>If you see this you are an Assembler!</h6>
+}
 
 
 <div class="control-section" id="animation">

@@ -119,12 +119,45 @@ namespace HeijunkaFrontEnd.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostGeneralLogin(string login)
         {
-            //returnUrl ??= Url.Content("~/Heijunka/Timeline");
+            string returnUrl = Url.Content("/Heijunka/Timeline");
+            var result = await _signInManager.PasswordSignInAsync("Assembler", "123Pa$$word.", Input.RememberMe, lockoutOnFailure: false);
+            _logger.LogInformation("Assembler logged in.");
+            return LocalRedirect(returnUrl);
+        }
+        public async Task<IActionResult> OnPostProductionControlLogin(string login)
+        {
+            string returnUrl = Url.Content("/Heijunka/Timeline");
+            var result = await _signInManager.PasswordSignInAsync("ProductionControl", "123Pa$$word.", Input.RememberMe, lockoutOnFailure: false);
+            _logger.LogInformation("ProductionControl logged in.");
+            return LocalRedirect(returnUrl);
+        }
+        public async Task<IActionResult> OnPostAdminLogin(string login)
+        {
+            string returnUrl = Url.Content("/Heijunka/Timeline");
+            var result = await _signInManager.PasswordSignInAsync("Admin", "123Pa$$word.", Input.RememberMe, lockoutOnFailure: false);
+            _logger.LogInformation("Admin logged in.");
+            return LocalRedirect(returnUrl);
+        }
+        public async Task<IActionResult> OnPostSupervisorLogin(string login)
+        {
+            string returnUrl = Url.Content("/Heijunka/Timeline");
+            var result = await _signInManager.PasswordSignInAsync("Supervisor", "123Pa$$word.", Input.RememberMe, lockoutOnFailure: false);
+            _logger.LogInformation("Supervisor logged in.");
+            return LocalRedirect(returnUrl);
+        }
+        public async Task<IActionResult> OnPostSuperUserLogin(string login)
+        {
+            string returnUrl = Url.Content("/Heijunka/Timeline");
+            var result = await _signInManager.PasswordSignInAsync("Superuser", "123Pa$$word.", Input.RememberMe, lockoutOnFailure: false);
+            _logger.LogInformation("Superuser logged in.");
+            return LocalRedirect(returnUrl);
+        }
 
+        public async Task<IActionResult> OnPostAsync(string returnUrl = null, string submit = null)
+        {
             returnUrl ??= Url.Content("/Heijunka/Timeline");
-
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
@@ -149,10 +182,10 @@ namespace HeijunkaFrontEnd.Areas.Identity.Pages.Account
                     _logger.LogInformation("User logged in.");
                     return LocalRedirect(returnUrl);
                 }
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-                }
+                //if (result.RequiresTwoFactor)
+                //{
+                //    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
+                //}
                 if (result.IsLockedOut)
                 {
                     _logger.LogWarning("User account locked out.");
