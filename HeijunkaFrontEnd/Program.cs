@@ -29,14 +29,12 @@ string TranslateDatabaseUrl(string connectionString)
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = TranslateDatabaseUrl(builder.Configuration.GetConnectionString("DATABASE_URL"));
 builder.Services.AddDbContext<HeijunkaFrontEndContext>(options => options.UseNpgsql(connectionString));
-//builder.Services.AddDefaultIdentity<HeijunkaUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<HeijunkaFrontEndContext>();
 builder.Services.AddIdentity<HeijunkaUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddDefaultUI()
     .AddEntityFrameworkStores<HeijunkaFrontEndContext>()
     .AddDefaultTokenProviders();
 
-//builder.Services.AddScoped<UserClaimsPrincipalFactory<HeijunkaUser>, ApplicationUserClaimsPrincipalFactory>();
-//// Add services to the container.
+// Add services to the container.
 
 // Values travelling from Controller to View view ActionResult will use Pascal Case
 builder.Services.AddControllersWithViews().AddJsonOptions(options =>
@@ -102,6 +100,10 @@ using (var scope = app.Services.CreateScope())
         // The below is to automatically seed superusers/admins/etc.
         //await ContextSeed.SeedRolesAsync(userManager, roleManager);
         //await ContextSeed.SeedSuperAdminAsync(userManager, roleManager);
+        //await ContextSeed.SeedAdminAsync(userManager, roleManager);
+        //await ContextSeed.SeedSupervisorAsync(userManager, roleManager);
+        //await ContextSeed.SeedProductionControlAsync(userManager, roleManager);
+        //await ContextSeed.SeedAssemblerAsync(userManager, roleManager);
 
     }
     catch (Exception ex)

@@ -31,13 +31,14 @@
                         </div>
                     </div>
                     <div>
-                        <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
+                        <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary" value="normalLogin">Log in</button>
                     </div>
 
-                    <div>
+                    <div><!--
                         <p>
                             <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
                         </p>
+                        -->
                         <p>
                             <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
                         </p>
@@ -49,6 +50,22 @@
                         -->
                     </div>
                 </form>
+                <br />
+                <br />
+
+                <h3>Test Account Logins:</h3>
+                <form method="post">
+                    <div class="dev-buttons">
+                        <input type="submit" asp-page-handler="GeneralLogin" value="General Login" class="w-100 btn btn-lg btn-secondary" />
+                        <input type="submit" asp-page-handler="ProductionControlLogin" value="ProductionControl Login" class="w-100 btn btn-lg btn-secondary" />
+                        <input type="submit" asp-page-handler="SupervisorLogin" value="Supervisor Login" class="w-100 btn btn-lg btn-secondary" />
+                        <input type="submit" asp-page-handler="AdminLogin" value="Admin Login" class="w-100 btn btn-lg btn-secondary" />
+                        <input type="submit" asp-page-handler="SuperUserLogin" value="SuperUser Login" class="w-100 btn btn-lg btn-secondary" />
+                    </div>
+                </form>
+
+                
+                
             </section>
     </div>
 </div>
@@ -62,6 +79,10 @@
 
     .login-form{
         min-width: 400px;
+    }
+
+    .login-form h3 {
+        text-align: center;
     }
 
     @@keyframes slideInFromBottom {
@@ -81,7 +102,17 @@
         display:grid;
         place-items: center;
     }
+    .dev-buttons{
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        column-gap: 2em;
+        height: 300px;
+    }
 
+    .dev-buttons btn{
+        padding: 10px 0;
+    }
 
     
 </style>

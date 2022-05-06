@@ -28,7 +28,7 @@ namespace HeijunkaFrontEnd.Areas.Identity.Data
             //Seed Default User
             var defaultUser = new HeijunkaUser
             {
-                UserName = "superuser@gmail.com",
+                UserName = "Superuser",
                 Email = "superuser@gmail.com",
                 //FirstName = "k",
                 //LastName = "a",
@@ -51,5 +51,104 @@ namespace HeijunkaFrontEnd.Areas.Identity.Data
             }
         }
 
+        public static async Task SeedAdminAsync(UserManager<HeijunkaUser> userManager, RoleManager<IdentityRole> roleManager)
+        {
+            //Seed Default User
+            var defaultUser = new HeijunkaUser
+            {
+                UserName = "Admin",
+                Email = "admin@gmail.com",
+                //FirstName = "k",
+                //LastName = "a",
+                EmailConfirmed = true,
+                PhoneNumberConfirmed = false
+            };
+            if (userManager.Users.All(u => u.Id != defaultUser.Id))
+            {
+                var user = await userManager.FindByEmailAsync(defaultUser.Email);
+                if (user == null)
+                {
+                    await userManager.CreateAsync(defaultUser, "123Pa$$word.");
+                    await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.Assembler.ToString());
+                    await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.ProductionControl.ToString());
+                    await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.Supervisor.ToString());
+                    await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.Admin.ToString());
+                }
+
+            }
+        }
+
+
+        public static async Task SeedSupervisorAsync(UserManager<HeijunkaUser> userManager, RoleManager<IdentityRole> roleManager)
+        {
+            //Seed Default User
+            var defaultUser = new HeijunkaUser
+            {
+                UserName = "Supervisor",
+                Email = "supervisor@gmail.com",
+                //FirstName = "k",
+                //LastName = "a",
+                EmailConfirmed = true,
+                PhoneNumberConfirmed = false
+            };
+            if (userManager.Users.All(u => u.Id != defaultUser.Id))
+            {
+                var user = await userManager.FindByEmailAsync(defaultUser.Email);
+                if (user == null)
+                {
+                    await userManager.CreateAsync(defaultUser, "123Pa$$word.");
+                    await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.Assembler.ToString());
+                    await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.Supervisor.ToString());
+                }
+
+            }
+        }
+        public static async Task SeedProductionControlAsync(UserManager<HeijunkaUser> userManager, RoleManager<IdentityRole> roleManager)
+        {
+            //Seed Default User
+            var defaultUser = new HeijunkaUser
+            {
+                UserName = "ProductionControl",
+                Email = "productioncontrol@gmail.com",
+                //FirstName = "k",
+                //LastName = "a",
+                EmailConfirmed = true,
+                PhoneNumberConfirmed = false
+            };
+            if (userManager.Users.All(u => u.Id != defaultUser.Id))
+            {
+                var user = await userManager.FindByEmailAsync(defaultUser.Email);
+                if (user == null)
+                {
+                    await userManager.CreateAsync(defaultUser, "123Pa$$word.");
+                    await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.Assembler.ToString());
+                    await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.ProductionControl.ToString());
+                }
+
+            }
+        }
+        public static async Task SeedAssemblerAsync(UserManager<HeijunkaUser> userManager, RoleManager<IdentityRole> roleManager)
+        {
+            //Seed Default User
+            var defaultUser = new HeijunkaUser
+            {
+                UserName = "Assembler",
+                Email = "assembler@gmail.com",
+                //FirstName = "k",
+                //LastName = "a",
+                EmailConfirmed = true,
+                PhoneNumberConfirmed = false
+            };
+            if (userManager.Users.All(u => u.Id != defaultUser.Id))
+            {
+                var user = await userManager.FindByEmailAsync(defaultUser.Email);
+                if (user == null)
+                {
+                    await userManager.CreateAsync(defaultUser, "123Pa$$word.");
+                    await userManager.AddToRoleAsync(defaultUser, UserRoleEnums.Assembler.ToString());
+                }
+
+            }
+        }
     }
 }
