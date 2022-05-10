@@ -115,6 +115,7 @@ namespace HeijunkaAppLibrary.Data
             List<ScheduleDataModel> scheduleData = _db.LoadData<ScheduleDataModel, dynamic>(sql, new { date }, connectionStringName);
 
             // Get Process Data to Obtain Duration
+
             List<ProcessModel> processList = GetAllProcesses();
 
             var processId = 0;

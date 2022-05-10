@@ -13,22 +13,22 @@
 @using Syncfusion.EJ2.Schedule
 
 
-
-@if (User.IsInRole("SuperUser")) {
+<!--
+if (User.IsInRole("SuperUser")) {
     <h6>If you see this you are a Superuser!</h6>
 }
-@if (User.IsInRole("Admin")) {
+if (User.IsInRole("Admin")) {
     <h6>If you see this you are an Admin!</h6>
 }
-@if (User.IsInRole("Supervisor")) {
+if (User.IsInRole("Supervisor")) {
     <h6>If you see this you are a Supervisor!</h6>
 }
-@if (User.IsInRole("ProductionControl")) {
+if (User.IsInRole("ProductionControl")) {
     <h6>If you see this you are a Production Control!</h6>
 }
-@if (User.IsInRole("Assembler")) {
+if (User.IsInRole("Assembler")) {
     <h6>If you see this you are an Assembler!</h6>
-}
+}-->
 
 
 <div class="control-section" id="animation">
@@ -75,8 +75,8 @@
              //.HeaderRows(headerRow => headerRow.Option(HeaderRowType.Hour).Add())
              .EventSettings(e => e.DataSource(
                  d => d
-                    .Url("Heijunka/GetScheduleData")
-                    .CrudUrl("Heijunka/UpdateScheduleData")
+                    .Url("GetScheduleData")
+                    .CrudUrl("UpdateScheduleData")
                     .Adaptor("UrlAdaptor")
                     .CrossDomain(true)
                  )
@@ -87,6 +87,7 @@
              .ActionBegin("onActionBegin")
              .Drag("OnItemDrag")
              .EventRendered("onEventRendered") 
+             .ActionFailure("onActionFailure") 
              .PopupOpen("onPopupOpen")
              .PopupClose("onPopupClose")
              .EditorTemplate("#EventEditorTemplate") 
@@ -129,16 +130,7 @@
         </div>
 
         <!-- Sidebar -->
-        <!--
-        @{Html.EJS().Sidebar("menuSidebar").Width("145px").Target(".content-wrapper").EnableDock(true).ShowBackdrop(false).DockSize("50px").IsOpen(false).ContentTemplate(@<div>
-            <div class="main-menu">
-                <div>
-                    @Html.EJS().Menu("dockMenu").Orientation(Syncfusion.EJ2.Navigations.Orientation.Vertical).CssClass("dock-menu").Items(ViewBag.Items).Render()
-                </div>
-            </div>
-        </div>)
-        .HtmlAttributes(ViewBag.HtmlAttribute).Render();}
-        -->
+        
 
     </div>
 </div>
@@ -446,7 +438,19 @@
         //var newProcess = {Id: scheduleEventsData.length + 1, QueueId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
     }
 
+    function onActionFailure(args) {
+        console.log("onActionFailure");
+        console.log(args);
+        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+        var span = document.createElement('span');
+        scheduleObj.element.parentNode.insertBefore(span, scheduleObj.element);
+        span.style.color = '#FF0000';
+        span.innerHTML = 'Server exception: 404 Not found';
+    }
+
     function onEventRendered(args) { 
+        console.log("onEventRendered");
+        console.log(args);
         var scheduleObj = document.querySelector('.e-schedule').ej2_instances[0];
         if (args.data.EndTime < scheduleObj.selectedDate) {
             args.element.classList.add('e-past-app');
@@ -516,8 +520,8 @@
     }
 
     function onPopupOpen(args, eventData) {
-        //console.log("onPopupOpen");
-        //console.log(args, eventData);
+        // console.log("onPopupOpen");
+        // console.log(args, eventData);
         if (args.type === 'Editor')
         {
             formObject = null;
@@ -527,19 +531,20 @@
             // Order Number
             var orderElement = args.element.querySelector('#OrderNumber');
             orderElement.value = args.data.OrderNumber;
-
+            // console.log(args.data.StartDate);
+            // console.log(processElement.value);
             // Start Time
             var startElement = args.element.querySelector('#StartTime');
             if (!startElement.classList.contains('e-datetimepicker')) {
                 new ej.calendars.DateTimePicker({ 
-                    value: new Date(args.data.StartDate), 
-                    min: Date(args.data.StartDate),
-                    change: () => { endElement.value = updateDate(args.data.StartDate, processElement.value); }}, startElement);
+                    value: new Date(startElement.value) || new Date(args.data.StartDate) || new Date(), 
+                    min: Date(startElement.value),
+                    change: () => { endElement.value = updateDate(startElement.value, processElement.value); }}, startElement);
             }
 
             // End Time
             var endElement = args.element.querySelector('#EndTime');
-            endElement.value = updateDate(args.data.StartDate, processElement.value);
+            endElement.value = updateDate(startElement.value, processElement.value);
 
 
             // Get Parts List Only
@@ -592,7 +597,7 @@
             
             
 
-            console.log(args.data.Subject, args.data.QueueId);
+            // console.log(args.data.Subject, args.data.QueueId);
 
 
              // Order Number & Part Selected Validation
@@ -667,23 +672,17 @@
         var scheduleObj = document.getElementById('schedule').ej2_instances[0];
         var scheduleResources = scheduleObj.resources[0].dataSource;  // current queues in place
 
-
-
         var scheduleEventsData = scheduleObj.eventsData;   // current appointments in place
-
 
         var startDate = new Date();
 
         var endDate = new Date();
         endDate.setHours(endDate.getHours() + 3);
 
-
         var newProcess = {Id: scheduleEventsData.length + 1, QueueId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
         //scheduleObj.openEditor(newProcess, 'Add', true);
 
         scheduleObj.addEvent(newProcess);
-    
-
         //scheduleEventsData.push(newProcess);
         //scheduleObj.refreshLayout();
     }
@@ -1008,10 +1007,6 @@
         //    }
         //});
     };
-
-    document.addEventListener('DOMContentLoaded', function () {
-        sidebarObj = document.getElementById("menuSidebar").ej2_instances[0];
-    });
 
     function toolbarClicked(args) {
         if (args.item.tooltipText == "Menu") {

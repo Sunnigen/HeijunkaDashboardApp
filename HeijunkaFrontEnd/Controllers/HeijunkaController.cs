@@ -67,13 +67,9 @@ namespace HeijunkaTest.Controllers
                 ScheduleDataModel appointment = _db.GetScheduleById(value.Id);
                 if (appointment != null)
                 {
-
                     _db.UpdateScheduleData(value);
-
                 };
-
                 return Json(value);
-
             }
 
             if (param.action == "remove" || (param.action == "batch" && param.deleted.Count != 0)) // this block of code will execute while removing the appointment
