@@ -263,6 +263,12 @@ if (User.IsInRole("Assembler")) {
                     </td>
                 </tr>
                 <tr>
+                    <td class="e-textlabel">Status</td>
+                    <td colspan="4">
+                        <input id="Status" class="e-field e-input" type="text" name="Status" style="width: 100%" />
+                    </td>
+                </tr>
+                <tr>
                     <td class="e-textlabel">Order Number</td>
                     <td colspan="4">
                         <input id="OrderNumber" class="e-field e-input" type="number" name="OrderNumber" style="width: 100%" />
@@ -429,6 +435,7 @@ if (User.IsInRole("Assembler")) {
             Id: scheduleEventsData.length + 1, 
             QueueId: args.QueueId, 
             Subject: args.Name, 
+            Status: args.Status, 
             OrderNumber: args.OrderNumber,
             StartTime: args.StartTime, 
             EndTime: args.EndTime
@@ -449,17 +456,38 @@ if (User.IsInRole("Assembler")) {
     }
 
     function onEventRendered(args) { 
-        console.log("onEventRendered");
-        console.log(args);
+        // console.log("onEventRendered");
+        // console.log(args);
         var scheduleObj = document.querySelector('.e-schedule').ej2_instances[0];
         if (args.data.EndTime < scheduleObj.selectedDate) {
             args.element.classList.add('e-past-app');
         }
-
+        // Set Correct Height to Center
         let cellHeight = (scheduleObj.element.querySelector('.e-work-cells')).offsetHeight;
         args.element.style.height = (cellHeight/3) + 'px';
         const top = parseInt(args.element.style.top.substring(0, args.element.style.top.length - 2)) + cellHeight/3;
         args.element.style.top = top + 'px';
+
+        // Change color based on Status
+        const appDate = new Date(args.data.StartDate).getTime();
+        const completeDate = new Date(args.data.EndTime).getTime();
+        const now = Date.now();
+        console.log(args.data.Subject);
+        console.log(completeDate);
+        console.log(now);
+        console.log(completeDate < now);
+
+        if (args.data.IsComplete === true) {
+            args.element.style.backgroundColor = "#008000";  // green - completed
+        } else if (args.data.IsActive === true && now < completeDate) {
+            args.element.style.backgroundColor = "#8B8000";  // yellow - started
+        } else if (args.data.IsComplete === false && appDate < now) {
+            args.element.style.backgroundColor = "#DC143C";  // red - late (doesn't matter if not started or not)
+        
+        } else {
+            args.element.style.backgroundColor = "#808080";  // gray - not started
+        }
+        
     }
 
     function updateDate(startDateString, partNameString) {
@@ -520,8 +548,8 @@ if (User.IsInRole("Assembler")) {
     }
 
     function onPopupOpen(args, eventData) {
-        // console.log("onPopupOpen");
-        // console.log(args, eventData);
+        console.log("onPopupOpen");
+        console.log(args);
         if (args.type === 'Editor')
         {
             formObject = null;
@@ -564,6 +592,29 @@ if (User.IsInRole("Assembler")) {
                 processElement.setAttribute('name', 'Subject');
             }
 
+            var curr_status = "Not Started";
+
+            if (args.data.IsComplete === true) {
+                curr_status = "Complete";
+            } else if (args.data.IsActive === true) {
+                curr_status = "In Work";
+            }
+
+            // Drop Down List to Select Status
+            var statusElement = args.element.querySelector('#Status');
+            if (!statusElement.classList.contains('e-dropdownlist'))
+            {
+                var dropDownListObject = new ej.dropdowns.DropDownList({
+                    placeholder: "Select Status",
+                    dataSource: ["Not Started", "In Work", "Complete"],
+                    value: curr_status,
+                    fields: {text: "Status"}
+                })
+                dropDownListObject.appendTo(statusElement);
+                statusElement.setAttribute('name', 'Status');
+            }
+
+
             // Drop List to Select Queue/Owner
             var queueElement = args.element.querySelector('#QueueId');
             var scheduleObj = document.getElementById('schedule').ej2_instances[0];
@@ -595,10 +646,6 @@ if (User.IsInRole("Assembler")) {
                 }
             }
             
-            
-
-            // console.log(args.data.Subject, args.data.QueueId);
-
 
              // Order Number & Part Selected Validation
             var options = {
@@ -606,6 +653,7 @@ if (User.IsInRole("Assembler")) {
                     // name attribute: validating rule
                     'Subject': {required: true},
                     'QueueId': {required: true},
+                    'Status': {required: true}
 
                 },
             
@@ -628,8 +676,6 @@ if (User.IsInRole("Assembler")) {
                 }
             }
             formObject2 = new ej.inputs.FormValidator("#form-element", options);
-
-
         }
     }
 

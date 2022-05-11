@@ -9,7 +9,7 @@ namespace HeijunkaAppLibrary.Models
         public string Subject { get; set; }
         public string OrderNumber { get; set; }
         public int QueueId { get; set; }
-
+        public string Status { get; set; }
         public int Id { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }

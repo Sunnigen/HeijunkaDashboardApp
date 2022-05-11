@@ -87,31 +87,31 @@ if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), @"node_module
 var app = builder.Build();
 
 // Check if Default User Roles are Present in Db
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
-    try
-    {
-        var context = services.GetRequiredService<HeijunkaFrontEndContext>();
-        var userManager = services.GetRequiredService<UserManager<HeijunkaUser>>();
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+//using (var scope = app.Services.CreateScope())
+//{
+//    var services = scope.ServiceProvider;
+//    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+//    try
+//    {
+//        var context = services.GetRequiredService<HeijunkaFrontEndContext>();
+//        var userManager = services.GetRequiredService<UserManager<HeijunkaUser>>();
+//        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-        // The below is to automatically seed superusers/admins/etc.
-        //await ContextSeed.SeedRolesAsync(userManager, roleManager);
-        //await ContextSeed.SeedSuperAdminAsync(userManager, roleManager);
-        //await ContextSeed.SeedAdminAsync(userManager, roleManager);
-        //await ContextSeed.SeedSupervisorAsync(userManager, roleManager);
-        //await ContextSeed.SeedProductionControlAsync(userManager, roleManager);
-        //await ContextSeed.SeedAssemblerAsync(userManager, roleManager);
+//        // The below is to automatically seed superusers/admins/etc.
+//        await ContextSeed.SeedRolesAsync(userManager, roleManager);
+//        await ContextSeed.SeedSuperAdminAsync(userManager, roleManager);
+//        await ContextSeed.SeedAdminAsync(userManager, roleManager);
+//        await ContextSeed.SeedSupervisorAsync(userManager, roleManager);
+//        await ContextSeed.SeedProductionControlAsync(userManager, roleManager);
+//        await ContextSeed.SeedAssemblerAsync(userManager, roleManager);
 
-    }
-    catch (Exception ex)
-    {
-        var logger = loggerFactory.CreateLogger<Program>();
-        logger.LogError(ex, "An error occurred seeding the DB.");
-    }
-}
+//    }
+//    catch (Exception ex)
+//    {
+//        var logger = loggerFactory.CreateLogger<Program>();
+//        logger.LogError(ex, "An error occurred seeding the DB.");
+//    }
+//}
 
 
 

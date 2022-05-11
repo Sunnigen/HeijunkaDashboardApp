@@ -57,9 +57,26 @@ namespace HeijunkaAppLibrary.Data
             string orderNumber = data.OrderNumber;
             DateTime startTime = Convert.ToDateTime(data.StartTime);
             DateTime lastModifiedDate = DateTime.Now;
-            bool isComplete = true;
-            bool isActive = true;
             string notes = "Updated";
+
+            bool isComplete = false;
+            bool isActive = false;
+
+            if (data.Status == "Not Started")
+            {
+                isComplete = false;
+                isActive = false;
+            } else if (data.Status == "In Work")
+            {
+                isComplete = false;
+                isActive = true;
+            } else if (data.Status == "Complete")
+            {
+                isComplete = true;
+                isActive = true;
+            }
+
+
 
             string sql = @"update heijunka
                            set QueueId = @queueId, 
@@ -89,7 +106,7 @@ namespace HeijunkaAppLibrary.Data
             bool isActive = false;
             string notes = "Test";
 
-            string sql = @"insert into heijunka(QueueId, UserLastModifiedId, ProcessId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, IsComplete, IsActive, Notes)
+            string sql = @"INSERT INTO heijunka(QueueId, UserLastModifiedId, ProcessId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, IsComplete, IsActive, Notes)
                                              values(@queueId, @userLastModifiedId, @processId, @orderNumber, @createdDate, @lastModifiedDate, @startTime, @isComplete, @isActive, @notes)";
             _db.SaveData(sql, new { queueId, userLastModifiedId, processId, orderNumber, createdDate, lastModifiedDate, startTime, isComplete, isActive, notes }, connectionStringName);
         }
@@ -109,9 +126,9 @@ namespace HeijunkaAppLibrary.Data
             string dateString = date.ToShortDateString();
 
             // Get List of Existing Scheduled Processes
-            string sql = @"select Id, QueueId, UserLastModifiedId, ProcessId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, IsComplete, IsActive, Notes
-                           from heijunka
-                           where @date = StartDate";
+            string sql = @"SELECT Id, QueueId, UserLastModifiedId, ProcessId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, IsComplete, IsActive, Notes
+                           FROM heijunka
+                           WHERE @date = DATE(StartDate)";
             List<ScheduleDataModel> scheduleData = _db.LoadData<ScheduleDataModel, dynamic>(sql, new { date }, connectionStringName);
 
             // Get Process Data to Obtain Duration
