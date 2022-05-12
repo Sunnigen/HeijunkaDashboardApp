@@ -16,35 +16,47 @@ namespace HeijunkaAppLibrary.Data
         {
             _db = db;
         }
+        public List<string> GetHistoryData()
+        {
+            // Get Entire History of User Changes
+            string sql = @"SELECT * FROM history";
+            return _db.LoadData<string, dynamic>(sql, new { }, connectionStringName);
+        }
+        public void UpdateHistoryData(string entry)
+        {
+            // Get Entire History of User Changes
+            string sql = @"INSERT INTO history(entry) values(@entry)";
+            _db.SaveData(sql, new { entry }, connectionStringName);
+        }
         public List<ProcessModel> GetAllProcesses()
         {
             // Get List of Processes/Products to be Used for Staging and Scheduling
-            string sql = @"select Id, Name, Duration, Description
-                           from processes";
+            string sql = @"SELECT Id, Name, Duration, Description
+                           FROM processes";
             return _db.LoadData<ProcessModel, dynamic>(sql, new { }, connectionStringName);
         }
         public ProcessModel GetProcessById(int id)
         {
             // Get List of Processes/Products to be Used for Staging and Scheduling
-            string sql = @"select Id, Name, Duration, Description
-                           from processes
-                           where Id = @id";
+            string sql = @"SELECT Id, Name, Duration, Description
+                           FROM processes
+                           WHERE Id = @id";
             return _db.LoadData<ProcessModel, dynamic>(sql, new { id }, connectionStringName).First();
         }
 
         public ProcessModel GetProcessByName(string processName)
         {
             // Get List of Processes/Products to be Used for Staging and Scheduling
-            string sql = @"select Id, Name, Duration, Description
-                           from processes
-                           where Name = @processName";
+            string sql = @"SELECT Id, Name, Duration, Description
+                           FROM processes
+                           WHERE Name = @processName";
             return _db.LoadData<ProcessModel, dynamic>(sql, new { processName }, connectionStringName).First();
         }
 
         public void DeleteScheduleData(int id)
         {
-            string sql = @"delete from heijunka
-                           where Id = @id";
+            string sql = @"DELETE FROM heijunka
+                           WHERE Id = @id";
             _db.SaveData(sql, new { id }, connectionStringName);
         }
 
@@ -253,6 +265,17 @@ namespace HeijunkaAppLibrary.Data
                            DROP TABLE IF EXISTS Users";
 
             _db.SaveData(sql, new { }, connectionStringName);
+        }
+
+        public void CreateHistoryTable()
+        {
+            string sql = @"CREATE TABLE history(
+    Id serial PRIMARY KEY, 
+    Entry VARCHAR(1000)
+)";
+
+            _db.SaveData(sql, new { }, connectionStringName);
+
         }
 
         public void CreateTables()

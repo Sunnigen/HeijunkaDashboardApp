@@ -45,6 +45,20 @@ namespace HeijunkaTest.Controllers
             return Json(p);
         }
 
+        public ActionResult GetHistoryData()
+        {
+            // Obtain Existing History Data
+            var data = _db.GetHistoryData();
+            return Json(data);
+        }
+
+        public ActionResult UpdateHistoryData([FromBody] DataEntry dataEntry)
+        {
+            // Update Existing History Data
+            _db.UpdateHistoryData(dataEntry.entry);
+            return Json(dataEntry.entry);
+        }
+
         public ActionResult GetScheduleData([FromBody] GetParams param)
         {
             // Obtain Existing Parts in Process Data
@@ -249,6 +263,11 @@ namespace HeijunkaTest.Controllers
         {
             public DateTime StartDate { get; set; }
             public DateTime EndDate { get; set; }
+        }
+
+        public class DataEntry
+        {
+            public string? entry { get; set; }
         }
 
         public class EditParams

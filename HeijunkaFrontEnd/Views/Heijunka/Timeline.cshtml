@@ -11,6 +11,10 @@
 
 @using Syncfusion.EJ2
 @using Syncfusion.EJ2.Schedule
+@using Syncfusion.EJ2.Lists
+
+
+@inject UserManager<HeijunkaUser> UserManager
 
 
 <!--
@@ -34,12 +38,27 @@ if (User.IsInRole("Assembler")) {
 <div class="control-section" id="animation">
     <div class="content-wrapper">
 
-        <div class="event-container">
-            <div class="title-container">
-                <h2 class="title-text">Info/Events</h2>
+        @if (User.IsInRole("Admin") || User.IsInRole("SuperUser"))
+        {
+            <div class="event-container">
+                    <div class="title-container">
+                    <h2 class="title-text">Info/Events</h2>
+                </div>
+                @(Html.EJS().ListView("history")
+                .Enable(true)
+                .EnableVirtualization(true)
+                .DataSource(d => d
+                    .Url("GetHistoryData")
+                    .CrudUrl("UpdateHistoryData")
+                    .Adaptor("UrlAdaptor")
+                    .CrossDomain(true)
+                )
+                .Fields(new ListViewFieldSettings {Text = "text"})
+                .Template("<div class='text-content'> ${text} </div>")
+                .Render()
+                )
             </div>
-            <label id="queue-count-label">There are @ViewBag.Owners.Count Queues at the moment</label>
-        </div>
+        }
         
         <div class="schedule-container">
             <div class="title-container">
@@ -47,54 +66,50 @@ if (User.IsInRole("Assembler")) {
             </div>
 
             <div>
-                <!--field="QueueId" title="Owners" name="Owners" textField="Text" idField="Id" colorField="Color" -->
+            
             @(Html.EJS().Schedule("schedule")
-             .Width("100%")
-             .Height("700px")
-             .Group(group => group.Resources(ViewBag.Resources))
-             .Resources(res => {res.DataSource(ViewBag.Owners)
-                 .Field("QueueId")
-                 .Title("Owners")
-                 .Name("Owners")
-                 .TextField("QueueName")
-                 .IdField("Id")
-                 .ColorField("Color")
-                 .Add();
-             })
-             .Views(view => {view
-                .Option(View.TimelineDay)
-                .AllowVirtualScrolling(true)
-                .Add();
-             })
-             .TimeScale(ts => ts
-                .Enable(true)
-                .Interval(60)
-                .SlotCount(6)
-             )
-             //.SelectedDate(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day))
-             //.HeaderRows(headerRow => headerRow.Option(HeaderRowType.Hour).Add())
-             .EventSettings(e => e.DataSource(
-                 d => d
+                .Width("100%")
+                .Height("700px")
+                .Group(group => group.Resources(ViewBag.Resources))
+                .Resources(res => {res.DataSource(ViewBag.Owners)
+                    .Field("QueueId")
+                    .Title("Owners")
+                    .Name("Owners")
+                    .TextField("QueueName")
+                    .IdField("Id")
+                    .ColorField("Color")
+                    .Add();
+                })
+                .Views(view => {view
+                    .Option(View.TimelineDay)
+                    .AllowVirtualScrolling(true)
+                    .Add();
+                })
+                .TimeScale(ts => ts
+                    .Enable(true)
+                    .Interval(60)
+                    .SlotCount(6)
+                )
+                .EventSettings(e => e.DataSource(
+                    d => d
                     .Url("GetScheduleData")
                     .CrudUrl("UpdateScheduleData")
                     .Adaptor("UrlAdaptor")
                     .CrossDomain(true)
-                 )
-                 .EnableTooltip(true)
-             )
-             .AllowDragAndDrop(false)
-             .AllowResizing(false)
-             .ActionBegin("onActionBegin")
-             .Drag("OnItemDrag")
-             .EventRendered("onEventRendered") 
-             .ActionFailure("onActionFailure") 
-             .PopupOpen("onPopupOpen")
-             .PopupClose("onPopupClose")
-             .EditorTemplate("#EventEditorTemplate") 
-             .ShowQuickInfo(false)
-             .Render()
+                    )
+                    .EnableTooltip(true)
+                )
+                .AllowDragAndDrop(false)
+                .AllowResizing(false)
+                .ActionBegin("onActionBegin")
+                .EventRendered("onEventRendered") 
+                .ActionFailure("onActionFailure") 
+                .PopupOpen("onPopupOpen")
+                .PopupClose("onPopupClose")
+                .EditorTemplate("#EventEditorTemplate") 
+                .ShowQuickInfo(false)
+                .Render()
             )
-
             </div>
                         
            
@@ -102,48 +117,51 @@ if (User.IsInRole("Assembler")) {
             
         </div>
         <!-- Staging Area for Parts to Process -->
-        <div class="treeview-container">
-            <div class="title-container">
-                <h2 class="title-text">Staging Area</h2>
-            </div>
-            <!-- Actual TreeView Widget-->
-            @(Html.EJS().TreeView("tree")
-                .Fields(Fields => Fields.DataSource(ViewBag.DataSource)
-                    .Id("Id")
-                    .Text("Name")
-                    .Text("OrderNumber")
-                    .Selected("is_selected")
-                    .HtmlAttributes("hasAttribute")
+
+        @if (User.IsInRole("Supervisor") || User.IsInRole("ProductionControl"))  {
+            <div class="treeview-container">
+                <div class="title-container">
+                    <h2 class="title-text">Staging Area</h2>
+                </div>
+                <!-- Actual TreeView Widget-->
+                @(Html.EJS().TreeView("tree")
+                    .Fields(Fields => Fields.DataSource(ViewBag.DataSource)
+                        .Id("Id")
+                        .Text("Name")
+                        .Text("OrderNumber")
+                        .Selected("is_selected")
+                        .HtmlAttributes("hasAttribute")
+                    )
+                    .AllowEditing(true)
+                    .AllowDragAndDrop(true)
+                    .NodeClicked("nodeClicked")
+                    .NodeDragStop("OnTreeDragStop")
+                    .NodeDragging("OnItemDrag")
+                    .NodeTemplate("#treeTemplate")
+                    .DragArea(".content-wrapper")
+                    .CssClass("treeview-external-drag")
+                    .Render()
                 )
-                .AllowEditing(true)
-                .AllowDragAndDrop(true)
-                .NodeClicked("nodeClicked")
-                .NodeDragStop("OnTreeDragStop")
-                .NodeDragging("OnItemDrag")
-                .NodeTemplate("#treeTemplate")
-                .DragArea(".content-wrapper")
-                .CssClass("treeview-external-drag")
+                <ejs-button id="addStagingButton" onclick="addStaging()" content="Stage Process"></ejs-button>
+
+            </div>
+
+
+            <!-- Contextual Menu for Staging Area-->
+            @(Html.EJS().ContextMenu("menu")
+                .Target("#tree")
+                .Select("menuClick")
+                .BeforeOpen("beforeOpen")
+                .Items(ViewBag.menuOptions)
                 .Render()
             )
-            <ejs-button id="addStagingButton" onclick="addStaging()" content="Stage Process"></ejs-button>
 
-        </div>
-
-        <!-- Sidebar -->
-        
-
+        }
     </div>
 </div>
 
 
-<!-- Contextual Menu for Staging Area-->
-@(Html.EJS().ContextMenu("menu")
-    .Target("#tree")
-    .Select("menuClick")
-    .BeforeOpen("beforeOpen")
-    .Items(ViewBag.menuOptions)
-    .Render()
-)
+
 
 <!-- Contextual Menu for Queues-->
 @(Html.EJS().ContextMenu("schedulerMenu")
@@ -382,6 +400,21 @@ if (User.IsInRole("Assembler")) {
     }
 
     function onActionBegin(event) {
+
+        // Check for Overlapping Events
+
+         if (event.requestType === 'eventCreate' || event.requestType === 'eventChange') {
+                var data;
+                if (event.requestType === 'eventCreate') {
+                    data = event.data[0];
+                } else if (event.requestType === 'eventChange') {
+                    data = event.data;
+                }
+                if (!this.isSlotAvailable(data)) {
+                    event.cancel = true;
+                }
+        }
+
         if (event.requestType === 'eventCreate' && isTreeItemDropped) {
             var treeObj = document.querySelector(".e-treeview.treeview-external-drag").ej2_instances[0];
             var treeViewdata = treeObj.fields.dataSource;
@@ -392,7 +425,7 @@ if (User.IsInRole("Assembler")) {
                 remove(elements[i]);
             }
         }
-    }
+    } 
 
     function OnTreeDragStop(event) {
         var treeElement = ej.base.closest(event.target, '.e-treeview');
@@ -440,9 +473,11 @@ if (User.IsInRole("Assembler")) {
             StartTime: args.StartTime, 
             EndTime: args.EndTime
         }
+        
         //console.log(`scheduleProcess\n\tId: ${newProcess.Id}, QueueId: ${newProcess.QueueId}, Subject: ${newProcess.Subject}, StartTime: ${newProcess.StartTime}, EndTime: ${newProcess.EndTime}`);
         scheduleObj.addEvent(newProcess);
         //var newProcess = {Id: scheduleEventsData.length + 1, QueueId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
+        insertLog(`${@UserManager.GetUserName(User)} scheduled a new ${args.Name} at ${args.StartTime.toLocaleDateString()}`);
     }
 
     function onActionFailure(args) {
@@ -456,26 +491,27 @@ if (User.IsInRole("Assembler")) {
     }
 
     function onEventRendered(args) { 
-        // console.log("onEventRendered");
-        // console.log(args);
+        console.log("onEventRendered");
+        console.log(args);        
+        // insertLog(`${@Json.Serialize(UserManager.GetUserName(User))} scheduled a new ${args.data.Name} at ${args.data.StartTime}`);
         var scheduleObj = document.querySelector('.e-schedule').ej2_instances[0];
         if (args.data.EndTime < scheduleObj.selectedDate) {
             args.element.classList.add('e-past-app');
         }
         // Set Correct Height to Center
         let cellHeight = (scheduleObj.element.querySelector('.e-work-cells')).offsetHeight;
-        args.element.style.height = (cellHeight/3) + 'px';
-        const top = parseInt(args.element.style.top.substring(0, args.element.style.top.length - 2)) + cellHeight/3;
+        args.element.style.height = (cellHeight/2) + 'px';
+        const top = parseInt(args.element.style.top.substring(0, args.element.style.top.length - 2)) + cellHeight/2;
         args.element.style.top = top + 'px';
 
         // Change color based on Status
         const appDate = new Date(args.data.StartDate).getTime();
         const completeDate = new Date(args.data.EndTime).getTime();
         const now = Date.now();
-        console.log(args.data.Subject);
-        console.log(completeDate);
-        console.log(now);
-        console.log(completeDate < now);
+        //console.log(args.data.Subject);
+        //console.log(completeDate);
+        //console.log(now);
+        //console.log(completeDate < now);
 
         if (args.data.IsComplete === true) {
             args.element.style.backgroundColor = "#008000";  // green - completed
@@ -550,6 +586,14 @@ if (User.IsInRole("Assembler")) {
     function onPopupOpen(args, eventData) {
         console.log("onPopupOpen");
         console.log(args);
+        // Check if User has Authorization
+        if (@Json.Serialize(User.IsInRole("Supervisor")) || @Json.Serialize(User.IsInRole("ProductionControl"))) {
+        
+        } else {
+            args.cancel = true;
+        }
+
+
         if (args.type === 'Editor')
         {
             formObject = null;
@@ -671,7 +715,7 @@ if (User.IsInRole("Assembler")) {
             var options = {
                 rules: {
                     // name attribute: validating rule
-                    'OrderNumber': {required: true, maxLength: 11, minLength: 6},
+                    'OrderNumber': {required: true, maxLength: 9, minLength: 6},
 
                 }
             }
@@ -694,9 +738,12 @@ if (User.IsInRole("Assembler")) {
 
         if (scheduleResources.length > 0) {
             scheduleObj.removeResource(scheduleResources.length + 1,'Owners');
-            scheduleResources.pop();
-            var label = document.getElementById('queue-count-label');
-            label.innerHTML = `There are ${scheduleResources.length} Queues at the moment!`;
+            var q = scheduleResources.pop();
+            console.log("Removing a queue:");
+            console.log(q);
+
+            insertLog(`${@UserManager.GetUserName(User)} removed Queue: ${q.QueueName}`);
+            
         }
     }
 
@@ -859,6 +906,14 @@ if (User.IsInRole("Assembler")) {
     }
 
     function onSchedulerRightClick(args) {
+        // Check if User has Authorization 
+        if (@Json.Serialize(User.IsInRole("ProductionControl")) || @Json.Serialize(User.IsInRole("Supervisor"))) {
+
+        } else {
+            args.cancel = true;
+        }
+
+
         // Before Popup Open, Define which Menu Items should Exist
         console.log("onSchedulerRightClick | cellData");
         var scheduleObj = document.querySelector(".e-schedule").ej2_instances[0];
@@ -992,6 +1047,7 @@ if (User.IsInRole("Assembler")) {
         var queueName = document.getElementById("QueueName").value;
         var queueDescription = document.getElementById("QueueDescription").value;
         var queueData = {QueueName: queueName, QueueDescription: queueDescription};
+        insertLog(`${@UserManager.GetUserName(User)} added Queue: ${queueName}`);
 
         insertQueue(queueData);
 
@@ -1022,42 +1078,31 @@ if (User.IsInRole("Assembler")) {
         )
     }
 
-    function printtoConsole() {
-        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
-        var treeView = document.getElementById('tree').ej2_instances[0];
-        var scheduleResources = scheduleObj.resources[0].dataSource;
-        var scheduleEventsData = scheduleObj.eventsData;
-        console.log(scheduleObj);
-        console.log(treeView);
-        console.log(scheduleEventsData);
-        console.log(scheduleResources);
-        //var complexObject = {
-        //    Id: 1,
-        //    Text: 'Hello World!',
-        //    Color: 'Red'
-        //};
-
-        //$.ajax({
-        //    type: "POST",
-        //    url: "Heijunka/TestFunction1",
-        //    data: complexObject,
-        //    contentType: "application/json; charset=utf-8",
-        //    dataType: "json",
-        //    success: function (arg) {
-        //      alert(arg);
-        //      console.log(arg);
-        //    },
-        //    error: function (xhr) {
-        //        alert("ERROR!!");
-        //        alert(xhr);
-        //    }
-        //});
-    };
-
     function toolbarClicked(args) {
         if (args.item.tooltipText == "Menu") {
             sidebarObj.toggle();
         }
+    }
+    function insertLog(data_entry) {
+        var historyLog = document.getElementById("history").ej2_instances[0]; 
+        data = {text: data_entry};
+        
+        historyLog.addItem([data]);
+        collection = {entry: data_entry};
+
+        var ajax = new ej.base.Ajax({
+           url: '/Heijunka/UpdateHistoryData',
+           data: JSON.stringify(collection),
+           type: "POST",
+           contentType: 'application/json'
+       });
+
+       ajax.send().then(
+           function (value) {
+               value = JSON.parse(value);
+               console.log(`historylog: ${value}`);
+           }
+       )
     }
 </script>
 

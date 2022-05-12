@@ -35,5 +35,8 @@ namespace HeijunkaAppLibrary.Data
         ProcessModel GetProcessById(int id);
         void CreateTables();
         void DeleteTables();
+        void CreateHistoryTable();
+        List<string> GetHistoryData();
+        void UpdateHistoryData(string entry);
     }
 }

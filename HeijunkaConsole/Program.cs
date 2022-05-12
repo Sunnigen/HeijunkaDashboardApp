@@ -26,7 +26,11 @@ class HerokuConsole
 
         //CreateParts();
 
-        DeleteAllUsers();  // DANGEROUS!!!
+        //CreateHistoryTable();
+
+        // DeleteAllUsers();  // DANGEROUS!!!
+
+        // CreateHistoryTable();
 
         PrintTests();
 
@@ -71,6 +75,13 @@ class HerokuConsole
         var _db = serviceProvider.GetService<IHerokuDatabaseData>();
 
         _db.PrintTables();
+    }
+
+    private static void CreateHistoryTable()
+    {
+        var _db = serviceProvider.GetService<IHerokuDatabaseData>();
+
+        _db.CreateHistoryTable();
     }
 
     private static void CreateTables()
