@@ -7,6 +7,7 @@
   </PropertyGroup>
   
   <ItemGroup>
+         <PackageReference Include="Dapper" Version="2.0.123" />
          <PackageReference Include="EFCore.NamingConventions" Version="6.0.0" />
          <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.4" />
          <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.3" />
@@ -31,12 +32,14 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\HeijunkaAppLibrary\HeijunkaAppLibrary.csproj" />
+    <Folder Include="Themes\" />
+    <Folder Include="wwwroot\themes\" />
   </ItemGroup>
   
   <ItemGroup>
-    <Folder Include="Themes\" />
-    <Folder Include="wwwroot\themes\" />
+    <Reference Include="HeijunkaAppLibrary">
+      <HintPath>HeijunkaAppLibrary.dll</HintPath>
+    </Reference>
   </ItemGroup>
   
   <ProjectExtensions><VisualStudio><UserProperties libman_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
