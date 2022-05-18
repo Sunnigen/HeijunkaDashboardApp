@@ -436,6 +436,7 @@ if (User.IsInRole("Assembler")) {
         }
         if (!treeElement) {
             event.cancel = true;
+            
             var scheduleElement = ej.base.closest(event.target, '.e-content-wrap');
             if (scheduleElement) {
                 var treeviewData = this.fields.dataSource;
@@ -444,13 +445,16 @@ if (User.IsInRole("Assembler")) {
                         treeviewData.filter(function (item) { return item.Id === parseInt(event.draggedNodeData.id, 10); });
                     var cellData = scheduleObj.getCellDetails(event.target);
                     var resourceDetails = scheduleObj.getResourcesByIndex(cellData.groupIndex);
+                    console.log("resourceDetails.resourceData.Id");
+                    console.log(resourceDetails.resourceData.Id);
                     var eventData = {
                         Name: filteredData[0].Name,
                         OrderNumber: filteredData[0].OrderNumber,
                         StartTime: cellData.startTime,
                         EndTime: updateDate(cellData.startTime, filteredData[0].Name),
                         QueueId: resourceDetails.resourceData.Id,
-                        Id:resourceDetails.resourceData.Id
+                        Status: "Not Started",
+                        Id: resourceDetails.resourceData.Id
                     };
                     //scheduleObj.openEditor(eventData, 'Save');
                     isTreeItemDropped = true;
@@ -477,7 +481,7 @@ if (User.IsInRole("Assembler")) {
         //console.log(`scheduleProcess\n\tId: ${newProcess.Id}, QueueId: ${newProcess.QueueId}, Subject: ${newProcess.Subject}, StartTime: ${newProcess.StartTime}, EndTime: ${newProcess.EndTime}`);
         scheduleObj.addEvent(newProcess);
         //var newProcess = {Id: scheduleEventsData.length + 1, QueueId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
-        insertLog(`${@UserManager.GetUserName(User)} scheduled a new ${args.Name} at ${args.StartTime.toLocaleDateString()}`);
+        insertLog(`${@Json.Serialize(UserManager.GetUserName(User))} scheduled a new ${args.Name} at ${args.StartTime.toLocaleDateString()}`);
     }
 
     function onActionFailure(args) {
@@ -491,8 +495,8 @@ if (User.IsInRole("Assembler")) {
     }
 
     function onEventRendered(args) { 
-        console.log("onEventRendered");
-        console.log(args);        
+        //console.log("onEventRendered");
+        //console.log(args);        
         // insertLog(`${@Json.Serialize(UserManager.GetUserName(User))} scheduled a new ${args.data.Name} at ${args.data.StartTime}`);
         var scheduleObj = document.querySelector('.e-schedule').ej2_instances[0];
         if (args.data.EndTime < scheduleObj.selectedDate) {
@@ -500,8 +504,8 @@ if (User.IsInRole("Assembler")) {
         }
         // Set Correct Height to Center
         let cellHeight = (scheduleObj.element.querySelector('.e-work-cells')).offsetHeight;
-        args.element.style.height = (cellHeight/2) + 'px';
-        const top = parseInt(args.element.style.top.substring(0, args.element.style.top.length - 2)) + cellHeight/2;
+        args.element.style.height = (cellHeight) + 'px';
+        const top = parseInt(args.element.style.top.substring(0, args.element.style.top.length - 2)) + cellHeight;
         args.element.style.top = top + 'px';
 
         // Change color based on Status
@@ -742,7 +746,7 @@ if (User.IsInRole("Assembler")) {
             console.log("Removing a queue:");
             console.log(q);
 
-            insertLog(`${@UserManager.GetUserName(User)} removed Queue: ${q.QueueName}`);
+            insertLog(`${@Json.Serialize(UserManager.GetUserName(User))} removed Queue: ${q.QueueName}`);
             
         }
     }
@@ -1047,7 +1051,7 @@ if (User.IsInRole("Assembler")) {
         var queueName = document.getElementById("QueueName").value;
         var queueDescription = document.getElementById("QueueDescription").value;
         var queueData = {QueueName: queueName, QueueDescription: queueDescription};
-        insertLog(`${@UserManager.GetUserName(User)} added Queue: ${queueName}`);
+        insertLog(`${@Json.Serialize(UserManager.GetUserName(User))} added Queue: ${queueName}`);
 
         insertQueue(queueData);
 
@@ -1084,10 +1088,16 @@ if (User.IsInRole("Assembler")) {
         }
     }
     function insertLog(data_entry) {
-        var historyLog = document.getElementById("history").ej2_instances[0]; 
-        data = {text: data_entry};
-        
-        historyLog.addItem([data]);
+        try {
+            var historyLog = document.getElementById("history").ej2_instances[0]; 
+            data = {text: data_entry};
+            historyLog.addItem([data]);
+        } catch (e) {
+            if (e instanceof TypeError) {
+                // do nothing
+            }
+
+        }
         collection = {entry: data_entry};
 
         var ajax = new ej.base.Ajax({

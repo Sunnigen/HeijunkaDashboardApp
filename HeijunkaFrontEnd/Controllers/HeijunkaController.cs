@@ -96,7 +96,9 @@ namespace HeijunkaTest.Controllers
                     int data = Int32.Parse(param.key);
                     _db.DeleteScheduleData(data);
                     return Json(param);
-                } else {
+                }
+                else
+                {
                     _db.DeleteScheduleData(value.Id);
                     return Json(value);
                 }
@@ -124,7 +126,7 @@ namespace HeijunkaTest.Controllers
 
             // Owners/Queues
             List<QueueModel> queues = _db.FindActiveQueues();
-            Random rnd = new Random();
+            //Random rnd = new Random();
             //foreach (QueueModel q in queues) {
             //    string hexOutput = String.Format("{0:X}", rnd.Next(0, 0xFFFFFF));
             //    while (hexOutput.Length < 6)
@@ -133,7 +135,7 @@ namespace HeijunkaTest.Controllers
             //    }
             //    q.Color = "#" + hexOutput;
             //}
-    
+
             ViewBag.Owners = queues;
 
             // Set Staging Area
@@ -145,7 +147,7 @@ namespace HeijunkaTest.Controllers
             List<string> names = new List<string>();
             foreach (ProcessModel m in ViewBag.Parts)
             {
-                names.Add(m.Name);  
+                names.Add(m.Name);
             }
             ViewBag.PartNames = names;
 
@@ -215,29 +217,56 @@ namespace HeijunkaTest.Controllers
             };
         }
 
+        private string GenerateOrderNumber()
+        {
+            Random rnd = new Random();
+            string orderNumber = rnd.Next(100000000, 999999999).ToString();
+            //while (orderNumber.Length < 9)
+            //{
+            //    orderNumber = "0" + orderNumber;
+            //}
+            return orderNumber;
+        }
+
         private List<StagingObjectModel> GetStagedParts()
         {
+            // Randomly Generate Staged Parts
+            List<ProcessModel> partsList = _db.GetAllProcesses();
+            List<StagingObjectModel> stagedParts = new List<StagingObjectModel>();
+            Random rnd = new Random();
 
-            return new List<StagingObjectModel>() {
-                new StagingObjectModel
+            for (int i = 0; i < 3; i++)
+            {
+                stagedParts.Add(new StagingObjectModel
                 {
-                    Id = 1,
-                    Name = "StrongEagle 333 Left Wing Winglets",
-                    OrderNumber = "33334444"
-                },
-                new StagingObjectModel
-                {
-                    Id = 2,
-                    Name = "Newsom LightEngine Repair Kit",
-                    OrderNumber = "11112222"
-                },
-                new StagingObjectModel
-                {
-                    Id = 3,
-                    Name = "Boeing 444 Fuselage Door",
-                    OrderNumber = "12345678"
-                }
-            };
+                    Id = i + 1,
+                    Name = partsList[rnd.Next(partsList.Count)].Name,
+                    OrderNumber = GenerateOrderNumber()
+                });
+            }
+            return stagedParts;
+
+
+            //return new List<StagingObjectModel>() {
+            //    new StagingObjectModel
+            //    {
+            //        Id = 1,
+            //        Name = "StrongEagle 333 Left Wing Winglets",
+            //        OrderNumber = "33334444"
+            //    },
+            //    new StagingObjectModel
+            //    {
+            //        Id = 2,
+            //        Name = "Newsom LightEngine Repair Kit",
+            //        OrderNumber = "11112222"
+            //    },
+            //    new StagingObjectModel
+            //    {
+            //        Id = 3,
+            //        Name = "Boeing 444 Fuselage Door",
+            //        OrderNumber = "12345678"
+            //    }
+            //};
         }
 
         public class ButtonModel
