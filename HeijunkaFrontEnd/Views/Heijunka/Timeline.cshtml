@@ -45,6 +45,7 @@ if (User.IsInRole("Assembler")) {
                     <h2 class="title-text">Info/Events</h2>
                 </div>
                 @(Html.EJS().ListView("history")
+                .Height("700px")
                 .Enable(true)
                 .EnableVirtualization(true)
                 .DataSource(d => d
@@ -54,7 +55,7 @@ if (User.IsInRole("Assembler")) {
                     .CrossDomain(true)
                 )
                 .Fields(new ListViewFieldSettings {Text = "DataEntry"})
-                .Template("<div class='e-list-wrapper e-list-multi-line'><span class='e-list-content'> ${DataEntry} </span></div>")
+                .Template("<div class='clearfix desc e-list-wrapper e-list-multi-line'><span class='e-list-content e-text-overflow'> ${DataEntry} </span></div>")
                 .Render()
                 )
             </div>
@@ -445,8 +446,8 @@ if (User.IsInRole("Assembler")) {
                         treeviewData.filter(function (item) { return item.Id === parseInt(event.draggedNodeData.id, 10); });
                     var cellData = scheduleObj.getCellDetails(event.target);
                     var resourceDetails = scheduleObj.getResourcesByIndex(cellData.groupIndex);
-                    console.log("resourceDetails.resourceData.Id");
-                    console.log(resourceDetails.resourceData.Id);
+                    //console.log("resourceDetails");
+                    //console.log(resourceDetails);
                     var eventData = {
                         Name: filteredData[0].Name,
                         OrderNumber: filteredData[0].OrderNumber,
@@ -504,8 +505,8 @@ if (User.IsInRole("Assembler")) {
         }
         // Set Correct Height to Center
         let cellHeight = (scheduleObj.element.querySelector('.e-work-cells')).offsetHeight;
-        args.element.style.height = (cellHeight) + 'px';
-        const top = parseInt(args.element.style.top.substring(0, args.element.style.top.length - 2)) + cellHeight;
+        args.element.style.height = (cellHeight/2) + 'px';
+        const top = parseInt(args.element.style.top.substring(0, args.element.style.top.length - 2)) + cellHeight/6;
         args.element.style.top = top + 'px';
 
         // Change color based on Status
@@ -1130,14 +1131,19 @@ if (User.IsInRole("Assembler")) {
         width: 100%;
     }
 
-    .e-listview {
-        border: 5px solid rgb(173, 255, 47);
+
+ 
+    .e-listview:not(.e-list-template) .e-list-item {
+        height: 100px;
+        line-height: 36px;
+        position: relative;
     }
 
-    .e-listview .e-list-item .e-level-1 {
-        height: 100px;
-        line-height: 100px;
-        overflow-wrap: break-word;
+    .e-listview .e-list-template .e-list-wrapper.e-list-multi-line .e-list-content {
+        
+        margin: 0;
+        padding: 0.115em 0;
+        word-wrap: break-word;
     }
         
     .e-location-container{
