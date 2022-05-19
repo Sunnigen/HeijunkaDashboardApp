@@ -36,7 +36,8 @@ namespace HeijunkaAppLibrary.Data
         void CreateTables();
         void DeleteTables();
         void CreateHistoryTable();
-        List<string> GetHistoryData();
+        void DeleteHistoryTable();
         void UpdateHistoryData(string entry);
+        List<DataEntryModel> GetHistoryData();
     }
 }

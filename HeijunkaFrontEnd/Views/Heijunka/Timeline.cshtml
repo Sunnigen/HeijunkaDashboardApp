@@ -53,8 +53,8 @@ if (User.IsInRole("Assembler")) {
                     .Adaptor("UrlAdaptor")
                     .CrossDomain(true)
                 )
-                .Fields(new ListViewFieldSettings {Text = "text"})
-                .Template("<div class='text-content'> ${text} </div>")
+                .Fields(new ListViewFieldSettings {Text = "DataEntry"})
+                .Template("<div class='e-list-wrapper e-list-multi-line'><span class='e-list-content'> ${DataEntry} </span></div>")
                 .Render()
                 )
             </div>
@@ -1090,7 +1090,7 @@ if (User.IsInRole("Assembler")) {
     function insertLog(data_entry) {
         try {
             var historyLog = document.getElementById("history").ej2_instances[0]; 
-            data = {text: data_entry};
+            data = {DataEntry: data_entry};
             historyLog.addItem([data]);
         } catch (e) {
             if (e instanceof TypeError) {
@@ -1128,6 +1128,16 @@ if (User.IsInRole("Assembler")) {
     .schedule-container {
         padding-right: 10px;
         width: 100%;
+    }
+
+    .e-listview {
+        border: 5px solid rgb(173, 255, 47);
+    }
+
+    .e-listview .e-list-item .e-level-1 {
+        height: 100px;
+        line-height: 100px;
+        overflow-wrap: break-word;
     }
         
     .e-location-container{

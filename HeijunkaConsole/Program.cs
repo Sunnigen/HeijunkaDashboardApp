@@ -26,15 +26,22 @@ class HerokuConsole
 
         //CreateParts();
 
-        //CreateHistoryTable();
-
         // DeleteAllUsers();  // DANGEROUS!!!
 
-        // CreateHistoryTable();
+        //DeleteHistoryTable(); // DANGEROUS!!!
+
+        //CreateHistoryTable(); // DANGEROUS!!!
 
         PrintTests();
 
         Console.ReadLine();
+    }
+
+    private static void DeleteHistoryTable()
+    {
+        var _db = serviceProvider.GetService<IHerokuDatabaseData>();
+        _db.DeleteHistoryTable();
+        Console.WriteLine("Deleting history table.");
     }
 
     private static void DeleteAllUsers()
@@ -42,6 +49,7 @@ class HerokuConsole
         /*DANGEROUS*/
         var _db = serviceProvider.GetService<IHerokuDatabaseData>();
         _db.DeleteAllUsers();
+        Console.WriteLine("Deleting all users!");
     }
 
     private static void CreateParts()
@@ -53,6 +61,7 @@ class HerokuConsole
         _db.InsertProcess(processDescription: "Legacy Boeing Spares.", productName: "Boeing 444 Fuselage Door", timetoComplete: 90);
         _db.InsertProcess(processDescription: "LW Part, double-decker plane. Requires extra inspection.", productName: "StrongEagle 333 LW Winglets", timetoComplete: 180);
         _db.InsertProcess(processDescription: "Repair kit for Newsom Lightengine R&D.", productName: "Newsom LightEngine Repair Kit", timetoComplete: 30);
+        Console.WriteLine("Creating many parts!.");
     }
 
     private static void CreateQueues()
@@ -62,12 +71,14 @@ class HerokuConsole
         _db.InsertQueue(queueName: "Cutting Edge 2", description: "Bldg 2 Big Hanger");
         _db.InsertQueue(queueName: "Cutting Edge 3", description: "Bldg 3 AeroBreeze");
         _db.InsertQueue(queueName: "Cutting Edge 42", description: "Bldg 42 R&D");
+        Console.WriteLine("Creating many queues!.");
     }
 
     private static void DeleteTables()
     {
         var _db = serviceProvider.GetService<IHerokuDatabaseData>();
         _db.DeleteTables();
+        Console.WriteLine("Deleting all tables.");
     }
 
     private static void PrintTableInfo()
@@ -82,6 +93,7 @@ class HerokuConsole
         var _db = serviceProvider.GetService<IHerokuDatabaseData>();
 
         _db.CreateHistoryTable();
+        Console.WriteLine("History table created.");
     }
 
     private static void CreateTables()
@@ -89,6 +101,7 @@ class HerokuConsole
         var _db = serviceProvider.GetService<IHerokuDatabaseData>();
 
         _db.CreateTables();
+        Console.WriteLine("Many tables created.");
     }
 
     private static void PrintTests()

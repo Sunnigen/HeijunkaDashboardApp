@@ -16,17 +16,17 @@ namespace HeijunkaAppLibrary.Data
         {
             _db = db;
         }
-        public List<string> GetHistoryData()
+        public List<DataEntryModel> GetHistoryData()
         {
             // Get Entire History of User Changes
-            string sql = @"SELECT * FROM history";
-            return _db.LoadData<string, dynamic>(sql, new { }, connectionStringName);
+            string sql = @"SELECT Id, DataEntry FROM history";
+            return _db.LoadData<DataEntryModel, dynamic>(sql, new { }, connectionStringName);
         }
-        public void UpdateHistoryData(string entry)
+        public void UpdateHistoryData(string data)
         {
             // Get Entire History of User Changes
-            string sql = @"INSERT INTO history(entry) values(@entry)";
-            _db.SaveData(sql, new { entry }, connectionStringName);
+            string sql = @"INSERT INTO history(DataEntry) values(@data)";
+            _db.SaveData(sql, new { data }, connectionStringName);
         }
         public List<ProcessModel> GetAllProcesses()
         {
@@ -262,7 +262,15 @@ namespace HeijunkaAppLibrary.Data
                            DROP TABLE IF EXISTS HistoryLog; 
                            DROP TABLE IF EXISTS Processes;
                            DROP TABLE IF EXISTS Queues;
+                           DROP TABLE IF EXISTS History;
                            DROP TABLE IF EXISTS Users";
+
+            _db.SaveData(sql, new { }, connectionStringName);
+        }
+
+        public void DeleteHistoryTable()
+        {
+            string sql = @"DROP TABLE IF EXISTS History;";
 
             _db.SaveData(sql, new { }, connectionStringName);
         }
@@ -271,7 +279,7 @@ namespace HeijunkaAppLibrary.Data
         {
             string sql = @"CREATE TABLE history(
     Id serial PRIMARY KEY, 
-    Entry VARCHAR(1000)
+    DataEntry VARCHAR(1000)
 )";
 
             _db.SaveData(sql, new { }, connectionStringName);
