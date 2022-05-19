@@ -1,5 +1,5 @@
 # Digital Heijunka
-View product in use [here](https://digitalheijunkatest1.azurewebsites.net/).
+View product in use [here](https://digital-heijunka.herokuapp.com/).
 
 ## Application
 Digital Heijunka is a full stack application that allows production manangers to reduce unevenness in production processes and minimize the chance of overburden.
