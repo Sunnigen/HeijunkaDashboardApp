@@ -45,9 +45,9 @@ builder.Services.AddControllersWithViews().AddJsonOptions(options =>
 builder.Services.AddMvc();
 builder.Services.AddMvc(option => option.EnableEndpointRouting = false).AddNewtonsoftJson();
 builder.Services.AddMvc()
-    .AddNewtonsoftJson(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
-    //.AddNewtonsoftJson(opt => opt.SerializerSettings.DateFormatHandling = Newtonsoft.Json.DateFormatHandling.MicrosoftDateFormat)
-    //.AddNewtonsoftJson(opt => opt.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local);
+    .AddNewtonsoftJson(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver())
+    .AddNewtonsoftJson(opt => opt.SerializerSettings.DateFormatHandling = Newtonsoft.Json.DateFormatHandling.MicrosoftDateFormat)
+    .AddNewtonsoftJson(opt => opt.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local);
 
 builder.Services.AddMvc()
         .AddRazorPagesOptions(options =>
