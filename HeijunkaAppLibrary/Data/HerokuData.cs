@@ -146,13 +146,16 @@ namespace HeijunkaAppLibrary.Data
             string sql = @"SELECT Id, QueueId, UserLastModifiedId, ProcessId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, IsComplete, IsActive, Notes
                            FROM heijunka
                            WHERE @date = DATE(StartDate)";
+            Console.WriteLine($"sql statement: {sql}");
             List<ScheduleDataModel> scheduleData = _db.LoadData<ScheduleDataModel, dynamic>(sql, new { date }, connectionStringName);
-            Console.WriteLine(scheduleData);
-
+            
             // Get Process Data to Obtain Duration
 
             List<ProcessModel> processList = GetAllProcesses();
-
+            foreach (ProcessModel p in processList)
+            {
+                Console.Write($"{p.Name} ");
+            }
             var processId = 0;
             foreach (ScheduleDataModel s in scheduleData)
             {
@@ -168,6 +171,10 @@ namespace HeijunkaAppLibrary.Data
                         break;
                     }
                 }
+            }
+            foreach (ScheduleDataModel scheduleDataItem in scheduleData)
+            {
+                Console.WriteLine($"{scheduleDataItem.Subject} {scheduleDataItem.OrderNumber}");
             }
 
             return scheduleData;
