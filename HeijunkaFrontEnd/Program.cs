@@ -25,6 +25,13 @@ string TranslateDatabaseUrl(string connectionString)
 
     return builder.ToString();
 }
+//var connectionString = builder.Configuration.GetConnectionString("HeijunkaFrontEndContextConnection") ?? throw new InvalidOperationException("Connection string 'HeijunkaFrontEndContextConnection' not found.");
+
+//builder.Services.AddDbContext<HeijunkaFrontEndContext>(options =>
+//    options.UseSqlServer(connectionString));;
+
+//builder.Services.AddDefaultIdentity<HeijunkaUser>(options => options.SignIn.RequireConfirmedAccount = true)
+//    .AddEntityFrameworkStores<HeijunkaFrontEndContext>();;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = TranslateDatabaseUrl(builder.Configuration.GetConnectionString("DATABASE_URL"));

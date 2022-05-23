@@ -7,6 +7,19 @@
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
+
+    <!--Account Manager Page-->
+    <!--https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/security/authorization/secure-data/samples/final6 -->
+    @if (User.IsInRole("Admin") || User.IsInRole("Superuser"))
+    {
+        <li class="nav-item">
+        <form id="manage-accounts-form" class="form-inline" asp-area="Identity" asp-page="/Account/Manage/Index" asp-route-returnUrl="~/">
+            <button id="manage-accounts" type="submit" class="nav-link btn btn-link text-dark">Manage Accounts</button>
+        </form>
+    </li>        
+    }
+        
+    
     <li class="nav-item">
         <!-- <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a> -->
         <a id="manage" class="nav-link text-dark">Hello @UserManager.GetUserName(User)!</a>
@@ -17,6 +30,7 @@
             <button id="logout" type="submit" class="nav-link btn btn-link text-dark">Logout</button>
         </form>
     </li>
+
 }
 else
 {
