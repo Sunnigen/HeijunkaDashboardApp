@@ -140,14 +140,15 @@ namespace HeijunkaAppLibrary.Data
         public List<ScheduleDataModel> GetScheduleData(DateTime date)
         {
             Console.WriteLine("GetScheduleData");
-            string dateString = date.ToShortDateString();
+            string dateString = date.ToShortDateString().Replace(@"/","-");
             Console.WriteLine($"date: {dateString}");
 
             // Get List of Existing Scheduled Processes
+            //string sql = @"SELECT Id, QueueId, UserLastModifiedId, ProcessId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, IsComplete, IsActive, Notes
+            //               FROM heijunka
+            //               WHERE @dateString = TO_CHAR(DATE(StartDate), 'mm-dd-yyyy')";
             string sql = @"SELECT Id, QueueId, UserLastModifiedId, ProcessId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, IsComplete, IsActive, Notes
-                           FROM heijunka
-                           WHERE DATE(StartDate) = @dateString";
-            Console.WriteLine($"sql statement: {sql}");
+                           FROM heijunka";
             List<ScheduleDataModel> scheduleData = _db.LoadData<ScheduleDataModel, dynamic>(sql, new { dateString }, connectionStringName);
             
             // Get Process Data to Obtain Duration
