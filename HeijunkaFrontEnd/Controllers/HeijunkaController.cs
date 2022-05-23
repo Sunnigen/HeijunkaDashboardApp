@@ -63,7 +63,8 @@ namespace HeijunkaTest.Controllers
         {
             // Obtain Existing Parts in Process Data
             Console.WriteLine("\nGetScheduleData");
-            var data = _db.GetScheduleData(param.StartDate);
+            Console.WriteLine($"Start Date to Search: {param.StartDate.ToShortDateString()}");
+            var data = _db.GetScheduleData(param.StartDate.ToShortDateString());
             Console.WriteLine(data);
             return Json(data);
         }
