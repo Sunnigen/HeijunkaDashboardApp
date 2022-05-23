@@ -116,35 +116,40 @@ if (User.IsInRole("Assembler")) {
                         
            
             <!-- <ejs-button id="listAppoints" onclick="listAllActiveProcess()" content="Appointment Data"></ejs-button> -->
+            <ejs-button id="addStagingButton" onclick="addStaging()" content="Stage Process"></ejs-button>
             
         </div>
         <!-- Staging Area for Parts to Process -->
-
-        @if (User.IsInRole("Supervisor") || User.IsInRole("ProductionControl"))  {
+        
+        
+            @if (User.IsInRole("Supervisor") || User.IsInRole("ProductionControl"))  {
             <div class="treeview-container">
                 <div class="title-container">
                     <h2 class="title-text">Staging Area</h2>
                 </div>
                 <!-- Actual TreeView Widget-->
-                @(Html.EJS().TreeView("tree")
-                    .Fields(Fields => Fields.DataSource(ViewBag.DataSource)
-                        .Id("Id")
-                        .Text("Name")
-                        .Text("OrderNumber")
-                        .Selected("is_selected")
-                        .HtmlAttributes("hasAttribute")
+                <div class="content">
+                    @(Html.EJS().TreeView("tree")
+                        .Fields(Fields => Fields.DataSource(ViewBag.DataSource)
+                            .Id("Id")
+                            .Text("Name")
+                            .Text("OrderNumber")
+                            .Selected("is_selected")
+                            .HtmlAttributes("hasAttribute")
+                        )
+                        .AllowEditing(true)
+                        .AllowDragAndDrop(true)
+                        .NodeClicked("nodeClicked")
+                        .NodeDragStop("OnTreeDragStop")
+                        .NodeDragging("OnItemDrag")
+                        .NodeTemplate("#treeTemplate")
+                        .DragArea(".content-wrapper")
+                        .CssClass("treeview-external-drag")
+                        .Render()
                     )
-                    .AllowEditing(true)
-                    .AllowDragAndDrop(true)
-                    .NodeClicked("nodeClicked")
-                    .NodeDragStop("OnTreeDragStop")
-                    .NodeDragging("OnItemDrag")
-                    .NodeTemplate("#treeTemplate")
-                    .DragArea(".content-wrapper")
-                    .CssClass("treeview-external-drag")
-                    .Render()
-                )
-                <ejs-button id="addStagingButton" onclick="addStaging()" content="Stage Process"></ejs-button>
+                </div>
+
+                
 
             </div>
 
@@ -159,6 +164,7 @@ if (User.IsInRole("Assembler")) {
             )
 
         }
+        
     </div>
 </div>
 
@@ -1175,6 +1181,11 @@ if (User.IsInRole("Assembler")) {
     .custom-event-editor td {
         padding: 7px;
         padding-right: 16px;
+    }
+
+    .treeview-container .content{
+            height: 700px;
+            overflow: auto;
     }
 
     .treeview-external-drag #waiting {
