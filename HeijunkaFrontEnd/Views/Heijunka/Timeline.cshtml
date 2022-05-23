@@ -496,8 +496,8 @@ if (User.IsInRole("Assembler")) {
     }
 
     function onEventRendered(args) { 
-        //console.log("onEventRendered");
-        //console.log(args);        
+        console.log("onEventRendered");
+        console.log(args);        
         // insertLog(`${@Json.Serialize(UserManager.GetUserName(User))} scheduled a new ${args.data.Name} at ${args.data.StartTime}`);
         var scheduleObj = document.querySelector('.e-schedule').ej2_instances[0];
         if (args.data.EndTime < scheduleObj.selectedDate) {

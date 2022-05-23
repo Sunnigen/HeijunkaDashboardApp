@@ -62,17 +62,22 @@ namespace HeijunkaTest.Controllers
         public ActionResult GetScheduleData([FromBody] GetParams param)
         {
             // Obtain Existing Parts in Process Data
+            Console.WriteLine("\nGetScheduleData");
             var data = _db.GetScheduleData(param.StartDate);
+            Console.WriteLine(data);
             return Json(data);
         }
 
         [HttpPost]
         public IActionResult UpdateScheduleData([FromBody] EditParams param)
         {
+            Console.WriteLine("\nUpdateScheduleData");
             if (param.action == "insert" || (param.action == "batch" && param.added.Count != 0)) // this block of code will execute while inserting the appointments
             {
                 var value = (param.action == "insert") ? param.value : param.added[0];
                 _db.InsertScheduleData(value);
+                Console.WriteLine("Insert");
+                Console.WriteLine(value);
                 return Json(value);
             }
             if (param.action == "update" || (param.action == "batch" && param.changed.Count != 0)) // this block of code will execute while updating the appointment
@@ -83,6 +88,8 @@ namespace HeijunkaTest.Controllers
                 {
                     _db.UpdateScheduleData(value);
                 };
+                Console.WriteLine("Update");
+                Console.WriteLine(value);
                 return Json(value);
             }
 
@@ -95,6 +102,8 @@ namespace HeijunkaTest.Controllers
                 {
                     int data = Int32.Parse(param.key);
                     _db.DeleteScheduleData(data);
+                    Console.WriteLine("Remove");
+                    Console.WriteLine(value);
                     return Json(param);
                 }
                 else

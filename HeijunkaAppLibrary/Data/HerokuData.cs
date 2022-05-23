@@ -62,6 +62,7 @@ namespace HeijunkaAppLibrary.Data
 
         public void UpdateScheduleData(SFScheduleDataModel data)
         {
+            Console.WriteLine("\nUpdateScheduleData");
             int id = data.Id;
             int userLastModifiedId = 2;
             int processId = GetProcessByName(data.Subject).Id;
@@ -101,12 +102,15 @@ namespace HeijunkaAppLibrary.Data
                                IsActive = @isActive, 
                                Notes = @notes
                            where Id = @id";
+            Console.WriteLine(sql);
             _db.SaveData(sql, new { queueId, userLastModifiedId, processId, orderNumber, lastModifiedDate, startTime, isComplete, isActive, notes, id }, connectionStringName);
 
         }
 
         public void InsertScheduleData(SFScheduleDataModel data)
         {
+            Console.WriteLine("\nInsertScheduleData");
+            Console.WriteLine(data);
             int userLastModifiedId = 1;
             int processId = GetProcessByName(data.Subject).Id;
             int queueId = data.QueueId;
@@ -135,6 +139,7 @@ namespace HeijunkaAppLibrary.Data
 
         public List<ScheduleDataModel> GetScheduleData(DateTime date)
         {
+            Console.WriteLine("GetScheduleData");
             string dateString = date.ToShortDateString();
 
             // Get List of Existing Scheduled Processes
@@ -142,6 +147,7 @@ namespace HeijunkaAppLibrary.Data
                            FROM heijunka
                            WHERE @date = DATE(StartDate)";
             List<ScheduleDataModel> scheduleData = _db.LoadData<ScheduleDataModel, dynamic>(sql, new { date }, connectionStringName);
+            Console.WriteLine(scheduleData);
 
             // Get Process Data to Obtain Duration
 
