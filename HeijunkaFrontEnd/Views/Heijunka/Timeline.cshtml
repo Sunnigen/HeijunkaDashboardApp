@@ -403,15 +403,21 @@ if (User.IsInRole("Assembler")) {
     function onActionBegin(event) {
 
         // Check for Overlapping Events
-
-         if (event.requestType === 'eventCreate' || event.requestType === 'eventChange') {
+        console.log("onActionBegin");
+        console.log(event);
+        if (event.requestType === 'eventCreate' || event.requestType === 'eventChange') {
                 var data;
+                console.log("data");
+                
                 if (event.requestType === 'eventCreate') {
                     data = event.data[0];
                 } else if (event.requestType === 'eventChange') {
                     data = event.data;
                 }
+                console.log(data);
+                // Cancel Event if it Overlaps with Another Event
                 if (!this.isSlotAvailable(data)) {
+                    console.log("cancelling event");
                     event.cancel = true;
                 }
         }
@@ -467,6 +473,8 @@ if (User.IsInRole("Assembler")) {
     }
 
     function scheduleProcess(args) {
+        console.log("scheduleProcess");
+        console.log(args);
         var scheduleObj = document.getElementById('schedule').ej2_instances[0];
         var scheduleEventsData = scheduleObj.eventsData;
         var newProcess = {
@@ -479,7 +487,7 @@ if (User.IsInRole("Assembler")) {
             EndTime: args.EndTime
         }
         
-        //console.log(`scheduleProcess\n\tId: ${newProcess.Id}, QueueId: ${newProcess.QueueId}, Subject: ${newProcess.Subject}, StartTime: ${newProcess.StartTime}, EndTime: ${newProcess.EndTime}`);
+        console.log(`scheduleProcess\n\tId: ${newProcess.Id}, QueueId: ${newProcess.QueueId}, Subject: ${newProcess.Subject}, StartTime: ${newProcess.StartTime}, EndTime: ${newProcess.EndTime}`);
         scheduleObj.addEvent(newProcess);
         //var newProcess = {Id: scheduleEventsData.length + 1, QueueId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
         insertLog(`${@Json.Serialize(UserManager.GetUserName(User))} scheduled a new ${args.Name} at ${args.StartTime.toLocaleDateString()}`);
@@ -496,8 +504,6 @@ if (User.IsInRole("Assembler")) {
     }
 
     function onEventRendered(args) { 
-        console.log("onEventRendered");
-        console.log(args);        
         // insertLog(`${@Json.Serialize(UserManager.GetUserName(User))} scheduled a new ${args.data.Name} at ${args.data.StartTime}`);
         var scheduleObj = document.querySelector('.e-schedule').ej2_instances[0];
         if (args.data.EndTime < scheduleObj.selectedDate) {
@@ -803,7 +809,7 @@ if (User.IsInRole("Assembler")) {
     }
 
     // Generate a random string with the format "X000000"
-    function GetRandomColor() { return "#" + Math.floor(Math.random()*16777215).toString(16); }
+    // function GetRandomColor() { return "#" + Math.floor(Math.random()*16777215).toString(16); }
 
     function GetQueues() {
         var ajax = new ej.base.Ajax('/Heijunka/GetQueues', 'Get', false);

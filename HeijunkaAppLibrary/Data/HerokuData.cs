@@ -89,8 +89,6 @@ namespace HeijunkaAppLibrary.Data
                 isActive = true;
             }
 
-
-
             string sql = @"update heijunka
                            set QueueId = @queueId, 
                                UserLastModifiedId = @userLastModifiedId,
@@ -139,9 +137,9 @@ namespace HeijunkaAppLibrary.Data
 
         public List<ScheduleDataModel> GetScheduleData(DateTime date)
         {
-            Console.WriteLine("GetScheduleData");
+            //Console.WriteLine("GetScheduleData");
             string dateString = date.ToShortDateString().Replace(@"/","-");
-            Console.WriteLine($"date: {dateString}");
+            //Console.WriteLine($"date: {dateString}");
 
             // Get List of Existing Scheduled Processes
             //string sql = @"SELECT Id, QueueId, UserLastModifiedId, ProcessId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, IsComplete, IsActive, Notes
@@ -171,10 +169,10 @@ namespace HeijunkaAppLibrary.Data
                     }
                 }
             }
-            foreach (ScheduleDataModel scheduleDataItem in scheduleData)
-            {
-                Console.WriteLine($"{scheduleDataItem.Subject} {scheduleDataItem.OrderNumber}");
-            }
+            //foreach (ScheduleDataModel scheduleDataItem in scheduWeData)
+            //{
+            //    Console.WriteLine($"{scheduleDataItem.Subject} {scheduleDataItem.OrderNumber}");
+            //}
 
             return scheduleData;
         }

@@ -62,10 +62,10 @@ namespace HeijunkaTest.Controllers
         public ActionResult GetScheduleData([FromBody] GetParams param)
         {
             // Obtain Existing Parts in Process Data
-            Console.WriteLine("\nGetScheduleData");
-            Console.WriteLine($"Start Date to Search: {param.StartDate.ToShortDateString()}");
+            //Console.WriteLine("\nGetScheduleData");
+            //Console.WriteLine($"Start Date to Search: {param.StartDate.ToShortDateString()}");
             var data = _db.GetScheduleData(param.StartDate);
-            Console.WriteLine(data);
+            //Console.WriteLine(data);
             return Json(data);
         }
 
