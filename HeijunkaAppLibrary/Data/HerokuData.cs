@@ -146,7 +146,7 @@ namespace HeijunkaAppLibrary.Data
             // Get List of Existing Scheduled Processes
             string sql = @"SELECT Id, QueueId, UserLastModifiedId, ProcessId, OrderNumber, CreatedDate, LastModifiedDate, StartDate, IsComplete, IsActive, Notes
                            FROM heijunka
-                           WHERE DATE(StartDate) = @date";
+                           WHERE DATE(StartDate) = @dateString";
             Console.WriteLine($"sql statement: {sql}");
             List<ScheduleDataModel> scheduleData = _db.LoadData<ScheduleDataModel, dynamic>(sql, new { dateString }, connectionStringName);
             
