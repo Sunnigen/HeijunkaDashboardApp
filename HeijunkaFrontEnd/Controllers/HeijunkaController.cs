@@ -49,6 +49,7 @@ namespace HeijunkaTest.Controllers
         {
             // Obtain Existing History Data
             var data = _db.GetHistoryData();
+            data.Reverse();
             return Json(data);
         }
 

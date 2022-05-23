@@ -116,7 +116,8 @@ if (User.IsInRole("Assembler")) {
                         
            
             <!-- <ejs-button id="listAppoints" onclick="listAllActiveProcess()" content="Appointment Data"></ejs-button> -->
-            <ejs-button id="addStagingButton" onclick="addStaging()" content="Stage Process"></ejs-button>
+            <ejs-button id="StageManyParts" onclick="randomStaging()" content="Stage Many Processes!"></ejs-button>
+            <ejs-button id="ScheduleStaging" onclick="scheduleStaging()" content="Digital Heijunka!"></ejs-button>
             
         </div>
         <!-- Staging Area for Parts to Process -->
@@ -148,9 +149,6 @@ if (User.IsInRole("Assembler")) {
                         .Render()
                     )
                 </div>
-
-                
-
             </div>
 
 
@@ -750,39 +748,9 @@ if (User.IsInRole("Assembler")) {
         }
     }
 
-    function removeQueue() {
-        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
-        var scheduleResources = scheduleObj.resources[0].dataSource;
-
-        if (scheduleResources.length > 0) {
-            scheduleObj.removeResource(scheduleResources.length + 1,'Owners');
-            var q = scheduleResources.pop();
-            console.log("Removing a queue:");
-            console.log(q);
-
-            insertLog(`${@Json.Serialize(UserManager.GetUserName(User))} removed Queue: ${q.QueueName}`);
-            
-        }
-    }
-
-    function addQueuetoScheduler(collection) {
-
-        // Add Queue to Scheduler and Update Scheduler Queues
-        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
-        var scheduleResources = scheduleObj.resources[0].dataSource;
-        scheduleObj.addResource(collection,'Owners', scheduleResources.length + 1);
-        scheduleResources.push(collection);
-        
-        // Update Event Panel
-        var label = document.getElementById('queue-count-label');
-        label.innerHTML = `There are ${scheduleResources.length} Queues at the moment!`;
-
-    }
-
     function addAppointment() {
         var scheduleObj = document.getElementById('schedule').ej2_instances[0];
         var scheduleResources = scheduleObj.resources[0].dataSource;  // current queues in place
-
         var scheduleEventsData = scheduleObj.eventsData;   // current appointments in place
 
         var startDate = new Date();
@@ -797,23 +765,69 @@ if (User.IsInRole("Assembler")) {
         //scheduleEventsData.push(newProcess);
         //scheduleObj.refreshLayout();
     }
+    // ************************** STAGING AREA ***************************************
+    function GenerateOrderNumber() { 
+        return Math.floor(Math.random()*16777215).toString(10); 
+    }
 
-    function addStaging() {
+    function randomInt(min, max) { 
+        return Math.floor(Math.random() * (max - min + 1) + min); 
+    }
+
+    function scheduleStaging() {
+        console.log("scheduleStaging");
+        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+        var scheduleResources = scheduleObj.resources[0].dataSource; // current queues in place
+        //console.log("queues:");
+        // console.log(scheduleResources);
+        var scheduleEventsData = scheduleObj.eventsData;   // current appointments in place
+        console.log(scheduleEventsData);
+    }
+
+    function randomStaging() {
+        console.log("randomStaging");
+        // 1. Get List of Available Parts
+        var parts = @Json.Serialize(ViewBag.Parts);
         var treeView = document.getElementById('tree').ej2_instances[0];
+        var treeViewdata = treeView.fields.dataSource;
+        console.log("treeViewdata");
+        console.log(treeViewdata);
 
-        var content = {
-            Id: treeView.fields.dataSource.length+ 1,
-            Name: "Shear Web",
-            OrderNumber: "321421442"
+        for (let i = 0; i < randomInt(10, 20); i++) {
+
+            // 2. Randomly Choose a Part
+            var index = randomInt(0, parts.length - 1);
+            console.log(index);
+            var partNumber = parts[index].Name;
+            console.log(partNumber);
+
+            // 3. Generate a Random Order Number
+            var orderNumber = GenerateOrderNumber();
+
+            stageNewPart(partNumber, orderNumber);
         }
+
+    }
+
+    function clearStagingArea() {
+        var treeView = document.getElementById('tree').ej2_instances[0];
+        treeView.removeNodes([treeObj.element.querySelector('.e-list-parent')]);
+    }
+
+    function stageNewPart(partNumber, orderNumber) {
+        var treeView = document.getElementById('tree').ej2_instances[0];
+        var treeViewdata = treeView.fields.dataSource;
+        var content = {
+            Id: treeView.fields.dataSource.length + 1,
+            Name: partNumber,
+            OrderNumber: orderNumber
+        };
 
         //treeView.addNodes(content);
         treeView.fields.dataSource.push(content);
         treeView.refresh();
-        //console.log(treeView.fields.dataSource);
-
-
     }
+    // ******************************** Queues **************************************
 
     // Generate a random string with the format "X000000"
     // function GetRandomColor() { return "#" + Math.floor(Math.random()*16777215).toString(16); }
@@ -838,27 +852,33 @@ if (User.IsInRole("Assembler")) {
         )
     }
 
-    function schedulerDialogPopup(positionData, data) {
+    function removeQueue() {
+        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+        var scheduleResources = scheduleObj.resources[0].dataSource;
 
-        if (data) {
-            var dialog = document.getElementById("modifyQueueDialog").ej2_instances[0];
+        if (scheduleResources.length > 0) {
+            scheduleObj.removeResource(scheduleResources.length + 1,'Owners');
+            var q = scheduleResources.pop();
+            console.log("Removing a queue:");
+            console.log(q);
 
-            // Open Dialog to Create/Modify Queue
-            dialog.header = `Modify ${data.QueueName}`;
-            var queueName = document.getElementById("ModifyQueueName");
-            var queueDescription = document.getElementById("ModifyQueueDescription");
-            var queueSwitch = document.getElementById("ModifyQueueSwitch").ej2_instances[0];
-            queueName.value = data.QueueName;
-            queueDescription.value = data.QueueDescription;
-            queueSwitch.checked = true;
-            queueSwitch.properties.checked = true;
-            dialog.QueueId = data.QueueId;
-        } else {
-            // New Queue Dialog
-            var dialog = document.getElementById("schedulerDialog").ej2_instances[0];
+            insertLog(`${@Json.Serialize(UserManager.GetUserName(User))} removed Queue: ${q.QueueName}`);
+            
         }
-        dialog.position = positionData;  // save position from original mouse click event
-        dialog.show();
+    }
+
+    function addQueuetoScheduler(collection) {
+
+        // Add Queue to Scheduler and Update Scheduler Queues
+        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+        var scheduleResources = scheduleObj.resources[0].dataSource;
+        scheduleObj.addResource(collection,'Owners', scheduleResources.length + 1);
+        scheduleResources.push(collection);
+        
+        // Update Event Panel
+        //var label = document.getElementById('queue-count-label');
+        //label.innerHTML = `There are ${scheduleResources.length} Queues at the moment!`;
+
     }
 
     function modifyQueueDialogClose(args) {
@@ -866,120 +886,6 @@ if (User.IsInRole("Assembler")) {
         var dialog = document.getElementById("modifyQueueDialog").ej2_instances[0];
         dialog.hide();
         resetRightClickData();
-    }
-
-    function schedulerDialogClose() {
-        // Close Dialog to Create/Modify Queue/Appointment
-        var dialog = document.getElementById("schedulerDialog").ej2_instances[0];
-        dialog.hide();
-        resetRightClickData();
-    }
-
-    function confirmSchedulerSelection(args) {
-        //console.log("confirmSchedulerSelection");
-        //console.log(args);
-        scheduleObj = scheduleObj = document.getElementById('schedule').ej2_instances[0];
-
-        var selection = args.item.properties.text;
-        var positionData = {X: args.event.pageX - 125, Y: args.event.pageY - 75};
-
-        //console.log(`Selection: ${selection}`);
-        //console.log("rightClickResource:");
-        //console.log(rightClickResource);
-        //console.log("rightClickCellData:");
-        //console.log(rightClickCellData);
-
-        if (selection === "Schedule New Part") {
-            // console.log("Schedule New Part");
-            var eventData = {
-                startTime: rightClickCellData.startTime,
-                queueId: rightClickResource.resourceData.Id,
-                endTime: rightClickCellData.startTime,
-            }
-            scheduleObj.openEditor(eventData, "Add");
-        } else if (selection === "Modify Part") {
-            // console.log("Modify Part");
-            //scheduleObj.modifyEventDialog(positionData);
-            resetRightClickData();
-        } else if (selection === "Delete Part") {
-            // console.log("Delete Part");
-            const data = parseInt(rightClickAppointmentId);
-            scheduleObj.deleteEvent(data);
-        } else if (selection === "Add New Queue") {
-            // console.log("Add New Queue");
-            insertQueueDialog(positionData);
-        } else if (selection === "Modify Queue") {
-            // console.log("Modify Queue");
-            modifyQueueDialog(positionData);
-        } else {
-            resetRightClickData();
-        }
-    }
-
-    function resetRightClickData() {
-        rightClickAppointmentId = null;
-        rightClickCellData = null;
-        rightClickResource = null;
-        
-    }
-
-    function onSchedulerRightClick(args) {
-        // Check if User has Authorization 
-        if (@Json.Serialize(User.IsInRole("ProductionControl")) || @Json.Serialize(User.IsInRole("Supervisor"))) {
-
-        } else {
-            args.cancel = true;
-        }
-
-
-        // Before Popup Open, Define which Menu Items should Exist
-        console.log("onSchedulerRightClick | cellData");
-        var scheduleObj = document.querySelector(".e-schedule").ej2_instances[0];
-        var schedulerMenu = document.getElementById("schedulerMenu").ej2_instances[0];
-        var cellData = scheduleObj.getCellDetails(args.event.target);
-        var items = @Json.Serialize(ViewBag.menuItems);
-
-        // No CellData if an Appointment is Targetted
-        if (!cellData) {
-            var uiType = args.event.target.className;
-
-            // Appointment is Selected
-            if (uiType === "e-time" || uiType === "e-subject") {
-                items.splice(0, 1);
-                const arr = args.event.srcElement.offsetParent.dataset.id.split("_");
-                var idAppointment = arr[1];
-                rightClickAppointmentId = idAppointment;
-                var groupIndex = event.srcElement.offsetParent.dataset.groupIndex;
-                var resourceDetails = scheduleObj.getResourcesByIndex(groupIndex);
-                cellData = {groupIndex: groupIndex, labelElement: event.path[9].children[0].children[0].children[0].children[0].children[0].children[0].children[groupIndex]};
-
-            } else {
-                // Queue Row Left Column is Selected
-                items.splice(0, 3);
-                // Group Index appears depending on which object within Queue Column is Selected
-                var groupIndex = event.srcElement.offsetParent.dataset.groupIndex;
-                if (!groupIndex) {
-                    groupIndex = event.srcElement.dataset.groupIndex;
-                }
-                
-                var resourceDetails = scheduleObj.getResourcesByIndex(groupIndex);
-                cellData = {groupIndex: groupIndex, labelElement: event.srcElement};
-            }
-            
-        } else {
-            var items = @Json.Serialize(ViewBag.menuItems);
-            items.splice(1, 2);
-            var resourceDetails = scheduleObj.getResourcesByIndex(cellData.groupIndex);
-            //console.log(event.path[6].children[0].children[0].children[0].children[0].children[0].children[cellData.groupIndex]);
-            //console.log(event.path[6].children[0].children[0].children[0].children[0].children[0].children[0].children[cellData.groupIndex]);
-            cellData["labelElement"] = event.path[6].children[0].children[0].children[0].children[0].children[0].children[0].children[cellData.groupIndex];
-        }
-        schedulerMenu.items = items;
-
-        rightClickCellData = cellData;
-        rightClickResource = resourceDetails;
-        console.log(rightClickCellData);
-        console.log(rightClickResource);
     }
 
     function modifyQueueDialog(positionData) {
@@ -1096,16 +1002,159 @@ if (User.IsInRole("Assembler")) {
         )
     }
 
+    // ******************************************************************************
+
+    function schedulerDialogPopup(positionData, data) {
+
+        if (data) {
+            var dialog = document.getElementById("modifyQueueDialog").ej2_instances[0];
+
+            // Open Dialog to Create/Modify Queue
+            dialog.header = `Modify ${data.QueueName}`;
+            var queueName = document.getElementById("ModifyQueueName");
+            var queueDescription = document.getElementById("ModifyQueueDescription");
+            var queueSwitch = document.getElementById("ModifyQueueSwitch").ej2_instances[0];
+            queueName.value = data.QueueName;
+            queueDescription.value = data.QueueDescription;
+            queueSwitch.checked = true;
+            queueSwitch.properties.checked = true;
+            dialog.QueueId = data.QueueId;
+        } else {
+            // New Queue Dialog
+            var dialog = document.getElementById("schedulerDialog").ej2_instances[0];
+        }
+        dialog.position = positionData;  // save position from original mouse click event
+        dialog.show();
+    }
+
+    
+
+    function schedulerDialogClose() {
+        // Close Dialog to Create/Modify Queue/Appointment
+        var dialog = document.getElementById("schedulerDialog").ej2_instances[0];
+        dialog.hide();
+        resetRightClickData();
+    }
+
+    function confirmSchedulerSelection(args) {
+        //console.log("confirmSchedulerSelection");
+        //console.log(args);
+        scheduleObj = scheduleObj = document.getElementById('schedule').ej2_instances[0];
+
+        var selection = args.item.properties.text;
+        var positionData = {X: args.event.pageX - 125, Y: args.event.pageY - 75};
+
+        //console.log(`Selection: ${selection}`);
+        //console.log("rightClickResource:");
+        //console.log(rightClickResource);
+        //console.log("rightClickCellData:");
+        //console.log(rightClickCellData);
+
+        if (selection === "Schedule New Part") {
+            // console.log("Schedule New Part");
+            var eventData = {
+                startTime: rightClickCellData.startTime,
+                queueId: rightClickResource.resourceData.Id,
+                endTime: rightClickCellData.startTime,
+            }
+            scheduleObj.openEditor(eventData, "Add");
+        } else if (selection === "Modify Part") {
+            // console.log("Modify Part");
+            //scheduleObj.modifyEventDialog(positionData);
+            resetRightClickData();
+        } else if (selection === "Delete Part") {
+            // console.log("Delete Part");
+            const data = parseInt(rightClickAppointmentId);
+            scheduleObj.deleteEvent(data);
+        } else if (selection === "Add New Queue") {
+            // console.log("Add New Queue");
+            insertQueueDialog(positionData);
+        } else if (selection === "Modify Queue") {
+            // console.log("Modify Queue");
+            modifyQueueDialog(positionData);
+        } else {
+            resetRightClickData();
+        }
+    }
+
+    function resetRightClickData() {
+        rightClickAppointmentId = null;
+        rightClickCellData = null;
+        rightClickResource = null;
+    }
+
+    function onSchedulerRightClick(args) {
+        // Check if User has Authorization 
+        if (@Json.Serialize(User.IsInRole("ProductionControl")) || @Json.Serialize(User.IsInRole("Supervisor"))) {
+
+        } else {
+            args.cancel = true;
+        }
+
+
+        // Before Popup Open, Define which Menu Items should Exist
+        console.log("onSchedulerRightClick | cellData");
+        var scheduleObj = document.querySelector(".e-schedule").ej2_instances[0];
+        var schedulerMenu = document.getElementById("schedulerMenu").ej2_instances[0];
+        var cellData = scheduleObj.getCellDetails(args.event.target);
+        var items = @Json.Serialize(ViewBag.menuItems);
+
+        // No CellData if an Appointment is Targetted
+        if (!cellData) {
+            var uiType = args.event.target.className;
+
+            // Appointment is Selected
+            if (uiType === "e-time" || uiType === "e-subject") {
+                items.splice(0, 1);
+                const arr = args.event.srcElement.offsetParent.dataset.id.split("_");
+                var idAppointment = arr[1];
+                rightClickAppointmentId = idAppointment;
+                var groupIndex = event.srcElement.offsetParent.dataset.groupIndex;
+                var resourceDetails = scheduleObj.getResourcesByIndex(groupIndex);
+                cellData = {groupIndex: groupIndex, labelElement: event.path[9].children[0].children[0].children[0].children[0].children[0].children[0].children[groupIndex]};
+
+            } else {
+                // Queue Row Left Column is Selected
+                items.splice(0, 3);
+                // Group Index appears depending on which object within Queue Column is Selected
+                var groupIndex = event.srcElement.offsetParent.dataset.groupIndex;
+                if (!groupIndex) {
+                    groupIndex = event.srcElement.dataset.groupIndex;
+                }
+                
+                var resourceDetails = scheduleObj.getResourcesByIndex(groupIndex);
+                cellData = {groupIndex: groupIndex, labelElement: event.srcElement};
+            }
+            
+        } else {
+            var items = @Json.Serialize(ViewBag.menuItems);
+            items.splice(1, 2);
+            var resourceDetails = scheduleObj.getResourcesByIndex(cellData.groupIndex);
+            //console.log(event.path[6].children[0].children[0].children[0].children[0].children[0].children[cellData.groupIndex]);
+            //console.log(event.path[6].children[0].children[0].children[0].children[0].children[0].children[0].children[cellData.groupIndex]);
+            cellData["labelElement"] = event.path[6].children[0].children[0].children[0].children[0].children[0].children[0].children[cellData.groupIndex];
+        }
+        schedulerMenu.items = items;
+
+        rightClickCellData = cellData;
+        rightClickResource = resourceDetails;
+        console.log(rightClickCellData);
+        console.log(rightClickResource);
+    }
+
+    
+
     function toolbarClicked(args) {
         if (args.item.tooltipText == "Menu") {
             sidebarObj.toggle();
         }
     }
+
     function insertLog(data_entry) {
         try {
             var historyLog = document.getElementById("history").ej2_instances[0]; 
             data = {DataEntry: data_entry};
-            historyLog.addItem([data]);
+            // historyLog.addItem([data]);
         } catch (e) {
             if (e instanceof TypeError) {
                 // do nothing
@@ -1127,7 +1176,20 @@ if (User.IsInRole("Assembler")) {
                console.log(`historylog: ${value}`);
            }
        )
+       console.log("historyLog");
+       console.log(historyLog.localData);
+
+       updateHistory(data);
     }
+
+    async function updateHistory(data) {
+        // Sort All Data Based on their Id - Descending
+        console.log("\n\nSort All Data Based on their Id - Descending");
+        var listObj = document.getElementById("history").ej2_instances[0];
+        var local_data = listObj.localData;
+        await listObj.dataSource.unshift(data);
+    }
+
 </script>
 
 <style>
