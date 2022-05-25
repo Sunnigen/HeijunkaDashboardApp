@@ -116,8 +116,18 @@ if (User.IsInRole("Assembler")) {
                         
            
             <!-- <ejs-button id="listAppoints" onclick="listAllActiveProcess()" content="Appointment Data"></ejs-button> -->
-            <ejs-button id="StageManyParts" onclick="randomStaging()" content="Stage Many Processes!"></ejs-button>
-            <ejs-button id="ScheduleStaging" onclick="scheduleStaging()" content="Digital Heijunka!"></ejs-button>
+            @if (User.IsInRole("ProductionControl"))
+            {
+                <ejs-button id="ClearStaging" onclick="clearStagingArea()" content="Clear Staging Area"></ejs-button>
+                <ejs-button id="ScheduleStaging" onclick="scheduleStaging()" content="Digital Heijunka!"></ejs-button>
+            }
+
+            @if (User.IsInRole("Superuser") || User.IsInRole("Admin"))
+            {
+                <ejs-button id="StageMany" onclick="randomStaging()" content="Stage Many Processes"></ejs-button>
+                <ejs-button id="DeleteToday" onclick="deleteAllProcesses()" content="Delete Today's Processes!"></ejs-button>
+            }
+            
             
         </div>
         <!-- Staging Area for Parts to Process -->
@@ -131,13 +141,13 @@ if (User.IsInRole("Assembler")) {
                 <!-- Actual TreeView Widget-->
                 <div class="content">
                     @(Html.EJS().TreeView("tree")
-                        .Fields(Fields => Fields.DataSource(ViewBag.DataSource)
+                        /*.Fields(Fields => Fields.DataSource(ViewBag.DataSource)
                             .Id("Id")
                             .Text("Name")
                             .Text("OrderNumber")
                             .Selected("is_selected")
                             .HtmlAttributes("hasAttribute")
-                        )
+                        )*/
                         .AllowEditing(true)
                         .AllowDragAndDrop(true)
                         .NodeClicked("nodeClicked")
@@ -353,6 +363,9 @@ if (User.IsInRole("Assembler")) {
             //treeObj.beginEdit(nodeId);
         }
         else if (args.item.text == "Remove Part") {
+            console.log("targetNodeId");
+            console.log(targetNodeId);
+            console.log(typeof(targetNodeId));
             treeObj.removeNodes([targetNodeId]);
             console.log(`targetNodeId: ${targetNodeId}   ${treeObj.fields.dataSource[targetNodeId - 1]}`);
             var removed = treeObj.fields.dataSource.splice(targetNodeId - 1, 1);
@@ -408,18 +421,18 @@ if (User.IsInRole("Assembler")) {
     function onActionBegin(event) {
 
         // Check for Overlapping Events
-        console.log("onActionBegin");
-        console.log(event);
+        // console.log("onActionBegin");
+        // console.log(event);
         if (event.requestType === 'eventCreate' || event.requestType === 'eventChange') {
                 var data;
-                console.log("data");
+                // console.log("data");
                 
                 if (event.requestType === 'eventCreate') {
                     data = event.data[0];
                 } else if (event.requestType === 'eventChange') {
                     data = event.data;
                 }
-                console.log(data);
+                // console.log(data);
                 // Cancel Event if it Overlaps with Another Event
                 if (!this.isSlotAvailable(data)) {
                     console.log("cancelling event");
@@ -766,171 +779,21 @@ if (User.IsInRole("Assembler")) {
         //scheduleEventsData.push(newProcess);
         //scheduleObj.refreshLayout();
     }
-    // ************************** STAGING AREA ***************************************
-    function GenerateOrderNumber() { 
-        return Math.floor(Math.random()*16777215).toString(10); 
-    }
+    // ************************** SUPERUSER/ADMIN COMMANDS ***************************************
+    function deleteAllProcesses() { 
 
-    function randomInt(min, max) { 
-        return Math.floor(Math.random() * (max - min + 1) + min); 
-    }
-
-    function scheduleAppointment(appointment) {
+        // DANGER! This will delete all events for "today"
+        console.log("*-* DELETING THE FOLLOWING PROCESSES *-*");
         var scheduleObj = document.getElementById('schedule').ej2_instances[0];
-        var scheduleResources = scheduleObj.resources[0].dataSource;  // current queues in place
-        var scheduleEventsData = scheduleObj.eventsData;   // current appointments in place
-
-        /*var appointment = {Id: scheduleEventsData.length + 1, 
-            QueueId: scheduleResources.length, 
-            Subject: "Drilling (120) fasteners", 
-            StartTime: startDate, 
-            EndTime: endDate}
-        */
-        appointment["Id"] = scheduleEventsData.length + 1;
-        
-
-        scheduleObj.addEvent(appointment);
-        //scheduleEventsData.push(newProcess);
-        //scheduleObj.refreshLayout();
-    }
-
-    function scheduleStaging() {
-        console.log("scheduleStaging");
-        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
-        var scheduleResources = scheduleObj.resources[0].dataSource; // current queues in place
-
-        //console.log("data");
-
-        //const appDate = new Date(args.data.StartDate).getTime();
-        //const completeDate = new Date(args.data.EndTime).getTime();
-        //const now = Date.now();
-        // console.log(scheduleObj.resources[0]);
         var scheduleEventsData = scheduleObj.eventsData;   // current appointments in place
         var curr_data = scheduleEventsData.filter(function(item) {
           return new Date(item.StartDate).getTime() >= new Date().setHours(0, 0, 0, 0);
         });
-        //console.log("curr_data");
-        //console.log(curr_data);
-
-        // Get Latest time for each Queue
-        //var queueCount = scheduleResources.length + 1;
-
-        const queueTimes = [];
-        for (let i = 0; i < curr_data.length; i++) {
-            var curr_appointment = curr_data[i];
-            var qInd = curr_appointment.QueueId - 1;
-            // Check if Queue Index is Empty
-            //console.log("queueTimes[qInd]");
-            //console.log(queueTimes[qInd]);
-            //console.log("qInd");
-            //console.log(qInd);
-            if (queueTimes[qInd] == null) {
-                queueTimes[qInd] = curr_appointment;
-            } else {  // Else compare End Dates and Store Latest
-                //console.log("Else compare End Dates and Store Latest");
-                //console.log(queueTimes[i]);
-                //console.log(curr_appointment.EndDate);
-                if (new Date(queueTimes[qInd].EndDate).getTime() < new Date(curr_appointment.EndDate).getTime()) {
-                    queueTimes[qInd] = curr_appointment;
-                }
-            }
-        }
-
-        // Current Data Queue
-        console.log("Current Data Queue");
-        for (let i = 0; i < queueTimes.length; i++) {
-            console.log(queueTimes[i]);
-        }
-
-        // Store Latest Appointment Data for each Queue
-        var treeObj = document.getElementById('tree').ej2_instances[0];
-        var treeViewdata = treeObj.fields.dataSource;
-        console.log("treeViewdata");
-        console.log(treeViewdata);
-
-        /*
-        // Find PartModel and Obtain Duration
         
-        //console.log(partsList);
-        var duration = 0;
-        for (const p of partsList) {
-            //console.log(` ${p.Id} ${p.Name} ${p.Duration} ${p}`);
-            if (p.Name === partNameString) {
-                duration = p.Duration;
-                //console.log(`Scheduling part name: ${p.Name}  duration: ${p.Duration}`);
-                break;
-            }
+        for (var event of curr_data) {
+            console.log(event);
+            scheduleObj.deleteEvent(event);
         }
-        */
-
-        // Bad Deep Copy
-        var treeCopyArr = {
-            dummyVal: "dummyVal"
-        };
-
-        for (const a of treeViewdata) {
-            tree
-        }
-
-        // Begin Scheduling All Appointments from Staging Area
-        console.log("Begin Scheduling All Appointments from Staging Area");
-        var partsList = @Json.Serialize(ViewBag.Parts);
-        // var treeCopyArr = @Json.Serialize(treeViewdata);  // deep copy
-
-        console.log("treeCopyArr");
-        console.log(treeCopyArr);
-        
-        for (const appNode of treeCopyArr) {
-            console.log(appNode);
-
-
-            // Look for Earliest Start Date, by Looking at the End Dates
-            var startDate = queueTimes[0].EndDate;
-            var qId = 0;
-            for (let i = 1; i < queueTimes.length; i++) {
-                if (startDate > queueTimes[i].EndDate) {
-                    startDate = queueTimes[i].EndDate;
-                    qId = i;
-                    console.log(`New start date: ${startDate}`);
-                    console.log(`New queue: ${qId}`);
-                }
-            }
-
-            // Obtain Duration from Parts List
-            for (const p of partsList) {
-                if (p.Name === appNode.Name) {
-                    duration = p.Duration;
-                    console.log(`Found name: ${p.Name}  duration: ${p.Duration}`);
-                    break;
-                }
-            }
-
-            // Calculate new End Date
-            var endDate = new Date(startDate.getTime() + duration*60000);
-            console.log(`end date:${endDate}`);
-
-            // Find Earliest StartTime, End Date and Queue
-
-            // Add Necessary Schedule Data
-            appNode["QueueId"] = qId;
-            appNode["Subject"] = appNode["Name"];
-            appNode["StartTime"] = startDate;
-            appNode["EndTime"] = endDate;
-
-            console.log("Scheduling new appointment:");
-            console.log(appNode);
-
-            // Schedule Appointment
-            scheduleAppointment(appNode);
-
-            // Update QueueTimes
-            queueTimes[qId] = appNode;
-
-            // Finally, Remove from TreeView Obj
-            // removes single tree node of id '6' 
-            treeObj.removeNodes([appNode.Id]); 
-        }
-        
     }
 
     function randomStaging() {
@@ -958,10 +821,22 @@ if (User.IsInRole("Assembler")) {
 
     }
 
-    function clearStagingArea() {
-        var treeView = document.getElementById('tree').ej2_instances[0];
-        treeView.removeNodes([treeObj.element.querySelector('.e-list-parent')]);
+
+    // ************************** STAGING AREA ***************************************
+    function GenerateOrderNumber() { 
+        return Math.floor(Math.random()*16777215).toString(10); 
     }
+
+    function randomInt(min, max) { 
+        return Math.floor(Math.random() * (max - min + 1) + min); 
+    }
+
+    function clearStagingArea() {
+        //console.log("clearStagingArea");
+        var treeObj = document.getElementById('tree').ej2_instances[0];
+        treeObj.removeNodes([treeObj.element.querySelector('.e-list-parent')]);  // remove visually nodes
+        treeObj.fields.dataSource = [];  // remove actual node data
+}
 
     function stageNewPart(partNumber, orderNumber) {
         var treeView = document.getElementById('tree').ej2_instances[0];
@@ -976,6 +851,122 @@ if (User.IsInRole("Assembler")) {
         treeView.fields.dataSource.push(content);
         treeView.refresh();
     }
+
+    function scheduleStaging() {
+        console.log("scheduleStaging");
+        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+        var scheduleResources = scheduleObj.resources[0].dataSource; // current queues in place
+
+        //console.log("data");
+
+        //const appDate = new Date(args.data.StartDate).getTime();
+        //const completeDate = new Date(args.data.EndTime).getTime();
+        //const now = Date.now();
+        // console.log(scheduleObj.resources[0]);
+        var scheduleEventsData = scheduleObj.eventsData;   // current appointments in place
+        var curr_data = scheduleEventsData.filter(function(item) {
+          return new Date(item.StartDate).getTime() >= new Date().setHours(0, 0, 0, 0);
+        });
+        
+        // Initialize Queue Times for Current Time
+        const queueTimes = [];
+        for (let i = 0; i < scheduleResources.length; i++) {
+            queueTimes[i] = {"EndDate": new Date()};
+        }
+
+        // Get Latest time for each Queue
+        //var queueCount = scheduleResources.length + 1;
+        
+        for (let i = 0; i < curr_data.length; i++) {
+            var curr_appointment = curr_data[i];
+            var qInd = curr_appointment.QueueId - 1;
+            // Check if Queue Index is Empty
+            //console.log("queueTimes[qInd]");
+            //console.log(queueTimes[qInd]);
+            //console.log("qInd");
+            //console.log(qInd);
+            if (new Date(queueTimes[qInd].EndDate).getTime() < new Date(curr_appointment.EndDate).getTime()) {
+                queueTimes[qInd] = curr_appointment;
+            }
+        }
+
+        // Current Data Queue
+        //console.log("Current Data Queue");
+        //for (let i = 0; i < queueTimes.length; i++) {
+            //console.log(queueTimes[i]);
+        //}
+
+        // Store Latest Appointment Data for each Queue
+        var treeObj = document.getElementById('tree').ej2_instances[0];
+        var treeViewData = treeObj.fields.dataSource;
+        //console.log("treeViewdata");
+        //console.log(treeViewdata);
+
+
+        // Begin Scheduling All Appointments from Staging Area
+        //console.log("Begin Scheduling All Appointments from Staging Area");
+        var partsList = @Json.Serialize(ViewBag.Parts);
+        
+        for (const appNode of treeViewData) {
+            console.log(queueTimes);
+
+            // Look for Earliest Start Date, by Looking at the End Dates
+            if (queueTimes[qInd] == null) {
+                queueTimes[qInd] = curr_appointment;
+            }
+            
+            var startDate = queueTimes[0].EndDate;
+            var qId = 0;
+            for (let i = 1; i < queueTimes.length; i++) {
+                //console.log(startDate);
+                //console.log(queueTimes[i].EndDate);
+                if (startDate > queueTimes[i].EndDate) {
+                    startDate = queueTimes[i].EndDate;
+                    qId = i;
+                    //console.log(`New start date: ${startDate}`);
+                    //console.log(`New queue: ${qId}`);
+                }
+            }
+
+            // Obtain Duration from Parts List
+            for (const p of partsList) {
+                if (p.Name === appNode.Name) {
+                    duration = p.Duration;
+                    //console.log(`Found name: ${p.Name}  duration: ${p.Duration}`);
+                    break;
+                }
+            }
+
+            // Calculate new End Date
+            var endDate = new Date(startDate.getTime() + duration*60000);
+
+            // Add Necessary Schedule Data
+            appNode["QueueId"] = qId + 1;
+            appNode["Subject"] = appNode["Name"];
+            appNode["StartTime"] = startDate;
+            appNode["StartDate"] = startDate;
+            appNode["EndTime"] = endDate;
+            appNode["EndDate"] = endDate;
+
+            console.log("Scheduling new appointment:");
+            console.log(appNode);
+
+            // Schedule Appointment
+            scheduleObj.addEvent(appNode);
+            // scheduleAppointment(appNode);
+
+            // Update QueueTimes
+            queueTimes[qId] = appNode;
+
+            // Finally, Remove from TreeView Obj
+            // removes single tree node of id '6' 
+            //console.log("// Finally, Remove from TreeView Obj");
+            //console.log(appNode.Id);
+            // treeObj.removeNodes([appNode.Id.toString()]); 
+        }   
+        clearStagingArea();
+    }
+
     // ******************************** Queues **************************************
 
     // Generate a random string with the format "X000000"
@@ -1397,6 +1388,7 @@ if (User.IsInRole("Assembler")) {
     .treeview-container .content{
             height: 700px;
             overflow: auto;
+            width: 250px;
     }
 
     .treeview-external-drag #waiting {

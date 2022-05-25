@@ -150,7 +150,7 @@ namespace HeijunkaTest.Controllers
             ViewBag.Owners = queues;
 
             // Set Staging Area
-            ViewBag.DataSource = GetStagedParts();
+            // ViewBag.DataSource = GetStagedParts();
 
             // Set Parts
             //ViewBag.Parts = CreateParts();
