@@ -542,6 +542,7 @@ if (User.IsInRole("Assembler")) {
         
     }
 
+
     function updateDate(startDateString, partNameString) {
         //console.log(`updateDate: startDateString:  ${startDateString}  partNameString: ${partNameString}`);
 
@@ -600,8 +601,8 @@ if (User.IsInRole("Assembler")) {
     }
 
     function onPopupOpen(args, eventData) {
-        console.log("onPopupOpen");
-        console.log(args);
+        //console.log("onPopupOpen");
+        //console.log(args);
         // Check if User has Authorization
         if (@Json.Serialize(User.IsInRole("Supervisor")) || @Json.Serialize(User.IsInRole("ProductionControl"))) {
         
@@ -754,8 +755,8 @@ if (User.IsInRole("Assembler")) {
         var scheduleEventsData = scheduleObj.eventsData;   // current appointments in place
 
         var startDate = new Date();
-
         var endDate = new Date();
+
         endDate.setHours(endDate.getHours() + 3);
 
         var newProcess = {Id: scheduleEventsData.length + 1, QueueId: scheduleResources.length, Subject: "Drilling (120) fasteners", StartTime: startDate, EndTime: endDate}
@@ -774,32 +775,180 @@ if (User.IsInRole("Assembler")) {
         return Math.floor(Math.random() * (max - min + 1) + min); 
     }
 
+    function scheduleAppointment(appointment) {
+        var scheduleObj = document.getElementById('schedule').ej2_instances[0];
+        var scheduleResources = scheduleObj.resources[0].dataSource;  // current queues in place
+        var scheduleEventsData = scheduleObj.eventsData;   // current appointments in place
+
+        /*var appointment = {Id: scheduleEventsData.length + 1, 
+            QueueId: scheduleResources.length, 
+            Subject: "Drilling (120) fasteners", 
+            StartTime: startDate, 
+            EndTime: endDate}
+        */
+        appointment["Id"] = scheduleEventsData.length + 1;
+        
+
+        scheduleObj.addEvent(appointment);
+        //scheduleEventsData.push(newProcess);
+        //scheduleObj.refreshLayout();
+    }
+
     function scheduleStaging() {
         console.log("scheduleStaging");
         var scheduleObj = document.getElementById('schedule').ej2_instances[0];
         var scheduleResources = scheduleObj.resources[0].dataSource; // current queues in place
-        //console.log("queues:");
-        // console.log(scheduleResources);
+
+        //console.log("data");
+
+        //const appDate = new Date(args.data.StartDate).getTime();
+        //const completeDate = new Date(args.data.EndTime).getTime();
+        //const now = Date.now();
+        // console.log(scheduleObj.resources[0]);
         var scheduleEventsData = scheduleObj.eventsData;   // current appointments in place
-        console.log(scheduleEventsData);
+        var curr_data = scheduleEventsData.filter(function(item) {
+          return new Date(item.StartDate).getTime() >= new Date().setHours(0, 0, 0, 0);
+        });
+        //console.log("curr_data");
+        //console.log(curr_data);
+
+        // Get Latest time for each Queue
+        //var queueCount = scheduleResources.length + 1;
+
+        const queueTimes = [];
+        for (let i = 0; i < curr_data.length; i++) {
+            var curr_appointment = curr_data[i];
+            var qInd = curr_appointment.QueueId - 1;
+            // Check if Queue Index is Empty
+            //console.log("queueTimes[qInd]");
+            //console.log(queueTimes[qInd]);
+            //console.log("qInd");
+            //console.log(qInd);
+            if (queueTimes[qInd] == null) {
+                queueTimes[qInd] = curr_appointment;
+            } else {  // Else compare End Dates and Store Latest
+                //console.log("Else compare End Dates and Store Latest");
+                //console.log(queueTimes[i]);
+                //console.log(curr_appointment.EndDate);
+                if (new Date(queueTimes[qInd].EndDate).getTime() < new Date(curr_appointment.EndDate).getTime()) {
+                    queueTimes[qInd] = curr_appointment;
+                }
+            }
+        }
+
+        // Current Data Queue
+        console.log("Current Data Queue");
+        for (let i = 0; i < queueTimes.length; i++) {
+            console.log(queueTimes[i]);
+        }
+
+        // Store Latest Appointment Data for each Queue
+        var treeObj = document.getElementById('tree').ej2_instances[0];
+        var treeViewdata = treeObj.fields.dataSource;
+        console.log("treeViewdata");
+        console.log(treeViewdata);
+
+        /*
+        // Find PartModel and Obtain Duration
+        
+        //console.log(partsList);
+        var duration = 0;
+        for (const p of partsList) {
+            //console.log(` ${p.Id} ${p.Name} ${p.Duration} ${p}`);
+            if (p.Name === partNameString) {
+                duration = p.Duration;
+                //console.log(`Scheduling part name: ${p.Name}  duration: ${p.Duration}`);
+                break;
+            }
+        }
+        */
+
+        // Bad Deep Copy
+        var treeCopyArr = {
+            dummyVal: "dummyVal"
+        };
+
+        for (const a of treeViewdata) {
+            tree
+        }
+
+        // Begin Scheduling All Appointments from Staging Area
+        console.log("Begin Scheduling All Appointments from Staging Area");
+        var partsList = @Json.Serialize(ViewBag.Parts);
+        // var treeCopyArr = @Json.Serialize(treeViewdata);  // deep copy
+
+        console.log("treeCopyArr");
+        console.log(treeCopyArr);
+        
+        for (const appNode of treeCopyArr) {
+            console.log(appNode);
+
+
+            // Look for Earliest Start Date, by Looking at the End Dates
+            var startDate = queueTimes[0].EndDate;
+            var qId = 0;
+            for (let i = 1; i < queueTimes.length; i++) {
+                if (startDate > queueTimes[i].EndDate) {
+                    startDate = queueTimes[i].EndDate;
+                    qId = i;
+                    console.log(`New start date: ${startDate}`);
+                    console.log(`New queue: ${qId}`);
+                }
+            }
+
+            // Obtain Duration from Parts List
+            for (const p of partsList) {
+                if (p.Name === appNode.Name) {
+                    duration = p.Duration;
+                    console.log(`Found name: ${p.Name}  duration: ${p.Duration}`);
+                    break;
+                }
+            }
+
+            // Calculate new End Date
+            var endDate = new Date(startDate.getTime() + duration*60000);
+            console.log(`end date:${endDate}`);
+
+            // Find Earliest StartTime, End Date and Queue
+
+            // Add Necessary Schedule Data
+            appNode["QueueId"] = qId;
+            appNode["Subject"] = appNode["Name"];
+            appNode["StartTime"] = startDate;
+            appNode["EndTime"] = endDate;
+
+            console.log("Scheduling new appointment:");
+            console.log(appNode);
+
+            // Schedule Appointment
+            scheduleAppointment(appNode);
+
+            // Update QueueTimes
+            queueTimes[qId] = appNode;
+
+            // Finally, Remove from TreeView Obj
+            // removes single tree node of id '6' 
+            treeObj.removeNodes([appNode.Id]); 
+        }
+        
     }
 
     function randomStaging() {
-        console.log("randomStaging");
+        //console.log("randomStaging");
         // 1. Get List of Available Parts
         var parts = @Json.Serialize(ViewBag.Parts);
         var treeView = document.getElementById('tree').ej2_instances[0];
         var treeViewdata = treeView.fields.dataSource;
-        console.log("treeViewdata");
-        console.log(treeViewdata);
+        //console.log("treeViewdata");
+        //console.log(treeViewdata);
 
         for (let i = 0; i < randomInt(10, 20); i++) {
 
             // 2. Randomly Choose a Part
             var index = randomInt(0, parts.length - 1);
-            console.log(index);
+            //console.log(index);
             var partNumber = parts[index].Name;
-            console.log(partNumber);
+            //console.log(partNumber);
 
             // 3. Generate a Random Order Number
             var orderNumber = GenerateOrderNumber();
